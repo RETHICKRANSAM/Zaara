@@ -71,3 +71,9 @@ function renderTimeline(roadmap) {
         setTimeout(() => card.classList.add('animate'), i * 30);
     });
 }
+
+function goHome() {
+    document.getElementById('roadmap-view').classList.add('hidden');
+    document.getElementById('landing-view').classList.remove('hidden');
+    document.getElementById('timeline').innerHTML = '';
+}
