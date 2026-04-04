@@ -64,11 +64,11 @@ TEMPLATES = {
     ],
     'internship': [
         { 't': 'Internship Success Guide', 'd': 'How to pick a stack and land your first role.', 'r': 'https://roadmap.sh/' },
-        { 't': 'Portfolio Architecture', 'd': 'Building high-impact projects that attract recruiters.', 'r': 'https://www.freecodecamp.org/news/how-to-build-a-developer-portfolio/' }
+        { 't': 'Portfolio Architecture', 'd': 'Building high-impact projects that attract recruiters.', 'r': 'https://dev.to/t/portfolio' }
     ],
     'freelance': [
         { 't': 'Freelance Tech Roadmap', 'd': 'Guide to managing technical clients and solo projects.', 'r': 'https://roadmap.sh/full-stack' },
-        { 't': 'Personal Branding', 'd': 'Establishing a professional online identity as a dev.', 'r': 'https://www.freecodecamp.org/news/personal-branding-for-software-developers/' }
+        { 't': 'Personal Branding', 'd': 'Establishing a professional online identity as a dev.', 'r': 'https://dev.to/t/branding' }
     ],
     'embedded_systems': [
         { 't': 'Embedded Systems Roadmap', 'd': 'Mastering the bridge between hardware and software.', 'r': 'https://roadmap.sh/cpp' },
@@ -91,7 +91,7 @@ LANGUAGE_EXTENSIONS = {
         { 't': 'Bare-Metal Driver Design', 'd': 'Writing your own I2C and UART drivers from scratch.', 'r': 'https://embedded-trainings.ferrous-systems.com/' }
     ],
     'cpp': [
-        { 't': 'Modern C++ for Embedded', 'd': 'Standard Template Library (STL) in constrained environments.', 'r': 'https://developer.nordicsemi.com/' },
+        { 't': 'Modern C++ for Embedded', 'd': 'Standard Template Library (STL) in constrained environments.', 'r': 'https://academy.nordicsemi.com/' },
         { 't': 'OOP in Hardware', 'd': 'Class-based architecture for peripheral management.', 'r': 'https://www.cplusplus.com/doc/tutorial/' }
     ],
     'rust': [
@@ -128,7 +128,7 @@ MEDICAL_SPECIALTIES = {
     ],
     'pulmonologist': [
         { 't': 'Respiratory Pathophysiology', 'd': 'Lung disease management and critical care basics.', 'r': 'https://www.thoracic.org/patients/patient-resources/' },
-        { 't': 'Pulmonary Function Tests', 'd': 'Interpreting lung capacity and airflow metrics.', 'r': 'https://medlineplus.gov/lab-tests/pulmonary-function-tests/' }
+        { 't': 'Pulmonary Function Tests', 'd': 'Interpreting lung capacity and airflow metrics.', 'r': 'https://medlineplus.gov/ency/article/003853.htm' }
     ],
     'nephrologist': [
         { 't': 'Renal Physiology', 'd': 'Kidney function and electrolyte balance control.', 'r': 'https://www.asnonline.org/education/' },
