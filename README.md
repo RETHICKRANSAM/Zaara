@@ -30,9 +30,11 @@ An intelligent AI-powered web application that helps users plan their career jou
 
 ## 📸 Screenshots
 
-<img width="1919" height="912" alt="image" src="https://github.com/user-attachments/assets/10931804-3c94-4da5-9f36-6dc875756fa8" />
+<img width="1920" height="1167" alt="screencapture-localhost-5000-2026-04-04-11_21_01" src="https://github.com/user-attachments/assets/dab06f32-f32c-4716-8c87-4e9716090261" />
 
-<img width="1920" height="6683" alt="screencapture-127-0-0-1-5000-2026-04-04-09_35_51" src="https://github.com/user-attachments/assets/2e3b4aa9-5390-4e4b-84b7-81721ca6c1d0" />
+
+<img width="1920" height="8100" alt="screencapture-localhost-5000-2026-04-04-11_21_38" src="https://github.com/user-attachments/assets/27d4676a-5c4a-4325-8c21-50b0517c0fa8" />
+
 
 
 
