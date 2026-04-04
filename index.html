@@ -194,6 +194,44 @@
             100% { opacity: 0.9; }
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Document PDF Export Optimization */
+        @media print {
+            body, html, * {
+                background: white !important;
+                color: black !important;
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+                text-shadow: none !important;
+                box-shadow: none !important;
+                letter-spacing: normal !important;
+            }
+            button, a[href="#timeline"], .status-labels, .scanlines, .cursor-dot, .cursor-ring, .cursor-trail, .click-particle, #canvas-bg, .mascot-pane, #landing-view {
+                display: none !important;
+            }
+            .glass-panel, .glass-card {
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid !important;
+                margin-bottom: 20px !important;
+                padding: 15px !important;
+            }
+            .timeline-node {
+                border-color: black !important;
+                background: white !important;
+            }
+            /* Fix Text Overrides */
+            .gradient-text, .text-purple-400, .text-pink-400, .text-cyan-400, .text-white, .text-zinc-500, .text-zinc-400, .text-zinc-300, .text-zinc-200 {
+                color: black !important;
+            }
+            .bg-black\/30 {
+                background: transparent !important;
+                border: none !important;
+            }
+            .border-pink-500\/50 {
+                border-color: #333 !important;
+            }
+            /* Adjust layout widths */
+            #main-container { max-width: 100% !important; padding: 0 !important; }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
