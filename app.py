@@ -136,6 +136,60 @@ MEDICAL_SPECIALTIES = {
     ]
 }
 
+def get_mock_insights(goal):
+    insights = {
+        'ai_engineer': {
+            'identity': "Neural Architect & ML Optimizer",
+            'skills': ["Python Basics", "Linear Algebra & Calculus", "Neural Networks", "Transformer Architecture", "LLM Fine-tuning"],
+            'tools': ["PyTorch", "TensorFlow", "Hugging Face", "CUDA", "Scikit-Learn"],
+            'projects': ["Custom Sentiment Analyzer", "Image Classification API", "Retrieval-Augmented Generation (RAG) Chatbot"],
+            'ai_recommendation': "Focus heavily on foundational math before diving deep into complex architectures. The best AI Engineers understand the theory behind the framework."
+        },
+        'web_dev': {
+            'identity': "Full-Stack System Builder",
+            'skills': ["HTML/CSS/JS", "React/Vue Frontend", "Node.js/Python Backend", "Database Design", "System Architecture"],
+            'tools': ["React", "TypeScript", "Node.js", "PostgreSQL", "Tailwind CSS"],
+            'projects': ["E-Commerce Mockup", "Real-time Chat App", "Full-Stack SaaS Platform"],
+            'ai_recommendation': "Build consistently. A strong personal portfolio demonstrating complete end-to-end applications matters more than purely theoretical knowledge."
+        },
+        'data_scientist': {
+            'identity': "Data Storyteller & Statistical Analyst",
+            'skills': ["Data Wrangling", "Exploratory Data Analysis (EDA)", "Probability & Statistics", "Machine Learning Models", "Data Visualization"],
+            'tools': ["Pandas", "NumPy", "Jupyter", "Tableau", "SQL"],
+            'projects': ["Predictive Pricing Model", "Customer Churn Analysis", "Interactive Data Dashboard"],
+            'ai_recommendation': "Your core value is extracting actionable insights. Don't just build models—learn to communicate what the data actually means for a business."
+        },
+        'cybersecurity': {
+            'identity': "Security Analyst & Off/Def Specialist",
+            'skills': ["Networking Basics", "Linux Administration", "Ethical Hacking", "Cryptography", "Incident Response"],
+            'tools': ["Kali Linux", "Wireshark", "Metasploit", "Burp Suite", "Nmap"],
+            'projects': ["Vulnerability Scanner Tool", "Packet Analyzer", "Secure Home Network Setup"],
+            'ai_recommendation': "Adopt a 'hacker mindset'—always think about how systems can be broken. Validate your skills through hands-on labs like HackTheBox or TryHackMe."
+        },
+        'embedded_systems': {
+            'identity': "Hardware/Firmware Integrator",
+            'skills': ["Digital Logic", "C/C++", "Microcontroller Architecture", "RTOS", "Signal Processing"],
+            'tools': ["Oscilloscope", "STM32/Arduino", "PlatformIO", "KiCad", "Logic Analyzer"],
+            'projects': ["Custom Weather Station", "Automated Robot Arm", "Custom Keyboard PCB Firmware"],
+            'ai_recommendation': "The bridge between software and hardware requires immense patience. Learn to read technical datasheets thoroughly."
+        },
+        'medical_doctor': {
+            'identity': "Clinical Diagnostics Specialist",
+            'skills': ["Anatomy & Physiology", "Biochemistry", "Pathology", "Pharmacology", "Clinical Reasoning"],
+            'tools': ["Stethoscope", "Electronic Health Records (EHR)", "Diagnostic Imaging (MRI/CT/X-Ray)", "Differential Diagnosis Matrix"],
+            'projects': ["Clinical Case Studies", "Research Meta-Analysis", "Medical Volunteer Rotation"],
+            'ai_recommendation': "Medicine is a marathon of continuous learning. Focus heavily on mastering the fundamentals of anatomy and pathology before specializing."
+        }
+    }
+    
+    return insights.get(goal, {
+        'identity': "Advanced Systems Specialist",
+        'skills': ["Core Fundamentals", "Advanced Logic", "System Design", "Security Practices", "Optimization & Scale"],
+        'tools': ["Git/GitHub", "Docker", "Linux Terminal", "Cloud Platforms", "CI/CD"],
+        'projects': ["Automated Process Script", "CRUD Platform System", "Fully Deployed Scalable Application"],
+        'ai_recommendation': "Consistency and deep fundamental understanding will guarantee your success in this chosen technical domain."
+    })
+
 @app.route("/")
 def index():
     return send_file("index.html")
@@ -175,11 +229,18 @@ def generate():
         # Refine Title
         display_title = goal.replace('_', ' ').upper()
         if goal == 'embedded_systems': display_title += f" ({language.upper()})"
-        elif goal == 'medical_doctor' and specialty != 'general': display_title = f"{specialty.upper()} Specialist"
+        elif goal == 'medical_doctor' and specialty != 'general': display_title = f"{specialty.replace('_', ' ').upper()} Specialist"
+
+        insights = get_mock_insights(goal)
 
         return jsonify({
             "status": "success",
             "title": f"Your {duration}-Day {display_title} Path",
+            "career_identity": insights['identity'],
+            "skills_tree": insights['skills'],
+            "tools_stack": insights['tools'],
+            "projects": insights['projects'],
+            "ai_recommendation": insights['ai_recommendation'],
             "roadmap": roadmap_data,
             "metadata": {
                 "skill": skill,
