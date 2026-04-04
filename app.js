@@ -327,9 +327,10 @@ function renderTimeline(roadmap) {
                     <span class="text-purple-400 text-[10px] font-bold">DAY ${item.day}</span>
                     <span class="font-semibold text-sm">${item.topic}</span>
                 </div>
-                <p class="text-zinc-500 text-xs mb-2">${item.description}</p>
-                <a href="${item.resource}" target="_blank" class="text-cyan-400 text-[10px] hover:underline flex items-center gap-1">
-                    <i class="fa-solid fa-link"></i> Launch Resource
+                <p class="text-zinc-500 text-xs mb-3">${item.description}</p>
+                <a href="${item.resource}" target="_blank" class="text-cyan-400 text-[10px] hover:underline flex flex-col gap-1 mt-2 p-2 bg-black/30 rounded-lg border border-cyan-900/50">
+                    <div><i class="fa-solid fa-link"></i> Launch Resource</div>
+                    <div class="text-[8px] text-zinc-600 break-all font-mono">${item.resource}</div>
                 </a>
             </div>
         `;
