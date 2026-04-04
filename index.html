@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAARA — Career Neural Matrix</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root { --neon-purple: #b026ff; --neon-pink: #ec4899; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; color: #fff; font-family: 'VT323', monospace; font-size: 1.2rem; cursor: none; overflow-x: hidden; letter-spacing: 1px; min-height: 100vh; }
+        
+        .hidden { display: none !important; }
+        
+        #main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .glass-panel { 
+            background: #111; 
+            border: 2px solid var(--neon-purple); 
+            box-shadow: 6px 6px 0px var(--neon-purple);
+            border-radius: 0px;
+        }
+        .glass-card {
+            background: #1a1a1a;
+            border: 2px solid #555;
+            transition: all 0.1s;
+            border-radius: 0px;
+        }
+        .glass-card:hover {
+            background: #222;
+            border-color: var(--neon-pink);
+            transform: translate(-3px, -3px);
+            box-shadow: 5px 5px 0px var(--neon-pink);
+        }
+        .slide-in-card { opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; position: relative; padding-left: 2rem; margin-bottom: 2rem; }
+        .slide-in-card.animate { opacity: 1; transform: translateX(0); }
+        .timeline-node { position: absolute; left: -10px; top: 20px; width: 14px; height: 14px; background: var(--neon-purple); border: 2px solid #000; }
+
+        /* Custom Magnetic Cursor */
+        .cursor-dot {
+            width: 10px; height: 10px;
+            background: var(--neon-purple);
+            position: fixed; top: 0; left: 0;
+            pointer-events: none;
+            z-index: 99999;
+            transition: width 0.1s, height 0.1s, background 0.1s;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-dot.hovering {
+            width: 14px; height: 14px;
+            background: var(--neon-pink);
+        }
+        .cursor-ring {
+            width: 30px; height: 30px;
+            border: 2px solid var(--neon-purple);
+            position: fixed; top: 0; left: 0;
+            pointer-events: none;
+            z-index: 99998;
+            transition: width 0.1s ease, height 0.1s ease, border-color 0.1s ease, background 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-ring.hovering {
+            width: 40px; height: 40px;
+            border-color: var(--neon-pink);
+            background: rgba(236, 72, 153, 0.2);
+        }
+        .cursor-trail {
+            position: fixed;
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: var(--neon-purple);
+            pointer-events: none;
+            z-index: 99997;
+            opacity: 0.7;
+            animation: trailFade 0.6s ease forwards;
+        }
+        @keyframes trailFade {
+            to { opacity: 0; transform: scale(0); }
+        }
+        .click-particle {
+            position: fixed;
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            animation: particleBurst 0.6s ease-out forwards;
+        }
+        @keyframes particleBurst {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+
+        /* Magnetic element hover glow */
+        [data-magnetic] { transition: transform 0.1s ease; }
+        select, button, label, a, input { cursor: none; outline: none; }
+        input { background: #000; border: 2px solid #555; color: white; padding: 12px; border-radius: 0px; width: 100%; transition: border-color 0.1s; font-family: 'VT323'; }
+        input:focus { border-color: var(--neon-purple); box-shadow: inset 4px 4px 0px rgba(176,38,255,0.2); }
+        button { cursor: none; border: none; border-radius: 0 !important; font-family: 'VT323'; border: 2px solid transparent; }
+        button:hover { border-color: #fff; }
+        select { border-radius: 0 !important; font-family: 'VT323'; }
+
+        .gradient-text {
+            color: var(--neon-pink);
+            text-shadow: 2px 2px 0px var(--neon-purple);
+        }
+        
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .gap-4 { gap: 1rem; }
+        .text-center { text-align: center; }
+        .text-zinc-400 { color: #a1a1aa; }
+        .w-full { width: 100%; }
+        .p-10 { padding: 2.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+        .mb-12 { margin-bottom: 3rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+
+        /* Mascot Layout */
+        .split-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            width: 100%;
+        }
+        .content-pane { flex: 1.2; }
+        /* Perfect Side Positioning */
+        .mascot-pane { 
+            position: fixed; 
+            top: 52%;
+            transform: translateY(-50%);
+            z-index: 10;
+            pointer-events: none;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mascot-pane.on-right { right: -120px; }
+        .mascot-pane.on-left { left: 0px; }
+        
+        .mascot-image {
+            height: 60vh;
+            max-width: 900px;
+            animation: mascotFloat 2s steps(4) infinite alternate;
+        }
+        @keyframes mascotFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+        @media (max-width: 768px) {
+            .split-layout { flex-direction: column; text-align: center; }
+            .mascot-pane { display: none; }
+        }
+
+        .logo-main {
+            height: 160px;
+            width: auto;
+            max-width: 100%;
+            animation: logoPulse 2s steps(2) infinite alternate;
+        }
+        @keyframes logoPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        /* CRT Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+            background-size: 100% 4px;
+            z-index: 99990;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
+        }
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            50% { opacity: 0.85; }
+            100% { opacity: 0.9; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <!-- Holographic System Status -->
+    <div class="status-labels hidden md:block crt-flicker">
+        NEURAL LINK: <span class="text-white">ENCRYPTED</span><br>
+        MATRIX STATUS: <span class="text-white">STABLE</span><br>
+        CORE UPTIME: <span class="text-white">09:54:12</span>
+    </div>
+    <div class="status-labels status-right hidden md:block crt-flicker">
+        AUTHORIZED BY: <span class="text-white font-bold">ZAARA R-7</span><br>
+        LOCATION: <span class="text-white font-bold">NEURAL NODE 014</span><br>
+        LATENCY: <span class="text-white font-bold">0.001ms</span>
+    </div>
+
+    <!-- Retro CRT Scanline Overlay -->
+    <div class="scanlines"></div>
+
+    <!-- Custom Cursor Elements -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+    
+    <!-- Interactive Background Canvas -->
+    <canvas id="canvas-bg" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"></canvas>
+    <div id="main-container" class="max-w-6xl mx-auto">
+
+        <!-- Landing View -->
+        <div id="landing-view">
+            <div class="split-layout" style="max-width: 1200px; margin: 0 auto;">
+                <!-- MIRRORED MASCOT -->
+                <div class="mascot-pane on-left">
+                    <img src="zaara-new.png.png" alt="ZAARA Discovery" class="mascot-image" style="animation-delay: -2s;">
+                </div>
+
+                <div class="content-pane" style="margin-left: 250px;">
+                    <header class="mb-4 flex flex-col items-center">
+                        <div data-magnetic style="display: inline-block; padding: 20px;">
+                            <img src="zaara-logo-2d.png" alt="ZAARA Neural AI" class="logo-main mb-2" style="image-rendering: pixelated;">
+                        </div>
+                        <p class="text-zinc-400">Expanding human capability via the neural matrix.</p>
+                    </header>
+
+                    <div class="glass-panel p-8 space-y-6">
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-2">My Current Level</label>
+                            <select id="skill-level" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate / Advanced</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-2">My Career Goal</label>
+                            <select id="career-goal" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                                <option value="ai_engineer">🤖 AI / ML Engineer</option>
+                                <option value="web_dev">🌐 Full-Stack Web Developer</option>
+                                <option value="data_scientist">📊 Data Scientist</option>
+                                <option value="cybersecurity">🔒 Cybersecurity Analyst</option>
+                                <option value="cloud_engineer">☁️ Cloud Engineer (AWS/Azure)</option>
+                                <option value="mobile_dev">📱 Mobile App Developer</option>
+                                <option value="devops">⚙️ DevOps Engineer</option>
+                                <option value="game_dev">🎮 Game Developer</option>
+                                <option value="blockchain">⛓️ Blockchain Developer</option>
+                                <option value="ui_ux">🎨 UI/UX Designer</option>
+                                <option value="backend">🗄️ Backend Engineer</option>
+                                <option value="data_engineer">🔧 Data Engineer</option>
+                                <option value="software_engineer">💼 Software Engineer (Job Prep)</option>
+                                <option value="embedded_systems">🔌 Embedded Systems (ECE)</option>
+                                <option value="medical_doctor">🩺 Medical Doctor / Specialist</option>
+                                <option value="internship">🎓 Land an Internship</option>
+                                <option value="freelance">💸 Freelance Developer</option>
+                            </select>
+                        </div>
+
+                        <!-- Dynamic Language Preference (ECE Focus) -->
+                        <div id="language-pref-container" class="slide-in-card hidden mt-4" style="animation-delay: 0.2s;">
+                            <label class="block text-sm text-zinc-400 mb-2">Programming Language Focus</label>
+                            <select id="preferred-language" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                                <option value="c">C (Hardware Standard)</option>
+                                <option value="cpp">C++ (Modern Embedded)</option>
+                                <option value="rust">Rust (Memory Safety)</option>
+                                <option value="python">MicroPython / CircuitPython</option>
+                                <option value="assembly">Bare-Metal Assembly</option>
+                            </select>
+                        </div>
+
+                        <!-- Dynamic Medical Specialization -->
+                        <div id="medical-spec-container" class="slide-in-card hidden mt-4" style="animation-delay: 0.2s;">
+                            <label class="block text-sm text-zinc-400 mb-2">Medical Specialization</label>
+                            <select id="medical-specialty" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                                <option value="cardiologist">❤️ Cardiologist (Heart)</option>
+                                <option value="neurologist">🧠 Neurologist (Brain & Nerves)</option>
+                                <option value="dermatologist">🧴 Dermatologist (Skin)</option>
+                                <option value="gastroenterologist">🥦 Gastroenterologist (Digestive)</option>
+                                <option value="pulmonologist">🫁 Pulmonologist (Lungs)</option>
+                                <option value="nephrologist">🧪 Nephrologist (Kidneys)</option>
+                                <option value="general">🩺 General Practice</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-2">Duration</label>
+                            <div class="flex gap-4">
+                                <label class="flex-1"><input type="radio" name="duration" value="30" checked class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/10 cursor-pointer text-xs font-bold uppercase tracking-wider">30 Days</div></label>
+                                <label class="flex-1"><input type="radio" name="duration" value="60" class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/10 cursor-pointer text-xs font-bold uppercase tracking-wider">60 Days</div></label>
+                            </div>
+                        </div>
+
+                        <button onclick="generate()" data-magnetic class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2">
+                            Initialize Sequence <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roadmap View -->
+        <div id="roadmap-view" class="hidden py-8">
+            <div class="flex justify-between items-center mb-8 glass-panel p-6 rounded-2xl">
+                <div>
+                    <h2 id="roadmap-title" class="text-2xl font-bold">Your Career Matrix</h2>
+                    <p id="roadmap-subtitle" class="text-sm text-zinc-400">Sequence Processed Successfully</p>
+                </div>
+                <button onclick="location.reload()" data-magnetic class="bg-zinc-800 p-2 rounded-lg hover:bg-zinc-700"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            
+            <div id="timeline" class="border-l border-zinc-800 ml-4 space-y-8"></div>
+        </div>
+    </div>
+
+    <!-- Logic provided by app.js -->
+
+
+    <!-- Magnetic Cursor Engine -->
+    <script>
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        let mouseX = 0, mouseY = 0;
+        let dotX = 0, dotY = 0;
+        let ringX = 0, ringY = 0;
+        let trailTimer = 0;
+
+        // Background Canvas Logic
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+        const pointCount = 60;
+        let width, height;
+
+        function initBackground() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            points = [];
+            for (let i = 0; i < pointCount; i++) {
+                points.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5 + 1,
+                    z: Math.random() * 0.5 + 0.1, // Parallax depth
+                    opacity: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+
+        function drawBackground() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Move dots based on cursor
+            const offsetX = (mouseX - width / 2) * 0.03;
+            const offsetY = (mouseY - height / 2) * 0.03;
+
+            points.forEach(p => {
+                // Flat 2d parallax
+                const x = (p.x + (offsetX * p.z) + width) % width;
+                const y = (p.y + (offsetY * p.z) + height) % height;
+                
+                ctx.beginPath();
+                ctx.rect(x, y, p.size * 2, p.size * 2);
+                ctx.fillStyle = `rgba(176, 38, 255, ${p.opacity > 0.3 ? 1.0 : 0.4})`; // flatter opacity
+                ctx.fill();
+            });
+            requestAnimationFrame(drawBackground);
+        }
+
+        window.addEventListener('resize', initBackground);
+        initBackground();
+        drawBackground();
+
+        // Track mouse position
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            // Spawn trail particles every 3 frames
+            trailTimer++;
+            if (trailTimer % 3 === 0) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = (mouseX - 2.5) + 'px';
+                trail.style.top = (mouseY - 2.5) + 'px';
+                document.body.appendChild(trail);
+                setTimeout(() => trail.remove(), 600);
+            }
+        });
+
+        // Smooth cursor follow with lerp
+        function animateCursor() {
+            dotX += (mouseX - dotX) * 0.35;
+            dotY += (mouseY - dotY) * 0.35;
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+
+            dot.style.transform = `translate(${dotX - 4}px, ${dotY - 4}px)`;
+            ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`;
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hover detection for interactive elements
+        const interactives = 'button, a, select, label, [data-magnetic], .slide-in-card > div';
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest(interactives)) {
+                dot.classList.add('hovering');
+                ring.classList.add('hovering');
+            }
+        });
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.closest(interactives)) {
+                dot.classList.remove('hovering');
+                ring.classList.remove('hovering');
+            }
+        });
+
+        // Magnetic pull effect
+        document.querySelectorAll('[data-magnetic]').forEach(el => {
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dx = (e.clientX - cx) * 0.25;
+                const dy = (e.clientY - cy) * 0.25;
+                el.style.transform = `translate(${dx}px, ${dy}px)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        // Click particle burst
+        document.addEventListener('click', (e) => {
+            const colors = ['#b026ff', '#ec4899', '#a855f7', '#7c3aed', '#06b6d4'];
+            for (let i = 0; i < 8; i++) {
+                const p = document.createElement('div');
+                p.className = 'click-particle';
+                p.style.left = e.clientX + 'px';
+                p.style.top = e.clientY + 'px';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                const angle = (Math.PI * 2 / 8) * i;
+                const dist = 30 + Math.random() * 40;
+                p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        });
+
+        // Re-apply magnetic to dynamically created cards
+        const origGenerate = window.generate;
+        if (origGenerate) {
+            // Magnetic will auto-apply via CSS hover on .slide-in-card > div
+        }
+
+        // Context-Aware UI: Embedded Systems Language Toggle & Medical Specialization Toggle
+        const goalSelector = document.getElementById('career-goal');
+        const langContainer = document.getElementById('language-pref-container');
+        const medicalContainer = document.getElementById('medical-spec-container');
+        
+        function updateUIVisibility() {
+            // Reset both
+            langContainer.classList.add('hidden');
+            langContainer.style.display = 'none';
+            medicalContainer.classList.add('hidden');
+            medicalContainer.style.display = 'none';
+
+            if (goalSelector.value === 'embedded_systems') {
+                langContainer.style.display = 'block';
+                setTimeout(() => {
+                    langContainer.classList.remove('hidden');
+                    langContainer.classList.add('animate');
+                }, 10);
+            } else if (goalSelector.value === 'medical_doctor') {
+                medicalContainer.style.display = 'block';
+                setTimeout(() => {
+                    medicalContainer.classList.remove('hidden');
+                    medicalContainer.classList.add('animate');
+                }, 10);
+            }
+        }
+
+        goalSelector.addEventListener('change', updateUIVisibility);
+        // Initial check
+        updateUIVisibility();
+
+        // --- 8-BIT AUDIO SYNTHESIS ENGINE ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playTone(freq, type, duration, vol=0.05) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playHover() { playTone(600, 'square', 0.05, 0.02); }
+        function playSelect() { playTone(1200, 'square', 0.08, 0.03); }
+        function playPowerup() {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // Attach event listeners for audio
+        document.body.addEventListener('click', initAudio, { once: true });
+        document.querySelectorAll('button, select, input, label[for]').forEach(el => {
+            el.addEventListener('mouseenter', playHover);
+        });
+        document.querySelectorAll('select, input[type="radio"]').forEach(el => {
+            el.addEventListener('change', playSelect);
+        });
+        
+        // Add powerup to the generate button explicitly
+        const initBtn = document.querySelector('button[onclick="generate()"]');
+        if (initBtn) initBtn.addEventListener('click', playPowerup);
+
+    </script>
+</body>
+</html>

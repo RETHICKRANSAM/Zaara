@@ -1,0 +1,211 @@
+/* Custom CSS for Neon Purple & Black Edition */
+
+:root {
+    --neon-purple: #b026ff;
+    --neon-pink: #d946ef;
+    --bg-black: #000000;
+    --surface-dark: #07000c;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #000000; 
+}
+::-webkit-scrollbar-thumb {
+    background: #27272a; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple); 
+}
+
+/* Solid Panels */
+.glass-panel {
+    background: #111;
+    border: 2px solid var(--neon-purple);
+    box-shadow: 6px 6px 0px var(--neon-purple);
+}
+
+.glass-input {
+    background: #000;
+    border: 2px solid #555;
+}
+
+/* Ambient Background Glows - Removed for 2D */
+.ambient-glow {
+    display: none;
+}
+
+/* Gradients & Glows */
+.gradient-text {
+    color: var(--neon-pink);
+    text-shadow: 2px 2px 0px var(--neon-purple);
+}
+.neon-text-glow {
+    text-shadow: 2px 2px 0px var(--neon-purple);
+}
+
+/* Animations */
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-in-card {
+    opacity: 0;
+    transform: translateX(-15px);
+}
+
+.slide-in-card.animate {
+    animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Custom Checkbox Animation (Neon variant) */
+.custom-checkbox {
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border: 2px solid #3f3f46; /* zinc-700 */
+    border-radius: 0px;
+    cursor: pointer;
+    position: relative;
+    background: #000;
+    transition: none;
+    display: grid;
+    place-items: center;
+}
+
+.custom-checkbox::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    transform: scale(0);
+    box-shadow: inset 1em 1em #000;
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.custom-checkbox:checked {
+    background-color: var(--neon-purple); 
+    border-color: var(--neon-purple);
+}
+
+.custom-checkbox:checked::before {
+    transform: scale(1);
+    box-shadow: inset 1em 1em #fff;
+}
+
+/* Timeline Cards (Neon variant) */
+.timeline-card {
+    background: #111;
+    border: 2px solid #333;
+    border-radius: 0px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    position: relative;
+}
+
+.timeline-card:hover {
+    border-color: var(--neon-pink);
+    transform: translate(-3px, -3px);
+    box-shadow: 5px 5px 0px var(--neon-pink);
+    background: #1a1a1a;
+}
+
+.timeline-card.completed {
+    background: #000;
+    border-color: #333;
+}
+
+.timeline-card.completed .card-header .topic-title {
+    color: #52525b; /* zinc-600 */
+    text-decoration: line-through;
+    text-decoration-color: var(--neon-purple);
+}
+
+/* Timeline Node styling */
+.timeline-node {
+    position: absolute;
+    left: -29px;
+    top: 28px;
+    width: 20px;
+    height: 20px;
+    border-radius: 0px;
+    background: #000;
+    border: 2px solid #3f3f46;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-card.completed .timeline-node {
+    border-color: var(--neon-purple);
+    background: var(--neon-purple);
+}
+
+.timeline-card.completed .timeline-node::after {
+    content: '\f00c';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: white;
+    font-size: 10px;
+}
+
+/* Expand Collapse details */
+.card-details {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-out;
+    opacity: 0;
+}
+
+.timeline-card.expanded .card-details {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 1rem;
+}
+
+.card-details-inner {
+    overflow: hidden;
+}
+
+/* 2D Retro Font Visibility Enhancements */
+.text-\[10px\] { font-size: 1.1rem !important; line-height: 1.4rem !important; }
+.text-xs { font-size: 1.3rem !important; line-height: 1.5rem !important; }
+.text-sm { font-size: 1.5rem !important; line-height: 1.7rem !important; }
+.text-base { font-size: 1.8rem !important; line-height: 2rem !important; }
+.text-lg { font-size: 2rem !important; line-height: 2.2rem !important; }
+.text-xl { font-size: 2.2rem !important; line-height: 2.5rem !important; }
+.text-2xl { font-size: 2.6rem !important; line-height: 2.8rem !important; }
+.text-3xl { font-size: 3.2rem !important; line-height: 3.5rem !important; }
+.text-5xl { font-size: 4.8rem !important; line-height: 5rem !important; }
+
+/* Form Elements Consistency */
+input, select, button { font-size: 1.5rem !important; }
