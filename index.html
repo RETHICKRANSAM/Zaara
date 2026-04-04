@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZAARA — Career Neural Matrix</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="app.js" defer></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         :root { --neon-purple: #b026ff; --neon-pink: #ec4899; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; color: #fff; font-family: 'VT323', monospace; font-size: 1.2rem; cursor: none; overflow-x: hidden; letter-spacing: 1px; min-height: 100vh; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; font-size: 1.1rem; cursor: none; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
         
         .hidden { display: none !important; }
         
@@ -23,24 +24,7 @@
             padding: 1rem;
         }
 
-        .glass-panel { 
-            background: #111; 
-            border: 2px solid var(--neon-purple); 
-            box-shadow: 6px 6px 0px var(--neon-purple);
-            border-radius: 0px;
-        }
-        .glass-card {
-            background: #1a1a1a;
-            border: 2px solid #555;
-            transition: all 0.1s;
-            border-radius: 0px;
-        }
-        .glass-card:hover {
-            background: #222;
-            border-color: var(--neon-pink);
-            transform: translate(-3px, -3px);
-            box-shadow: 5px 5px 0px var(--neon-pink);
-        }
+        /* Removed old inline glass-panel styles to avoid overriding styles.css */
         .slide-in-card { opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; position: relative; padding-left: 2rem; margin-bottom: 2rem; }
         .slide-in-card.animate { opacity: 1; transform: translateX(0); }
         .timeline-node { position: absolute; left: -10px; top: 20px; width: 14px; height: 14px; background: var(--neon-purple); border: 2px solid #000; }
@@ -102,11 +86,9 @@
         /* Magnetic element hover glow */
         [data-magnetic] { transition: transform 0.1s ease; }
         select, button, label, a, input { cursor: none; outline: none; }
-        input { background: #000; border: 2px solid #555; color: white; padding: 12px; border-radius: 0px; width: 100%; transition: border-color 0.1s; font-family: 'VT323'; }
-        input:focus { border-color: var(--neon-purple); box-shadow: inset 4px 4px 0px rgba(176,38,255,0.2); }
-        button { cursor: none; border: none; border-radius: 0 !important; font-family: 'VT323'; border: 2px solid transparent; }
-        button:hover { border-color: #fff; }
-        select { border-radius: 0 !important; font-family: 'VT323'; }
+        input[type="radio"] { cursor: none; }
+        button { cursor: none; border: none; font-family: 'Inter', sans-serif; border: 2px solid transparent; }
+        button:hover { border-color: rgba(255, 255, 255, 0.2); }
 
         .gradient-text {
             color: var(--neon-pink);
@@ -269,15 +251,15 @@
                 <div class="content-pane" style="margin-left: 250px;">
                     <header class="mb-4 flex flex-col items-center">
                         <div data-magnetic style="display: inline-block; padding: 20px;">
-                            <img src="zaara-logo-2d.png" alt="ZAARA Neural AI" class="logo-main mb-2" style="image-rendering: pixelated;">
+                            <img src="zaara-logo-2d.png" alt="ZAARA Neural AI" class="logo-main mb-2">
                         </div>
-                        <p class="text-zinc-400">Expanding human capability via the neural matrix.</p>
+                        <p class="text-zinc-400 text-lg font-bold gradient-text pb-2">Your AI Career Architect</p>
                     </header>
 
                     <div class="glass-panel p-8 space-y-6">
                         <div>
                             <label class="block text-sm text-zinc-400 mb-2">My Current Level</label>
-                            <select id="skill-level" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                            <select id="skill-level" class="w-full glass-input p-3">
                                 <option value="beginner">Beginner</option>
                                 <option value="intermediate">Intermediate / Advanced</option>
                             </select>
@@ -285,7 +267,7 @@
 
                         <div>
                             <label class="block text-sm text-zinc-400 mb-2">My Career Goal <span class="text-neon-pink">*</span></label>
-                            <select id="career-goal" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl transition-all">
+                            <select id="career-goal" class="w-full glass-input p-3 transition-all">
                                 <option value="" disabled selected>Select a career path...</option>
                                 <option value="ai_engineer">🤖 AI / ML Engineer</option>
                                 <option value="web_dev">🌐 Full-Stack Web Developer</option>
@@ -310,7 +292,7 @@
                         <!-- Dynamic Language Preference (ECE Focus) -->
                         <div id="language-pref-container" class="slide-in-card hidden mt-4" style="animation-delay: 0.2s;">
                             <label class="block text-sm text-zinc-400 mb-2">Programming Language Focus</label>
-                            <select id="preferred-language" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                            <select id="preferred-language" class="w-full glass-input p-3">
                                 <option value="c">C (Hardware Standard)</option>
                                 <option value="cpp">C++ (Modern Embedded)</option>
                                 <option value="rust">Rust (Memory Safety)</option>
@@ -322,7 +304,7 @@
                         <!-- Dynamic Medical Specialization -->
                         <div id="medical-spec-container" class="slide-in-card hidden mt-4" style="animation-delay: 0.2s;">
                             <label class="block text-sm text-zinc-400 mb-2">Medical Specialization</label>
-                            <select id="medical-specialty" class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+                            <select id="medical-specialty" class="w-full glass-input p-3">
                                 <option value="cardiologist">❤️ Cardiologist (Heart)</option>
                                 <option value="neurologist">🧠 Neurologist (Brain & Nerves)</option>
                                 <option value="dermatologist">🧴 Dermatologist (Skin)</option>
@@ -333,19 +315,40 @@
                             </select>
                         </div>
 
+                        <!-- Time Commitment Selector -->
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-2">Time Commitment</label>
+                            <select id="time-commitment" class="w-full glass-input p-3">
+                                <option value="part-time">Part-Time (< 10 hrs/week)</option>
+                                <option value="moderate" selected>Moderate (10-20 hrs/week)</option>
+                                <option value="full-time">Full-Time (20+ hrs/week)</option>
+                            </select>
+                        </div>
+
+                        <!-- Preferred Tech Stack Multi-Select -->
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-2">Preferred Technologies (Optional)</label>
+                            <input type="text" id="tech-stack" class="w-full glass-input p-3" placeholder="e.g., Python, React, AWS...">
+                        </div>
+
                         <div>
                             <label class="block text-sm text-zinc-400 mb-2">Duration</label>
                             <div class="flex gap-4">
-                                <label class="flex-1"><input type="radio" name="duration" value="30" checked class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/10 cursor-pointer text-xs font-bold uppercase tracking-wider">30 Days</div></label>
-                                <label class="flex-1"><input type="radio" name="duration" value="60" class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/10 cursor-pointer text-xs font-bold uppercase tracking-wider">60 Days</div></label>
+                                <label class="flex-1"><input type="radio" name="duration" value="30" checked class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/20 cursor-pointer text-xs font-bold uppercase tracking-wider transition-all">30 Days</div></label>
+                                <label class="flex-1"><input type="radio" name="duration" value="60" class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/20 cursor-pointer text-xs font-bold uppercase tracking-wider transition-all">60 Days</div></label>
                             </div>
                         </div>
 
                         <div id="form-error" class="hidden text-red-500 text-sm mt-4 text-center font-bold" style="text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);"></div>
 
-                        <button onclick="generate()" data-magnetic class="w-full bg-purple-600 hover:bg-purple-500 hover:scale-105 shadow-[0_0_15px_var(--neon-purple)] py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 mt-4">
-                            Initialize Sequence <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                        <div class="flex flex-col gap-3 mt-4">
+                            <button onclick="generate()" data-magnetic class="w-full bg-purple-600 hover:bg-purple-500 hover:scale-105 shadow-[0_0_15px_var(--neon-purple)] py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2">
+                                Initialize Sequence <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <button onclick="loadPreviousRoadmap()" class="w-full bg-transparent border border-purple-500 text-purple-400 hover:bg-purple-500/20 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left"></i> Load Previous Roadmap
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -353,13 +356,17 @@
 
         <!-- Loader View -->
         <div id="loader-view" class="hidden flex-col items-center justify-center p-20 text-center glass-panel w-full fade-in" style="min-height: 400px; margin: 40px auto; max-width: 800px;">
-            <div class="loader-ring mx-auto mb-6" style="width: 80px; height: 80px; border: 4px solid #111; border-top-color: var(--neon-purple); border-right-color: var(--neon-pink); border-radius: 50%; animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;"></div>
-            <h2 id="loader-text" class="text-2xl font-bold gradient-text crt-flicker">Analyzing Neural Profile...</h2>
+            <div class="loader-dots mb-6">
+                <span></span><span></span><span></span>
+            </div>
+            <h2 id="loader-text" class="text-2xl font-bold gradient-text">Analyzing your career path...</h2>
         </div>
 
         <!-- Roadmap View -->
         <div id="roadmap-view" class="hidden py-8 fade-in">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 glass-panel p-6 rounded-2xl">
+        <!-- Roadmap View to Export -->
+        <div id="exportable-roadmap">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 glass-panel p-6">
                 <div class="mb-4 md:mb-0">
                     <h2 id="roadmap-title" class="text-3xl font-bold gradient-text">Your Career Matrix</h2>
                     <p id="roadmap-subtitle" class="text-sm text-zinc-400">Sequence Processed Successfully</p>
@@ -369,47 +376,68 @@
             <!-- Identity Panel -->
             <div id="matrix-identity" class="glass-card p-6 mb-6">
                 <h3 class="text-purple-400 text-xs tracking-widest mb-1 opacity-80"><i class="fa-solid fa-id-badge"></i> CAREER IDENTITY</h3>
-                <div id="identity-text" class="text-2xl font-bold text-white crt-flicker"></div>
+                <div id="identity-text" class="text-2xl font-bold text-white typing-cursor" style="display:inline-block;"></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <!-- Skill Tree -->
                 <div class="glass-card p-6">
-                    <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-network-wired"></i> SKILL TREE (Beginner → Advanced)</h3>
-                    <ul id="skill-tree-list" class="list-disc pl-5 space-y-2 text-zinc-300 font-mono"></ul>
+                    <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-network-wired"></i> SKILLS TREE (Beginner → Advanced)</h3>
+                    <div id="skill-tree-list" class="skills-grid text-zinc-300 font-mono"></div>
                 </div>
                 <!-- Tools Stack -->
                 <div class="glass-card p-6">
-                    <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-toolbox"></i> RECOMMENDED STACK & TOOLS</h3>
-                    <ul id="tools-list" class="list-disc pl-5 space-y-2 text-zinc-300 font-mono"></ul>
+                    <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-toolbox"></i> RECOMMENDED TECH STACK</h3>
+                    <div id="tools-list" class="flex flex-wrap gap-2 text-zinc-300 font-mono"></div>
                 </div>
             </div>
 
             <!-- Projects Panel -->
             <div class="glass-card p-6 mb-8">
                 <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-flask"></i> SUGGESTED PROJECTS</h3>
-                <ul id="projects-list" class="list-disc pl-5 space-y-2 text-zinc-300 font-mono"></ul>
+                <ul id="projects-list" class="list-disc pl-5 space-y-3 text-zinc-300 font-mono"></ul>
             </div>
 
             <!-- AI Recommendation -->
             <div class="glass-card p-6 mb-8 border-pink-500/50" style="background: rgba(236,72,153,0.05); box-shadow: inset 0 0 20px rgba(236,72,153,0.05);">
-                <h3 class="text-pink-400 text-xs tracking-widest mb-2 font-bold"><i class="fa-solid fa-bolt"></i> ZAARA AI DIRECTIVE</h3>
-                <p id="ai-rec-text" class="text-pink-200 italic font-mono text-[1.1rem] leading-relaxed"></p>
+                <h3 class="text-pink-400 text-xs tracking-widest mb-2 font-bold"><i class="fa-solid fa-bolt"></i> AI SUGGESTIONS</h3>
+                <p id="ai-rec-text" class="text-pink-200 italic font-mono text-[1.1rem] leading-relaxed typing-cursor" style="display:inline-block;"></p>
             </div>
             
-            <h3 class="text-purple-400 text-xs tracking-widest mb-4 ml-4 opacity-80 mt-12"><i class="fa-solid fa-route"></i> EXECUTION PLAN</h3>
-            <div id="timeline" class="border-l border-zinc-800 ml-4 space-y-8 mb-12"></div>
+            <h3 class="text-purple-400 text-xs tracking-widest mb-4 ml-4 opacity-80 mt-12"><i class="fa-solid fa-route"></i> TIMELINE VISUALIZATION</h3>
+            <div id="timeline" class="border-l border-zinc-800 ml-4 space-y-8 mb-12 relative"></div>
+        </div>
 
             <!-- Final CTAs -->
             <div class="mt-8 flex flex-col md:flex-row gap-4 justify-center">
-                <button data-magnetic onclick="window.print()" class="bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-500 shadow-[0_0_10px_var(--neon-purple)] font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-download"></i> Download Roadmap</button>
+                <button data-magnetic onclick="downloadPDF()" class="bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-500 shadow-[0_0_10px_var(--neon-purple)] font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-file-pdf"></i> Download as PDF</button>
                 <button data-magnetic onclick="goHome()" class="bg-zinc-800 px-6 py-3 border border-zinc-600 rounded-lg hover:bg-zinc-700 font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-rotate-right"></i> Regenerate Path</button>
-                <a href="#timeline" data-magnetic class="border border-pink-500 text-pink-400 px-6 py-3 rounded-lg hover:bg-pink-500/20 font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-play"></i> Start Learning</a>
             </div>
         </div>
     </div>
 
-    <!-- Logic provided by app.js -->
+    <!-- AI Chatbot Widget -->
+    <div class="chatbot-widget">
+        <button class="chatbot-toggle" onclick="toggleChatbot()" id="chatbot-toggle-btn">
+            <i class="fa-solid fa-message"></i>
+        </button>
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                <span class="font-bold text-white"><i class="fa-solid fa-robot text-purple-400"></i> ZAARA Assistant</span>
+                <button onclick="toggleChatbot()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="chat-msg bot">Hello! I am your AI Career Architect. How can I assist you with your roadmap today?</div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask about career paths..." onkeypress="handleChatKeyPress(event)">
+                <button class="chatbot-send" onclick="sendChatbotMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
 
 
     <!-- Magnetic Cursor Engine -->

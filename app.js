@@ -221,13 +221,12 @@ async function generate() {
     document.getElementById('landing-view').classList.add('hidden');
     document.getElementById('roadmap-view').classList.add('hidden');
     
-    // Smooth Loader Sequence
     const loaderView = document.getElementById('loader-view');
     const loaderText = document.getElementById('loader-text');
     loaderView.classList.remove('hidden');
     loaderView.style.display = 'flex';
     
-    loaderText.innerText = "Analyzing Neural Profile...";
+    loaderText.innerText = "Analyzing your career path...";
     setTimeout(() => loaderText.innerText = "Generating Career Matrix...", 800);
     setTimeout(() => loaderText.innerText = "Syncing with ZAARA R-7...", 1600);
 
@@ -281,20 +280,29 @@ async function generate() {
                 document.getElementById('roadmap-title').innerText = data.title;
                 
                 // Advanced Result Payload
-                document.getElementById('identity-text').innerText = data.career_identity || 'Specialist Mode Engaged';
+                document.getElementById('roadmap-title').innerText = data.title;
+                
+                // Typing effect wrapper instead of direct assignment
+                typewriterEffect('identity-text', data.career_identity || 'Specialist Mode Engaged');
                 
                 const ulSkills = document.getElementById('skill-tree-list');
-                ulSkills.innerHTML = (data.skills_tree || []).map(s => `<li>${s}</li>`).join('');
+                ulSkills.innerHTML = (data.skills_tree || []).map(s => `<div class="skill-item">${s}</div>`).join('');
                 
                 const ulTools = document.getElementById('tools-list');
-                ulTools.innerHTML = (data.tools_stack || []).map(s => `<li>${s}</li>`).join('');
+                ulTools.innerHTML = (data.tools_stack || []).map(s => `<span class="tech-badge">${s}</span>`).join('');
                 
                 const ulProjects = document.getElementById('projects-list');
-                ulProjects.innerHTML = (data.projects || []).map(p => `<li>${p}</li>`).join('');
+                ulProjects.innerHTML = (data.projects || []).map(p => `<li><strong class="text-purple-300">${p.split(':')[0] || p}</strong><p class="text-xs text-zinc-400 mt-1">Recommended hands-on implementation project.</p></li>`).join('');
                 
-                document.getElementById('ai-rec-text').innerText = data.ai_recommendation || 'Consistency is key.';
+                typewriterEffect('ai-rec-text', data.ai_recommendation || 'Consistency is key.');
 
                 renderTimeline(data.roadmap);
+                
+                // Save to localStorage
+                data.created_at = new Date().toISOString();
+                localStorage.setItem('zaara_last_roadmap', JSON.stringify(data));
+                showToast('Roadmap automatically saved to Secure Matrix.', 'success');
+                
             } else {
                 document.getElementById('landing-view').classList.remove('hidden');
                 errObj.innerText = `Error: ${data.message}`;
@@ -319,23 +327,20 @@ function renderTimeline(roadmap) {
 
     roadmap.forEach((item, i) => {
         const card = document.createElement('div');
-        card.className = 'relative pl-8 mb-8 slide-in-card';
+        card.className = 'timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)]';
         card.innerHTML = `
             <div class="timeline-node"></div>
-            <div class="glass-card p-6 rounded-xl">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="text-purple-400 text-[10px] font-bold">DAY ${item.day}</span>
-                    <span class="font-semibold text-sm">${item.topic}</span>
-                </div>
-                <p class="text-zinc-500 text-xs mb-3">${item.description}</p>
-                <a href="${item.resource}" target="_blank" class="text-cyan-400 text-[10px] hover:underline flex flex-col gap-1 mt-2 p-2 bg-black/30 rounded-lg border border-cyan-900/50">
-                    <div><i class="fa-solid fa-link"></i> Launch Resource</div>
-                    <div class="text-[8px] text-zinc-600 break-all font-mono">${item.resource}</div>
-                </a>
+            <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
+                <span class="text-neon-purple text-[11px] font-bold tracking-wider">MONTH ${Math.ceil(item.day / 30) || 1} / STEP ${item.day}</span>
+                <span class="font-bold text-[15px] gradient-text">${item.topic}</span>
             </div>
+            <p class="text-zinc-400 text-sm mb-3 leading-relaxed">${item.description}</p>
+            <a href="${item.resource}" target="_blank" class="inline-flex flex-col gap-1 mt-2 p-3 bg-black/40 rounded-lg border border-purple-900/30 hover:border-purple-500/50 transition-all font-mono">
+                <div class="text-purple-300 text-xs font-bold"><i class="fa-solid fa-link"></i> Access Component</div>
+            </a>
         `;
         timeline.appendChild(card);
-        setTimeout(() => card.classList.add('animate'), i * 30);
+        setTimeout(() => card.classList.add('animate'), i * 50);
     });
 }
 
@@ -343,4 +348,145 @@ function goHome() {
     document.getElementById('roadmap-view').classList.add('hidden');
     document.getElementById('landing-view').classList.remove('hidden');
     document.getElementById('timeline').innerHTML = '';
+}
+
+// Utility: Typing Effect
+function typewriterEffect(elementId, text, speed = 15) {
+    const el = document.getElementById(elementId);
+    el.innerHTML = '';
+    el.classList.add('typing-cursor');
+    let i = 0;
+    
+    function typeWriter() {
+        if (i < text.length) {
+            el.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typeWriter, speed);
+        } else {
+            el.classList.remove('typing-cursor');
+            el.classList.add('crt-flicker'); // adding standard effect after typing
+        }
+    }
+    typeWriter();
+}
+
+// Utility: Toast Notification
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle text-green-400' : 'fa-info-circle text-purple-400'}"></i> ${message}`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        if(toast.parentNode) {
+            toast.remove();
+        }
+    }, 3500);
+}
+
+// Data Persistence: Load Previous Roadmap
+function loadPreviousRoadmap() {
+    const saved = localStorage.getItem('zaara_last_roadmap');
+    if (!saved) {
+        showToast('No previously saved roadmap found in local storage.', 'info');
+        return;
+    }
+    
+    try {
+        const data = JSON.parse(saved);
+        
+        document.getElementById('landing-view').classList.add('hidden');
+        document.getElementById('roadmap-view').classList.remove('hidden');
+        
+        document.getElementById('roadmap-title').innerText = data.title;
+        
+        typewriterEffect('identity-text', data.career_identity || 'Specialist Mode Engaged');
+        
+        const ulSkills = document.getElementById('skill-tree-list');
+        ulSkills.innerHTML = (data.skills_tree || []).map(s => `<div class="skill-item">${s}</div>`).join('');
+        
+        const ulTools = document.getElementById('tools-list');
+        ulTools.innerHTML = (data.tools_stack || []).map(s => `<span class="tech-badge">${s}</span>`).join('');
+        
+        const ulProjects = document.getElementById('projects-list');
+        ulProjects.innerHTML = (data.projects || []).map(p => `<li><strong class="text-purple-300">${p.split(':')[0] || p}</strong><p class="text-xs text-zinc-400 mt-1">Recommended hands-on implementation project.</p></li>`).join('');
+        
+        typewriterEffect('ai-rec-text', data.ai_recommendation || 'Consistency is key.');
+
+        renderTimeline(data.roadmap);
+        
+        showToast('Successfully loaded your previous career matrix.', 'success');
+    } catch(e) {
+        showToast('Data corrupted. Could not load previous roadmap.', 'error');
+    }
+}
+
+// PDF Export Function
+function downloadPDF() {
+    const element = document.getElementById('exportable-roadmap');
+    const opt = {
+        margin:       10,
+        filename:     'zaara-career-roadmap.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#050505' },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    showToast('Initializing PDF rendering sequence...', 'info');
+    
+    // Temporarily hide elements not suited for PDF
+    element.querySelectorAll('.typing-cursor').forEach(el => el.classList.remove('typing-cursor'));
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+        showToast('PDF successfully exported!', 'success');
+    });
+}
+
+// Floating Chatbot Logic
+let chatOpen = false;
+function toggleChatbot() {
+    chatOpen = !chatOpen;
+    const cw = document.getElementById('chatbot-window');
+    const toggleIcon = document.querySelector('#chatbot-toggle-btn i');
+    if(chatOpen) {
+        cw.classList.add('open');
+        toggleIcon.className = 'fa-solid fa-xmark';
+    } else {
+        cw.classList.remove('open');
+        toggleIcon.className = 'fa-solid fa-message';
+    }
+}
+
+function handleChatKeyPress(e) {
+    if(e.key === 'Enter') sendChatbotMessage();
+}
+
+function sendChatbotMessage() {
+    const input = document.getElementById('chatbot-input');
+    const text = input.value.trim();
+    if(!text) return;
+    
+    addChatMessage('user', text);
+    input.value = '';
+    
+    setTimeout(() => {
+        const responses = [
+            "Your career matrix is designed dynamically. Focusing on core fundamentals like data structures or architectural patterns will yield the highest ROI.",
+            "I recommend starting with the 'Tools & Tech Stack' recommendations before jumping into the timeline.",
+            "That's a great question. As an AI Architect, my directive is to guide you step-by-step. Keep following the monthly plan outlined.",
+            "Networking is just as important as code. Don't forget to push your roadmap projects to GitHub and share your progress."
+        ];
+        const res = responses[Math.floor(Math.random() * responses.length)];
+        addChatMessage('bot', res);
+    }, 800);
+}
+
+function addChatMessage(sender, text) {
+    const messages = document.getElementById('chatbot-messages');
+    const div = document.createElement('div');
+    div.className = `chat-msg ${sender}`;
+    div.innerText = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
 }
