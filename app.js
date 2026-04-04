@@ -15,17 +15,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function generate() {
+    const goalEl = document.getElementById('career-goal');
+    const errObj = document.getElementById('form-error');
+
+    if (!goalEl.value) {
+        goalEl.style.borderColor = 'red';
+        errObj.innerText = "ERROR: Please select a career path to proceed.";
+        errObj.classList.remove('hidden');
+        return;
+    }
+    goalEl.style.borderColor = '';
+    errObj.classList.add('hidden');
+
     const skill = document.getElementById('skill-level').value;
-    const goal = document.getElementById('career-goal').value;
+    const goal = goalEl.value;
     const language = document.getElementById('preferred-language').value;
     const specialty = document.getElementById('medical-specialty').value;
     const duration = document.querySelector('input[name="duration"]:checked').value;
     
-    const timeline = document.getElementById('timeline');
-    timeline.innerHTML = '<p class="text-zinc-500 animate-pulse text-center py-10">Accessing Neural Matrix...</p>';
-
     document.getElementById('landing-view').classList.add('hidden');
-    document.getElementById('roadmap-view').classList.remove('hidden');
+    document.getElementById('roadmap-view').classList.add('hidden');
+    
+    // Smooth Loader Sequence
+    const loaderView = document.getElementById('loader-view');
+    const loaderText = document.getElementById('loader-text');
+    loaderView.classList.remove('hidden');
+    loaderView.style.display = 'flex';
+    
+    loaderText.innerText = "Analyzing Neural Profile...";
+    setTimeout(() => loaderText.innerText = "Generating Career Matrix...", 800);
+    setTimeout(() => loaderText.innerText = "Syncing with ZAARA R-7...", 1600);
 
     try {
         const response = await fetch('/api/generate', {
@@ -36,14 +55,44 @@ async function generate() {
 
         const data = await response.json();
         
-        if (data.status === 'success') {
-            document.getElementById('roadmap-title').innerText = data.title;
-            renderTimeline(data.roadmap);
-        } else {
-            timeline.innerHTML = `<p class="text-red-500">Error: ${data.message}</p>`;
-        }
+        setTimeout(() => {
+            loaderView.style.display = 'none';
+            loaderView.classList.add('hidden');
+            
+            if (data.status === 'success') {
+                document.getElementById('roadmap-view').classList.remove('hidden');
+                document.getElementById('roadmap-title').innerText = data.title;
+                
+                // Advanced Result Payload
+                document.getElementById('identity-text').innerText = data.career_identity || 'Specialist Mode Engaged';
+                
+                const ulSkills = document.getElementById('skill-tree-list');
+                ulSkills.innerHTML = (data.skills_tree || []).map(s => `<li>${s}</li>`).join('');
+                
+                const ulTools = document.getElementById('tools-list');
+                ulTools.innerHTML = (data.tools_stack || []).map(s => `<li>${s}</li>`).join('');
+                
+                const ulProjects = document.getElementById('projects-list');
+                ulProjects.innerHTML = (data.projects || []).map(p => `<li>${p}</li>`).join('');
+                
+                document.getElementById('ai-rec-text').innerText = data.ai_recommendation || 'Consistency is key.';
+
+                renderTimeline(data.roadmap);
+            } else {
+                document.getElementById('landing-view').classList.remove('hidden');
+                errObj.innerText = `Error: ${data.message}`;
+                errObj.classList.remove('hidden');
+            }
+        }, 2400); // 2.4s cinematic delay
+
     } catch (e) {
-        timeline.innerHTML = `<p class="text-red-500">Connection Failed: AI Core is currently offline.</p>`;
+        setTimeout(() => {
+            loaderView.style.display = 'none';
+            loaderView.classList.add('hidden');
+            document.getElementById('landing-view').classList.remove('hidden');
+            errObj.innerText = "Connection Failed: AI Core is currently offline.";
+            errObj.classList.remove('hidden');
+        }, 1000);
     }
 }
 
