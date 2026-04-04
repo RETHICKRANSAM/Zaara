@@ -316,7 +316,10 @@
                     <h2 id="roadmap-title" class="text-2xl font-bold">Your Career Matrix</h2>
                     <p id="roadmap-subtitle" class="text-sm text-zinc-400">Sequence Processed Successfully</p>
                 </div>
-                <button onclick="location.reload()" data-magnetic class="bg-zinc-800 p-2 rounded-lg hover:bg-zinc-700"><i class="fa-solid fa-rotate-right"></i></button>
+                <div class="flex gap-4">
+                    <button onclick="goHome()" data-magnetic class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-500 font-bold flex items-center gap-2"><i class="fa-solid fa-house"></i> Home</button>
+                    <button onclick="location.reload()" data-magnetic class="bg-zinc-800 p-2 rounded-lg hover:bg-zinc-700" title="Reset All"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
             </div>
             
             <div id="timeline" class="border-l border-zinc-800 ml-4 space-y-8"></div>
