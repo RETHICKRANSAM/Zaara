@@ -202,6 +202,10 @@
         body.pdf-exporting, body.pdf-exporting #main-container, body.pdf-exporting p, body.pdf-exporting h2, body.pdf-exporting h3, body.pdf-exporting div, body.pdf-exporting span, body.pdf-exporting strong, body.pdf-exporting li {
             color: #111111 !important;
         }
+        /* Defeat all Tailwind text colors */
+        body.pdf-exporting .text-white, body.pdf-exporting .text-zinc-200, body.pdf-exporting .text-zinc-300, body.pdf-exporting .text-zinc-400, body.pdf-exporting .text-zinc-500 {
+            color: #111111 !important;
+        }
         /* Specific overrides for color visibility on white background */
         body.pdf-exporting .gradient-text { background: none !important; -webkit-background-clip: unset !important; background-clip: unset !important; -webkit-text-fill-color: unset !important; color: #9333ea !important; font-weight: bold !important;}
         body.pdf-exporting .text-purple-400, body.pdf-exporting .text-purple-300 { color: #7e22ce !important; }

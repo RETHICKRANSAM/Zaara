@@ -429,7 +429,7 @@ function downloadPDF() {
         margin:       [10, 10, 10, 10],
         filename:     'zaara-career-roadmap.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: Math.max(element.scrollWidth, 800) },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 1200, scrollY: 0, scrollX: 0 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
