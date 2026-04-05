@@ -422,33 +422,84 @@ function loadPreviousRoadmap() {
     }
 }
 
-// PDF Export Function
-function downloadPDF() {
+// PDF Export Function (Custom Architecture for Full-Page Capture)
+async function downloadPDF() {
     const element = document.getElementById('exportable-roadmap');
-    const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     'zaara-career-roadmap.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 1200, scrollY: 0, scrollX: 0 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-    };
     
-    showToast('Initializing PDF rendering sequence...', 'info');
+    showToast('Initializing high-res PDF matrix capture...', 'info');
     
-    // Temporarily apply PDF styling to the entire document
+    // 1. Prepare DOM Constraints
     document.body.classList.add('pdf-exporting');
     const cursors = element.querySelectorAll('.typing-cursor');
     cursors.forEach(el => el.classList.remove('typing-cursor'));
     
-    html2pdf().set(opt).from(element).save().then(() => {
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    
+    // Temporarily force dimensions to guarantee full scrollable content capture
+    document.body.style.overflow = 'visible';
+    document.documentElement.style.overflow = 'visible';
+
+    // Allow DOM to repaint safely
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    try {
+        // 2. Render Full Document Canvas
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            windowWidth: document.documentElement.scrollWidth || 1200,
+            windowHeight: document.documentElement.scrollHeight,
+            scrollY: 0,
+            scrollX: 0
+        });
+
+        // 3. Dynamic Page Slicing via jsPDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        // Map canvas dimensions to A4 millimeter constraints
+        const canvasWidthInMm = pdfWidth; 
+        const canvasHeightInMm = (canvas.height * pdfWidth) / canvas.width;
+        
+        let heightLeft = canvasHeightInMm;
+        let position = 0; 
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+        // Append initial page
+        pdf.addImage(imgData, 'JPEG', 0, position, canvasWidthInMm, canvasHeightInMm);
+        heightLeft -= pdfHeight;
+
+        // Loop and slice remainder canvas
+        while (heightLeft > 0) {
+            position = position - pdfHeight; // Shift focal point down
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, canvasWidthInMm, canvasHeightInMm);
+            heightLeft -= pdfHeight;
+        }
+
+        // 4. Output Render
+        pdf.save('zaara-career-roadmap.pdf');
+        showToast('PDF Matrix successfully compiled!', 'success');
+        
+    } catch (err) {
+        console.error("PDF Export Critical Failure:", err);
+        showToast('PDF compilation failed. Matrix offline.', 'error');
+    } finally {
+        // 5. Restore Original Application State
         document.body.classList.remove('pdf-exporting');
         cursors.forEach(el => el.classList.add('typing-cursor'));
-        showToast('PDF successfully exported!', 'success');
-    }).catch(err => {
-        document.body.classList.remove('pdf-exporting');
-        showToast('PDF Export encountered an error.', 'error');
-    });
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+    }
 }
 
 // Floating Chatbot Logic
