@@ -424,27 +424,29 @@ function loadPreviousRoadmap() {
 
 // PDF Export Function (Smart Pagination & Section-by-Section Capture)
 async function downloadPDF() {
-    const element = document.getElementById('exportable-roadmap');
-    
     showToast('Initializing Smart PDF Generation...', 'info');
     
     // 1. Pre-Capture Layout Preparation 
     document.body.classList.add('pdf-exporting');
-    const cursors = element.querySelectorAll('.typing-cursor');
+    const cursors = document.querySelectorAll('.typing-cursor');
     cursors.forEach(el => el.classList.remove('typing-cursor'));
     
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyMargin = document.body.style.margin;
+    const originalBodyPadding = document.body.style.padding;
     
     document.body.style.overflow = 'visible';
     document.documentElement.style.overflow = 'visible';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
     
     // Temporarily un-hide or fix problematic CSS globally
     const styleEl = document.createElement('style');
     styleEl.id = 'pdf-prep-style';
     styleEl.innerHTML = `
         * { overflow: visible !important; position: static !important; }
-        .glass-panel, .glass-card, .timeline-card { break-inside: avoid; page-break-inside: avoid; }
+        @media print { .container { width: 100%; } }
     `;
     document.head.appendChild(styleEl);
 
@@ -456,8 +458,8 @@ async function downloadPDF() {
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         
         // 2. A4 Dimensions & Margins Configuration
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const pdfWidth = 210;
+        const pdfHeight = 297;
         const margin = 15; // 15mm margins on all sides
         const usableWidth = pdfWidth - (margin * 2);
         const usableHeight = pdfHeight - (margin * 2);
@@ -467,6 +469,12 @@ async function downloadPDF() {
 
         // Header Function Setup
         const addHeaderFooter = (pageNum) => {
+            // Mask margins to enforce clean borders for manually spliced tall elements
+            pdf.setFillColor(255, 255, 255);
+            pdf.rect(0, 0, pdfWidth, margin - 1, 'F'); // Top margin clear
+            pdf.rect(0, pdfHeight - margin + 1, pdfWidth, margin, 'F'); // Bottom margin clear
+            
+            // Re-draw text over mask
             pdf.setFontSize(8);
             pdf.setTextColor(150);
             pdf.text('ZAARA — Career Neural Matrix Official Roadmap', margin, 10);
@@ -474,26 +482,20 @@ async function downloadPDF() {
         };
         addHeaderFooter(pageCount);
 
-        // 3. Section Slicer Logic: Collect all indivisible blocks
-        const blocksToRender = [];
-        Array.from(element.children).forEach(child => {
-            if (child.id === 'timeline') {
-                Array.from(child.children).forEach(tc => blocksToRender.push(tc));
-            } else {
-                blocksToRender.push(child);
-            }
-        });
+        // 3. Select all .roadmap-section elements
+        const sections = Array.from(document.querySelectorAll('.roadmap-section'));
 
         // 4. Section-by-Section Canvas Loop
-        for (let i = 0; i < blocksToRender.length; i++) {
-            const block = blocksToRender[i];
+        for (let i = 0; i < sections.length; i++) {
+            const section = sections[i];
             
-            const canvas = await html2canvas(block, {
+            // Convert each targeted logical block to an isolation canvas
+            const canvas = await html2canvas(section, {
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
-                windowWidth: 1200,
-                scrollY: -window.scrollY
+                scrollY: -window.scrollY,
+                windowHeight: document.body.scrollHeight
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.98);
@@ -504,23 +506,49 @@ async function downloadPDF() {
             const pdfImgHeight = (imgProps.height * pdfImgWidth) / imgProps.width;
 
             // 5. Smart Break Assessment
-            // If the element exceeds the current page limit, force a new page
-            if (currentY + pdfImgHeight > usableHeight + margin) {
-                pdf.addPage();
-                pageCount++;
-                currentY = margin;
-                addHeaderFooter(pageCount);
-            }
+            if (pdfImgHeight <= usableHeight) {
+                // Perfect fit inside one A4 page capacity
+                if (currentY + pdfImgHeight > usableHeight + margin) {
+                    pdf.addPage();
+                    pageCount++;
+                    currentY = margin;
+                    addHeaderFooter(pageCount);
+                }
 
-            // Edge Case Handler: If a single element is larger than a full page
-            // We must place it and accept the overflow, or in a perfect system slice it mathematically
-            // For now, place it normally
-            pdf.addImage(imgData, 'JPEG', margin, currentY, pdfImgWidth, pdfImgHeight);
-            
-            currentY += pdfImgHeight + 5; // 5mm spacing gap below block
+                pdf.addImage(imgData, 'JPEG', margin, currentY, pdfImgWidth, pdfImgHeight);
+                currentY += pdfImgHeight + 5; // 5mm spacing gap below block
+                
+            } else {
+                // Tall Section Handling: Split carefully across multiple pages
+                // Push to new page to maximize space for the first chunk
+                if (currentY > margin) {
+                    pdf.addPage();
+                    pageCount++;
+                    currentY = margin;
+                    addHeaderFooter(pageCount);
+                }
+                
+                let heightLeft = pdfImgHeight;
+                let position = currentY; // Place at top of page
+
+                pdf.addImage(imgData, 'JPEG', margin, position, pdfImgWidth, pdfImgHeight);
+                heightLeft -= usableHeight;
+                
+                while (heightLeft > 0) {
+                    position = position - usableHeight; // Shift focal point up so bottom chunk is printed
+                    pdf.addPage();
+                    pageCount++;
+                    
+                    pdf.addImage(imgData, 'JPEG', margin, position, pdfImgWidth, pdfImgHeight);
+                    addHeaderFooter(pageCount); // Adds white masked margins over the overlapping image
+                    heightLeft -= usableHeight;
+                }
+                
+                currentY = position + pdfImgHeight + 5;
+            }
         }
 
-        // 6. Complete and Output
+        // 6. Output Render
         pdf.save('zaara-career-roadmap.pdf');
         showToast('PDF Document generated perfectly!', 'success');
         
@@ -533,6 +561,8 @@ async function downloadPDF() {
         cursors.forEach(el => el.classList.add('typing-cursor'));
         document.body.style.overflow = originalBodyOverflow;
         document.documentElement.style.overflow = originalHtmlOverflow;
+        document.body.style.margin = originalBodyMargin;
+        document.body.style.padding = originalBodyPadding;
         const s = document.getElementById('pdf-prep-style');
         if(s) s.remove();
     }

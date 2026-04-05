@@ -403,7 +403,7 @@
         <div id="roadmap-view" class="hidden py-8 fade-in">
         <!-- Roadmap View to Export -->
         <div id="exportable-roadmap">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 glass-panel p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 glass-panel p-6 roadmap-section">
                 <div class="mb-4 md:mb-0">
                     <h2 id="roadmap-title" class="text-3xl font-bold gradient-text">Your Career Matrix</h2>
                     <p id="roadmap-subtitle" class="text-sm text-zinc-400">Sequence Processed Successfully</p>
@@ -411,12 +411,12 @@
             </div>
 
             <!-- Identity Panel -->
-            <div id="matrix-identity" class="glass-card p-6 mb-6">
+            <div id="matrix-identity" class="glass-card p-6 mb-6 roadmap-section">
                 <h3 class="text-purple-400 text-xs tracking-widest mb-1 opacity-80"><i class="fa-solid fa-id-badge"></i> CAREER IDENTITY</h3>
                 <div id="identity-text" class="text-2xl font-bold text-white typing-cursor" style="display:inline-block;"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 roadmap-section">
                 <!-- Skill Tree -->
                 <div class="glass-card p-6">
                     <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-network-wired"></i> SKILLS TREE (Beginner → Advanced)</h3>
@@ -430,18 +430,18 @@
             </div>
 
             <!-- Projects Panel -->
-            <div class="glass-card p-6 mb-8">
+            <div class="glass-card p-6 mb-8 roadmap-section">
                 <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-flask"></i> SUGGESTED PROJECTS</h3>
                 <ul id="projects-list" class="list-disc pl-5 space-y-3 text-zinc-300 font-mono"></ul>
             </div>
 
             <!-- AI Recommendation -->
-            <div class="glass-card p-6 mb-8 border-pink-500/50" style="background: rgba(236,72,153,0.05); box-shadow: inset 0 0 20px rgba(236,72,153,0.05);">
+            <div class="glass-card p-6 mb-8 border-pink-500/50 roadmap-section" style="background: rgba(236,72,153,0.05); box-shadow: inset 0 0 20px rgba(236,72,153,0.05);">
                 <h3 class="text-pink-400 text-xs tracking-widest mb-2 font-bold"><i class="fa-solid fa-bolt"></i> AI SUGGESTIONS</h3>
                 <p id="ai-rec-text" class="text-pink-200 italic font-mono text-[1.1rem] leading-relaxed typing-cursor" style="display:inline-block;"></p>
             </div>
             
-            <h3 class="text-purple-400 text-xs tracking-widest mb-4 ml-4 opacity-80 mt-12"><i class="fa-solid fa-route"></i> TIMELINE VISUALIZATION</h3>
+            <h3 class="text-purple-400 text-xs tracking-widest mb-4 ml-4 opacity-80 mt-12 roadmap-section"><i class="fa-solid fa-route"></i> TIMELINE VISUALIZATION</h3>
             <div id="timeline" class="border-l border-zinc-800 ml-4 space-y-8 mb-12 relative"></div>
         </div>
 
