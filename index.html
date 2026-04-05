@@ -190,6 +190,15 @@
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
+        
+        /* FIX HTML2CANVAS BLANK PAGES: Override animations which stay at opacity: 0 */
+        body.pdf-exporting .fade-in, body.pdf-exporting .slide-in-card, body.pdf-exporting .animate {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+
         body.pdf-exporting, body.pdf-exporting #main-container, body.pdf-exporting p, body.pdf-exporting h2, body.pdf-exporting h3, body.pdf-exporting div, body.pdf-exporting span, body.pdf-exporting strong, body.pdf-exporting li {
             color: #111111 !important;
         }
