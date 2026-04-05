@@ -422,13 +422,13 @@ function loadPreviousRoadmap() {
     }
 }
 
-// PDF Export Function (Custom Architecture for Full-Page Capture)
+// PDF Export Function (Smart Pagination & Section-by-Section Capture)
 async function downloadPDF() {
     const element = document.getElementById('exportable-roadmap');
     
-    showToast('Initializing high-res PDF matrix capture...', 'info');
+    showToast('Initializing Smart PDF Generation...', 'info');
     
-    // 1. Prepare DOM Constraints
+    // 1. Pre-Capture Layout Preparation 
     document.body.classList.add('pdf-exporting');
     const cursors = element.querySelectorAll('.typing-cursor');
     cursors.forEach(el => el.classList.remove('typing-cursor'));
@@ -436,69 +436,105 @@ async function downloadPDF() {
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
     
-    // Temporarily force dimensions to guarantee full scrollable content capture
     document.body.style.overflow = 'visible';
     document.documentElement.style.overflow = 'visible';
+    
+    // Temporarily un-hide or fix problematic CSS globally
+    const styleEl = document.createElement('style');
+    styleEl.id = 'pdf-prep-style';
+    styleEl.innerHTML = `
+        * { overflow: visible !important; position: static !important; }
+        .glass-panel, .glass-card, .timeline-card { break-inside: avoid; page-break-inside: avoid; }
+    `;
+    document.head.appendChild(styleEl);
 
     // Allow DOM to repaint safely
     await new Promise(resolve => setTimeout(resolve, 300));
     
     try {
-        // 2. Render Full Document Canvas
-        const canvas = await html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            windowWidth: document.documentElement.scrollWidth || 1200,
-            windowHeight: document.documentElement.scrollHeight,
-            scrollY: 0,
-            scrollX: 0
-        });
-
-        // 3. Dynamic Page Slicing via jsPDF
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
-
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        
+        // 2. A4 Dimensions & Margins Configuration
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
+        const margin = 15; // 15mm margins on all sides
+        const usableWidth = pdfWidth - (margin * 2);
+        const usableHeight = pdfHeight - (margin * 2);
         
-        // Map canvas dimensions to A4 millimeter constraints
-        const canvasWidthInMm = pdfWidth; 
-        const canvasHeightInMm = (canvas.height * pdfWidth) / canvas.width;
-        
-        let heightLeft = canvasHeightInMm;
-        let position = 0; 
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        let currentY = margin;
+        let pageCount = 1;
 
-        // Append initial page
-        pdf.addImage(imgData, 'JPEG', 0, position, canvasWidthInMm, canvasHeightInMm);
-        heightLeft -= pdfHeight;
+        // Header Function Setup
+        const addHeaderFooter = (pageNum) => {
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text('ZAARA — Career Neural Matrix Official Roadmap', margin, 10);
+            pdf.text(`Page ${pageNum}`, pdfWidth - margin - 15, pdfHeight - 10);
+        };
+        addHeaderFooter(pageCount);
 
-        // Loop and slice remainder canvas
-        while (heightLeft > 0) {
-            position = position - pdfHeight; // Shift focal point down
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, canvasWidthInMm, canvasHeightInMm);
-            heightLeft -= pdfHeight;
+        // 3. Section Slicer Logic: Collect all indivisible blocks
+        const blocksToRender = [];
+        Array.from(element.children).forEach(child => {
+            if (child.id === 'timeline') {
+                Array.from(child.children).forEach(tc => blocksToRender.push(tc));
+            } else {
+                blocksToRender.push(child);
+            }
+        });
+
+        // 4. Section-by-Section Canvas Loop
+        for (let i = 0; i < blocksToRender.length; i++) {
+            const block = blocksToRender[i];
+            
+            const canvas = await html2canvas(block, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                windowWidth: 1200,
+                scrollY: -window.scrollY
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const imgProps = pdf.getImageProperties(imgData);
+            
+            // Map image to A4 width proportion
+            const pdfImgWidth = usableWidth;
+            const pdfImgHeight = (imgProps.height * pdfImgWidth) / imgProps.width;
+
+            // 5. Smart Break Assessment
+            // If the element exceeds the current page limit, force a new page
+            if (currentY + pdfImgHeight > usableHeight + margin) {
+                pdf.addPage();
+                pageCount++;
+                currentY = margin;
+                addHeaderFooter(pageCount);
+            }
+
+            // Edge Case Handler: If a single element is larger than a full page
+            // We must place it and accept the overflow, or in a perfect system slice it mathematically
+            // For now, place it normally
+            pdf.addImage(imgData, 'JPEG', margin, currentY, pdfImgWidth, pdfImgHeight);
+            
+            currentY += pdfImgHeight + 5; // 5mm spacing gap below block
         }
 
-        // 4. Output Render
+        // 6. Complete and Output
         pdf.save('zaara-career-roadmap.pdf');
-        showToast('PDF Matrix successfully compiled!', 'success');
+        showToast('PDF Document generated perfectly!', 'success');
         
     } catch (err) {
-        console.error("PDF Export Critical Failure:", err);
-        showToast('PDF compilation failed. Matrix offline.', 'error');
+        console.error("Smart PDF Export Critical Failure:", err);
+        showToast('PDF compilation failed.', 'error');
     } finally {
-        // 5. Restore Original Application State
+        // 7. Cleanup & Restore
         document.body.classList.remove('pdf-exporting');
         cursors.forEach(el => el.classList.add('typing-cursor'));
         document.body.style.overflow = originalBodyOverflow;
         document.documentElement.style.overflow = originalHtmlOverflow;
+        const s = document.getElementById('pdf-prep-style');
+        if(s) s.remove();
     }
 }
 
