@@ -327,7 +327,7 @@ function renderTimeline(roadmap) {
 
     roadmap.forEach((item, i) => {
         const card = document.createElement('div');
-        card.className = 'timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)]';
+        card.className = 'timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)] roadmap-section';
         card.innerHTML = `
             <div class="timeline-node"></div>
             <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
@@ -422,149 +422,154 @@ function loadPreviousRoadmap() {
     }
 }
 
-// PDF Export Function (Smart Pagination & Section-by-Section Capture)
+// PDF Export Function — Section-by-Section Capture with Smart Pagination
 async function downloadPDF() {
-    showToast('Initializing Smart PDF Generation...', 'info');
-    
-    // 1. Pre-Capture Layout Preparation 
+    showToast('Preparing PDF document...', 'info');
+
+    // ── 1. Pre-Capture DOM Preparation ──────────────────────────────
     document.body.classList.add('pdf-exporting');
     const cursors = document.querySelectorAll('.typing-cursor');
     cursors.forEach(el => el.classList.remove('typing-cursor'));
-    
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalBodyMargin = document.body.style.margin;
-    const originalBodyPadding = document.body.style.padding;
-    
+
+    // Save originals
+    const savedStyles = {
+        bodyOF: document.body.style.overflow,
+        htmlOF: document.documentElement.style.overflow,
+    };
     document.body.style.overflow = 'visible';
     document.documentElement.style.overflow = 'visible';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    
-    // Temporarily un-hide or fix problematic CSS globally
-    const styleEl = document.createElement('style');
-    styleEl.id = 'pdf-prep-style';
-    styleEl.innerHTML = `
-        * { overflow: visible !important; position: static !important; }
-        @media print { .container { width: 100%; } }
-    `;
-    document.head.appendChild(styleEl);
 
-    // Allow DOM to repaint safely
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    // Inject a prep stylesheet — DO NOT touch position, only overflow
+    const prepStyle = document.createElement('style');
+    prepStyle.id = 'pdf-prep-style';
+    prepStyle.textContent = `
+        body.pdf-exporting #exportable-roadmap,
+        body.pdf-exporting #exportable-roadmap * {
+            overflow: visible !important;
+        }
+        body.pdf-exporting .slide-in-card,
+        body.pdf-exporting .fade-in,
+        body.pdf-exporting .animate {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+    `;
+    document.head.appendChild(prepStyle);
+
+    // Let the DOM repaint
+    await new Promise(r => setTimeout(r, 500));
+
     try {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        
-        // 2. A4 Dimensions & Margins Configuration
-        const pdfWidth = 210;
-        const pdfHeight = 297;
-        const margin = 15; // 15mm margins on all sides
-        const usableWidth = pdfWidth - (margin * 2);
-        const usableHeight = pdfHeight - (margin * 2);
-        
-        let currentY = margin;
-        let pageCount = 1;
 
-        // Header Function Setup
-        const addHeaderFooter = (pageNum) => {
-            // Mask margins to enforce clean borders for manually spliced tall elements
+        // ── 2. A4 Constants ─────────────────────────────────────────
+        const PAGE_W = 210;
+        const PAGE_H = 297;
+        const M = 12;                       // margin in mm
+        const CONTENT_W = PAGE_W - M * 2;   // 186 mm
+        const CONTENT_H = PAGE_H - M * 2;   // 273 mm
+        const GAP = 4;                       // gap between sections in mm
+
+        let curY = M;
+        let page = 1;
+
+        // Header / footer painter
+        const stamp = (pg) => {
+            // white mask strips to hide bleed from tall-image slicing
             pdf.setFillColor(255, 255, 255);
-            pdf.rect(0, 0, pdfWidth, margin - 1, 'F'); // Top margin clear
-            pdf.rect(0, pdfHeight - margin + 1, pdfWidth, margin, 'F'); // Bottom margin clear
-            
-            // Re-draw text over mask
-            pdf.setFontSize(8);
-            pdf.setTextColor(150);
-            pdf.text('ZAARA — Career Neural Matrix Official Roadmap', margin, 10);
-            pdf.text(`Page ${pageNum}`, pdfWidth - margin - 15, pdfHeight - 10);
+            pdf.rect(0, 0, PAGE_W, M, 'F');
+            pdf.rect(0, PAGE_H - M, PAGE_W, M, 'F');
+            // text
+            pdf.setFontSize(7);
+            pdf.setTextColor(160, 160, 160);
+            pdf.text('ZAARA — Career Neural Matrix', M, 8);
+            pdf.text(`Page ${pg}`, PAGE_W - M - 12, PAGE_H - 6);
         };
-        addHeaderFooter(pageCount);
+        stamp(page);
 
-        // 3. Select all .roadmap-section elements
-        const sections = Array.from(document.querySelectorAll('.roadmap-section'));
+        // ── 3. Collect every .roadmap-section in DOM order ──────────
+        const container = document.getElementById('exportable-roadmap');
+        const sections = container.querySelectorAll('.roadmap-section');
 
-        // 4. Section-by-Section Canvas Loop
-        for (let i = 0; i < sections.length; i++) {
-            const section = sections[i];
-            
-            // Convert each targeted logical block to an isolation canvas
+        if (sections.length === 0) {
+            throw new Error('No .roadmap-section elements found — nothing to export.');
+        }
+
+        // ── 4. Render each section to its own canvas, then place ────
+        for (const section of sections) {
+            // Skip invisible / zero-height elements
+            if (section.offsetHeight === 0) continue;
+
             const canvas = await html2canvas(section, {
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 scrollY: -window.scrollY,
-                windowHeight: document.body.scrollHeight
             });
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.98);
-            const imgProps = pdf.getImageProperties(imgData);
-            
-            // Map image to A4 width proportion
-            const pdfImgWidth = usableWidth;
-            const pdfImgHeight = (imgProps.height * pdfImgWidth) / imgProps.width;
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const ratio  = canvas.height / canvas.width;
+            const imgW   = CONTENT_W;
+            const imgH   = CONTENT_W * ratio;
 
-            // 5. Smart Break Assessment
-            if (pdfImgHeight <= usableHeight) {
-                // Perfect fit inside one A4 page capacity
-                if (currentY + pdfImgHeight > usableHeight + margin) {
+            // Case A — section fits on the remaining page
+            if (imgH <= CONTENT_H) {
+                if (curY + imgH > PAGE_H - M) {
                     pdf.addPage();
-                    pageCount++;
-                    currentY = margin;
-                    addHeaderFooter(pageCount);
+                    page++;
+                    curY = M;
+                    stamp(page);
                 }
-
-                pdf.addImage(imgData, 'JPEG', margin, currentY, pdfImgWidth, pdfImgHeight);
-                currentY += pdfImgHeight + 5; // 5mm spacing gap below block
-                
+                pdf.addImage(imgData, 'JPEG', M, curY, imgW, imgH);
+                curY += imgH + GAP;
             } else {
-                // Tall Section Handling: Split carefully across multiple pages
-                // Push to new page to maximize space for the first chunk
-                if (currentY > margin) {
+                // Case B — section taller than one full page: slice it
+                if (curY !== M) {
                     pdf.addPage();
-                    pageCount++;
-                    currentY = margin;
-                    addHeaderFooter(pageCount);
+                    page++;
+                    curY = M;
+                    stamp(page);
                 }
-                
-                let heightLeft = pdfImgHeight;
-                let position = currentY; // Place at top of page
 
-                pdf.addImage(imgData, 'JPEG', margin, position, pdfImgWidth, pdfImgHeight);
-                heightLeft -= usableHeight;
-                
-                while (heightLeft > 0) {
-                    position = position - usableHeight; // Shift focal point up so bottom chunk is printed
-                    pdf.addPage();
-                    pageCount++;
-                    
-                    pdf.addImage(imgData, 'JPEG', margin, position, pdfImgWidth, pdfImgHeight);
-                    addHeaderFooter(pageCount); // Adds white masked margins over the overlapping image
-                    heightLeft -= usableHeight;
+                let drawn = 0;
+                const sliceH = CONTENT_H;  // how much of the image fits per page
+
+                while (drawn < imgH) {
+                    const thisSlice = Math.min(sliceH, imgH - drawn);
+
+                    // We draw the *full* image offset upward so only the current
+                    // slice is visible within the page clip area.
+                    pdf.addImage(imgData, 'JPEG', M, M - drawn, imgW, imgH);
+                    stamp(page);  // white-mask header/footer hides bleed
+
+                    drawn += thisSlice;
+                    if (drawn < imgH) {
+                        pdf.addPage();
+                        page++;
+                    }
                 }
-                
-                currentY = position + pdfImgHeight + 5;
+                curY = M + (imgH % sliceH || sliceH) + GAP;
             }
         }
 
-        // 6. Output Render
+        // ── 5. Save ──────────────────────────────────────────────────
         pdf.save('zaara-career-roadmap.pdf');
-        showToast('PDF Document generated perfectly!', 'success');
-        
+        showToast(`PDF exported — ${page} pages`, 'success');
+
     } catch (err) {
-        console.error("Smart PDF Export Critical Failure:", err);
-        showToast('PDF compilation failed.', 'error');
+        console.error('PDF export error:', err);
+        showToast('PDF export failed: ' + err.message, 'error');
     } finally {
-        // 7. Cleanup & Restore
+        // ── 6. Restore DOM ───────────────────────────────────────────
         document.body.classList.remove('pdf-exporting');
         cursors.forEach(el => el.classList.add('typing-cursor'));
-        document.body.style.overflow = originalBodyOverflow;
-        document.documentElement.style.overflow = originalHtmlOverflow;
-        document.body.style.margin = originalBodyMargin;
-        document.body.style.padding = originalBodyPadding;
+        document.body.style.overflow = savedStyles.bodyOF;
+        document.documentElement.style.overflow = savedStyles.htmlOF;
         const s = document.getElementById('pdf-prep-style');
-        if(s) s.remove();
+        if (s) s.remove();
     }
 }
 
