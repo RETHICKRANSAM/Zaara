@@ -426,20 +426,28 @@ function loadPreviousRoadmap() {
 function downloadPDF() {
     const element = document.getElementById('exportable-roadmap');
     const opt = {
-        margin:       10,
+        margin:       [10, 10, 10, 10],
         filename:     'zaara-career-roadmap.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#050505' },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#000000', windowWidth: Math.max(element.scrollWidth, 800) },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
     showToast('Initializing PDF rendering sequence...', 'info');
     
     // Temporarily hide elements not suited for PDF
-    element.querySelectorAll('.typing-cursor').forEach(el => el.classList.remove('typing-cursor'));
+    element.classList.add('pdf-exporting');
+    const cursors = element.querySelectorAll('.typing-cursor');
+    cursors.forEach(el => el.classList.remove('typing-cursor'));
     
     html2pdf().set(opt).from(element).save().then(() => {
+        element.classList.remove('pdf-exporting');
+        cursors.forEach(el => el.classList.add('typing-cursor'));
         showToast('PDF successfully exported!', 'success');
+    }).catch(err => {
+        element.classList.remove('pdf-exporting');
+        showToast('PDF Export encountered an error.', 'error');
     });
 }
 
