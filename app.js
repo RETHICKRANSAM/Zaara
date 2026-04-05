@@ -436,17 +436,17 @@ function downloadPDF() {
     
     showToast('Initializing PDF rendering sequence...', 'info');
     
-    // Temporarily hide elements not suited for PDF
-    element.classList.add('pdf-exporting');
+    // Temporarily apply PDF styling to the entire document
+    document.body.classList.add('pdf-exporting');
     const cursors = element.querySelectorAll('.typing-cursor');
     cursors.forEach(el => el.classList.remove('typing-cursor'));
     
     html2pdf().set(opt).from(element).save().then(() => {
-        element.classList.remove('pdf-exporting');
+        document.body.classList.remove('pdf-exporting');
         cursors.forEach(el => el.classList.add('typing-cursor'));
         showToast('PDF successfully exported!', 'success');
     }).catch(err => {
-        element.classList.remove('pdf-exporting');
+        document.body.classList.remove('pdf-exporting');
         showToast('PDF Export encountered an error.', 'error');
     });
 }

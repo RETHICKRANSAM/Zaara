@@ -178,11 +178,11 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* Document PDF Export Optimization - Clean White Readability Layout */
-        .pdf-exporting, .pdf-exporting body, .pdf-exporting #main-container {
+        body.pdf-exporting, body.pdf-exporting #main-container, body.pdf-exporting #exportable-roadmap {
             background-color: #ffffff !important;
             background: #ffffff !important;
         }
-        .pdf-exporting * {
+        body.pdf-exporting * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             text-shadow: none !important;
@@ -190,37 +190,37 @@
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
-        .pdf-exporting body, .pdf-exporting #main-container, .pdf-exporting p, .pdf-exporting h2, .pdf-exporting h3, .pdf-exporting div, .pdf-exporting span, .pdf-exporting strong, .pdf-exporting li {
+        body.pdf-exporting, body.pdf-exporting #main-container, body.pdf-exporting p, body.pdf-exporting h2, body.pdf-exporting h3, body.pdf-exporting div, body.pdf-exporting span, body.pdf-exporting strong, body.pdf-exporting li {
             color: #111111 !important;
         }
         /* Specific overrides for color visibility on white background */
-        .pdf-exporting .gradient-text { background: none !important; -webkit-background-clip: unset !important; -webkit-text-fill-color: unset !important; color: #9333ea !important; font-weight: bold !important;}
-        .pdf-exporting .text-purple-400, .pdf-exporting .text-purple-300 { color: #7e22ce !important; }
-        .pdf-exporting .text-pink-400, .pdf-exporting .text-pink-200 { color: #be185d !important; font-weight: bold !important; }
-        .pdf-exporting .text-neon-purple { color: #9333ea !important; }
+        body.pdf-exporting .gradient-text { background: none !important; -webkit-background-clip: unset !important; background-clip: unset !important; -webkit-text-fill-color: unset !important; color: #9333ea !important; font-weight: bold !important;}
+        body.pdf-exporting .text-purple-400, body.pdf-exporting .text-purple-300 { color: #7e22ce !important; }
+        body.pdf-exporting .text-pink-400, body.pdf-exporting .text-pink-200 { color: #be185d !important; font-weight: bold !important; }
+        body.pdf-exporting .text-neon-purple { color: #9333ea !important; }
 
-        .pdf-exporting .glass-panel, .pdf-exporting .glass-card, .pdf-exporting .timeline-card {
+        body.pdf-exporting .glass-panel, body.pdf-exporting .glass-card, body.pdf-exporting .timeline-card {
             background: #f8fafc !important;
             border: 1px solid #cbd5e1 !important;
             page-break-inside: avoid !important;
             margin-bottom: 24px !important;
         }
-        .pdf-exporting .timeline-node {
+        body.pdf-exporting .timeline-node {
             background: #ffffff !important;
             border-color: #9333ea !important;
             box-shadow: none !important;
         }
-        .pdf-exporting .timeline-card:hover .timeline-node { transform: none !important; }
-        .pdf-exporting .tech-badge {
+        body.pdf-exporting .timeline-card:hover .timeline-node { transform: none !important; }
+        body.pdf-exporting .tech-badge {
             background: #f3e8ff !important;
             color: #6b21a8 !important;
             border: 1px solid #d8b4fe !important;
         }
-        .pdf-exporting .skill-item {
+        body.pdf-exporting .skill-item {
             background: #f1f5f9 !important;
             border-left-color: #9333ea !important;
         }
-        .pdf-exporting .bg-black\/40 {
+        body.pdf-exporting .bg-black\/40 {
             background: #ffffff !important;
             border: 1px solid #cbd5e1 !important;
         }
