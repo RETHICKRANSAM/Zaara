@@ -552,15 +552,700 @@ async function downloadPDF() {
     }
 }
 
-// Floating Chatbot Logic
+// ═══════════════════════════════════════════════════════════════════════
+// ZAARA AI CAREER MENTOR — Intelligent Chatbot Engine v2.0
+// ═══════════════════════════════════════════════════════════════════════
+
 let chatOpen = false;
+let chatHistory = [];
+let userContext = { askedAbout: [], skillLevel: null, careerGoal: null };
+
+// ── Career Knowledge Base ─────────────────────────────────────────────
+const CAREER_KB = {
+    ai_engineer: {
+        title: 'AI / ML Engineer',
+        description: 'Build intelligent systems using machine learning, deep learning, and LLMs.',
+        prerequisite: 'Strong Python skills + math fundamentals (linear algebra, calculus, probability)',
+        roadmap: [
+            '1. Master Python & core libraries (NumPy, Pandas)',
+            '2. Learn math foundations — linear algebra, calculus, statistics',
+            '3. Understand ML algorithms (regression, trees, SVMs, clustering)',
+            '4. Dive into deep learning — CNNs, RNNs, Transformers',
+            '5. Explore NLP & LLMs — Hugging Face, LangChain, RAG',
+            '6. Build & deploy models — MLOps, Docker, cloud APIs'
+        ],
+        tools: ['Python', 'PyTorch', 'TensorFlow', 'Scikit-Learn', 'Hugging Face', 'CUDA', 'LangChain', 'Jupyter'],
+        projects: [
+            '• Sentiment Analysis API using BERT',
+            '• Image classifier with custom CNN',
+            '• RAG-based chatbot with LangChain',
+            '• Recommendation engine for movies/books'
+        ],
+        salaryRange: '$95K - $180K+ (varies by experience & location)',
+        timeToLearn: '6-12 months (dedicated full-time study)'
+    },
+    web_dev: {
+        title: 'Full-Stack Web Developer',
+        description: 'Build end-to-end web applications with modern frontend and backend technologies.',
+        prerequisite: 'Basic HTML/CSS/JS knowledge is helpful but not required',
+        roadmap: [
+            '1. HTML5 & CSS3 fundamentals — semantic markup, Flexbox, Grid',
+            '2. JavaScript deep dive — ES6+, DOM manipulation, async/await',
+            '3. Learn a frontend framework — React, Vue, or Angular',
+            '4. Backend with Node.js or Python (Django/Flask)',
+            '5. Databases — PostgreSQL, MongoDB, Redis',
+            '6. Deploy — Docker, CI/CD, cloud hosting (Vercel, AWS)'
+        ],
+        tools: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Tailwind CSS', 'Next.js', 'Git'],
+        projects: [
+            '• Personal portfolio website',
+            '• E-commerce platform with payments',
+            '• Real-time chat app with WebSockets',
+            '• Full-stack SaaS dashboard'
+        ],
+        salaryRange: '$70K - $150K+',
+        timeToLearn: '4-8 months (dedicated study)'
+    },
+    data_scientist: {
+        title: 'Data Scientist',
+        description: 'Extract insights from data using statistics, ML, and visualization.',
+        prerequisite: 'Basic math/stats knowledge + Python or R basics',
+        roadmap: [
+            '1. Python + libraries (Pandas, NumPy, Matplotlib)',
+            '2. Statistics & probability — distributions, hypothesis testing',
+            '3. Data wrangling & EDA (Exploratory Data Analysis)',
+            '4. Machine Learning models — supervised & unsupervised',
+            '5. Data visualization — Tableau, Plotly, Seaborn',
+            '6. Big Data tools — Spark, SQL, cloud platforms'
+        ],
+        tools: ['Python', 'Pandas', 'NumPy', 'Jupyter', 'Tableau', 'SQL', 'Scikit-Learn', 'Matplotlib'],
+        projects: [
+            '• Customer churn prediction model',
+            '• Sales forecasting dashboard',
+            '• A/B test analysis pipeline',
+            '• Interactive data storytelling notebook'
+        ],
+        salaryRange: '$85K - $160K+',
+        timeToLearn: '5-10 months'
+    },
+    cybersecurity: {
+        title: 'Cybersecurity Analyst',
+        description: 'Protect systems and networks from digital threats.',
+        prerequisite: 'Basic networking knowledge + comfort with command line',
+        roadmap: [
+            '1. Networking fundamentals — TCP/IP, DNS, HTTP, OSI model',
+            '2. Linux administration & bash scripting',
+            '3. Security principles — CIA triad, encryption, authentication',
+            '4. Ethical hacking — OWASP Top 10, pen testing',
+            '5. Tools mastery — Wireshark, Nmap, Burp Suite, Metasploit',
+            '6. Certifications — CompTIA Security+, CEH, OSCP'
+        ],
+        tools: ['Kali Linux', 'Wireshark', 'Metasploit', 'Burp Suite', 'Nmap', 'Hashcat'],
+        projects: [
+            '• Build a vulnerability scanner',
+            '• Set up a honeypot network',
+            '• Capture-the-flag (CTF) challenges',
+            '• Secure home lab configuration'
+        ],
+        salaryRange: '$75K - $140K+',
+        timeToLearn: '6-12 months'
+    },
+    cloud_engineer: {
+        title: 'Cloud Engineer (AWS/Azure)',
+        description: 'Design and manage scalable cloud infrastructure.',
+        prerequisite: 'Basic Linux + networking knowledge',
+        roadmap: [
+            '1. Linux & networking fundamentals',
+            '2. Cloud platform basics — AWS/Azure/GCP core services',
+            '3. Infrastructure as Code — Terraform, CloudFormation',
+            '4. Containers — Docker & Kubernetes',
+            '5. CI/CD pipelines & automation',
+            '6. Certifications — AWS Solutions Architect, Azure Admin'
+        ],
+        tools: ['AWS', 'Terraform', 'Docker', 'Kubernetes', 'Ansible', 'GitHub Actions'],
+        projects: [
+            '• Auto-scaling web app deployment',
+            '• Multi-region disaster recovery setup',
+            '• Serverless API with Lambda/Functions',
+            '• Infrastructure automation pipeline'
+        ],
+        salaryRange: '$90K - $160K+',
+        timeToLearn: '6-10 months'
+    },
+    mobile_dev: {
+        title: 'Mobile App Developer',
+        description: 'Build native & cross-platform mobile applications.',
+        prerequisite: 'Basic programming knowledge in any language',
+        roadmap: [
+            '1. Choose your path — Flutter (Dart), React Native (JS), or native (Swift/Kotlin)',
+            '2. UI/UX design principles for mobile',
+            '3. State management & navigation',
+            '4. API integration & local storage',
+            '5. Testing & debugging on devices',
+            '6. App Store / Play Store deployment'
+        ],
+        tools: ['Flutter', 'Dart', 'React Native', 'Xcode', 'Android Studio', 'Firebase'],
+        projects: [
+            '• Todo app with cloud sync',
+            '• Weather app with live API',
+            '• Social media feed clone',
+            '• E-commerce mobile app'
+        ],
+        salaryRange: '$75K - $145K+',
+        timeToLearn: '4-8 months'
+    },
+    devops: {
+        title: 'DevOps Engineer',
+        description: 'Automate development pipelines and manage infrastructure.',
+        prerequisite: 'Linux basics + one scripting language (Python/Bash)',
+        roadmap: [
+            '1. Linux system administration',
+            '2. Scripting — Bash, Python',
+            '3. Version control — Git workflows',
+            '4. CI/CD — Jenkins, GitHub Actions, GitLab CI',
+            '5. Containers & orchestration — Docker, K8s',
+            '6. Monitoring — Prometheus, Grafana, ELK Stack'
+        ],
+        tools: ['Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Prometheus', 'Ansible'],
+        projects: [
+            '• Automated deployment pipeline',
+            '• Kubernetes cluster setup',
+            '• Monitoring dashboard with alerts',
+            '• GitOps workflow implementation'
+        ],
+        salaryRange: '$85K - $155K+',
+        timeToLearn: '5-9 months'
+    },
+    game_dev: {
+        title: 'Game Developer',
+        description: 'Create interactive games using engines and programming.',
+        prerequisite: 'Basic programming skills + creativity',
+        roadmap: [
+            '1. Choose an engine — Unity (C#) or Unreal (C++)',
+            '2. Learn game design principles',
+            '3. 2D game development fundamentals',
+            '4. 3D graphics & physics systems',
+            '5. Multiplayer & networking',
+            '6. Publishing & monetization'
+        ],
+        tools: ['Unity', 'Unreal Engine', 'C#', 'Blender', 'Photoshop', 'Git LFS'],
+        projects: [
+            '• 2D platformer game',
+            '• 3D first-person explorer',
+            '• Multiplayer card game',
+            '• Mobile puzzle game'
+        ],
+        salaryRange: '$65K - $130K+',
+        timeToLearn: '6-12 months'
+    },
+    blockchain: {
+        title: 'Blockchain Developer',
+        description: 'Build decentralized applications and smart contracts.',
+        prerequisite: 'JavaScript + understanding of cryptography basics',
+        roadmap: [
+            '1. Blockchain fundamentals — distributed ledger, consensus',
+            '2. Ethereum & Solidity smart contracts',
+            '3. Web3.js / Ethers.js for DApp frontends',
+            '4. DeFi protocols & token standards (ERC-20, ERC-721)',
+            '5. Security auditing for smart contracts',
+            '6. Layer 2 solutions & cross-chain development'
+        ],
+        tools: ['Solidity', 'Hardhat', 'Ethers.js', 'MetaMask', 'IPFS', 'OpenZeppelin'],
+        projects: [
+            '• ERC-20 token deployment',
+            '• NFT minting DApp',
+            '• Decentralized voting system',
+            '• DeFi yield aggregator'
+        ],
+        salaryRange: '$90K - $175K+',
+        timeToLearn: '5-10 months'
+    },
+    ui_ux: {
+        title: 'UI/UX Designer',
+        description: 'Design beautiful, user-friendly digital experiences.',
+        prerequisite: 'Design curiosity + basic knowledge of any design tool',
+        roadmap: [
+            '1. Design thinking & UX research methods',
+            '2. Wireframing & information architecture',
+            '3. Figma / Sketch for high-fidelity mockups',
+            '4. Prototyping & interaction design',
+            '5. Design systems & component libraries',
+            '6. Usability testing & iteration'
+        ],
+        tools: ['Figma', 'Adobe XD', 'Sketch', 'Miro', 'Maze', 'Framer'],
+        projects: [
+            'Redesign a popular mobile app UX',
+            'Create a design system from scratch',
+            'E-commerce checkout flow optimization',
+            'Mobile app prototype with micro-animations'
+        ],
+        salaryRange: '$70K - $140K+',
+        timeToLearn: '3-6 months'
+    }
+};
+
+// ── Intent Classification Engine ──────────────────────────────────────
+const INTENT_PATTERNS = [
+    {
+        intent: 'career_path',
+        patterns: [/become\s+(an?\s+)?(.+)/i, /how\s+to\s+be(come)?\s+(an?\s+)?(.+)/i, /want\s+to\s+(be|become)\s+(an?\s+)?(.+)/i, /career\s+(in|as|path|for)\s+(.+)/i, /interested\s+in\s+(.+)/i, /get\s+into\s+(.+)/i],
+        handler: 'handleCareerPath'
+    },
+    {
+        intent: 'roadmap',
+        patterns: [/roadmap/i, /learning\s+path/i, /step.by.step/i, /where\s+to\s+start/i, /how\s+to\s+start/i, /what\s+to\s+learn/i, /guide\s+(me|for)/i, /learn\s+next/i, /what\s+should\s+i\s+learn/i, /next\s+step/i],
+        handler: 'handleRoadmap'
+    },
+    {
+        intent: 'skills',
+        patterns: [/skills?\s+(needed|required|for|to)/i, /what\s+skills/i, /do\s+i\s+need/i, /prerequisites?/i, /requirements?\s+for/i],
+        handler: 'handleSkills'
+    },
+    {
+        intent: 'tools',
+        patterns: [/tools?\s+(for|to|needed|used)/i, /what\s+tools/i, /tech\s*stack/i, /technologies?\s+(for|to|used)/i, /frameworks?\s+for/i, /software\s+(for|to)/i],
+        handler: 'handleTools'
+    },
+    {
+        intent: 'projects',
+        patterns: [/project\s+(ideas?|for|to)/i, /what\s+projects?/i, /build\s+(something|a|an)/i, /portfolio/i, /hands?.?on/i, /practice/i, /what\s+to\s+build/i, /project\s+suggestion/i],
+        handler: 'handleProjects'
+    },
+    {
+        intent: 'salary',
+        patterns: [/salary/i, /pay/i, /earn(ings?)?/i, /income/i, /how\s+much\s+(do|can|does)/i, /compensation/i, /money/i],
+        handler: 'handleSalary'
+    },
+    {
+        intent: 'time',
+        patterns: [/how\s+long/i, /time\s+(to|it\s+take)/i, /duration/i, /months?\s+to/i, /years?\s+to/i, /quickly/i, /fast/i],
+        handler: 'handleTime'
+    },
+    {
+        intent: 'motivation',
+        patterns: [/motivat/i, /overwhelm/i, /stuck/i, /give\s+up/i, /too\s+(hard|difficult|much)/i, /can'?t\s+do/i, /impossible/i, /discourage/i, /lost/i, /confused/i, /tired/i, /burnout/i, /impostor/i, /syndrome/i],
+        handler: 'handleMotivation'
+    },
+    {
+        intent: 'comparison',
+        patterns: [/vs\.?|versus|or\s+|better|compare|difference\s+between/i, /which\s+(is|one|should)/i, /choose\s+between/i],
+        handler: 'handleComparison'
+    },
+    {
+        intent: 'python',
+        patterns: [/python/i],
+        handler: 'handlePython'
+    },
+    {
+        intent: 'react',
+        patterns: [/react/i, /reactjs/i, /react\.js/i],
+        handler: 'handleReact'
+    },
+    {
+        intent: 'javascript',
+        patterns: [/javascript/i, /\bjs\b/i],
+        handler: 'handleJavaScript'
+    },
+    {
+        intent: 'website_help',
+        patterns: [/how\s+(does|do)\s+(this|the)\s+(website|site|app|platform)/i, /what\s+(is|does)\s+(zaara|this)/i, /features?/i, /help\s+me\s+navigate/i, /how\s+to\s+use/i, /what\s+can\s+(you|zaara)/i, /explain\s+(zaara|this|the\s+site)/i],
+        handler: 'handleWebsiteHelp'
+    },
+    {
+        intent: 'greeting',
+        patterns: [/^(hi|hello|hey|yo|sup|greetings|howdy|good\s+(morning|afternoon|evening))/i, /^what'?s?\s+up/i],
+        handler: 'handleGreeting'
+    },
+    {
+        intent: 'thanks',
+        patterns: [/thank/i, /thanks/i, /thx/i, /appreciate/i, /helpful/i, /great/i, /awesome/i, /perfect/i, /amazing/i],
+        handler: 'handleThanks'
+    },
+    {
+        intent: 'internship',
+        patterns: [/internship/i, /intern\b/i, /first\s+job/i, /entry.level/i, /no\s+experience/i, /fresher/i, /new\s+grad/i, /campus/i, /placement/i],
+        handler: 'handleInternship'
+    },
+    {
+        intent: 'freelance',
+        patterns: [/freelanc/i, /remote\s+work/i, /work\s+from\s+home/i, /gig/i, /upwork/i, /fiverr/i, /client/i, /self.employ/i],
+        handler: 'handleFreelance'
+    },
+    {
+        intent: 'certification',
+        patterns: [/certif/i, /certificate/i, /credential/i, /accredit/i, /exam/i],
+        handler: 'handleCertification'
+    }
+];
+
+// ── Response Handlers ─────────────────────────────────────────────────
+const HANDLERS = {
+    handleCareerPath(msg) {
+        const career = detectCareer(msg);
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            userContext.careerGoal = career;
+            userContext.askedAbout.push(career);
+            return `Great choice! Here's what it takes to become a **${kb.title}**:\n\n` +
+                `📌 ${kb.description}\n\n` +
+                `🔑 **Prerequisite:** ${kb.prerequisite}\n\n` +
+                `**Quick Roadmap:**\n${kb.roadmap.slice(0, 4).join('\n')}\n\n` +
+                `💡 Want me to go deeper into **skills**, **projects**, or **tools** for this path?`;
+        }
+        return `I'd love to help you explore a career path! 🚀\n\n` +
+            `Which of these interests you most?\n` +
+            `• 🤖 AI / ML Engineer\n• 🌐 Web Developer\n• 📊 Data Scientist\n• 🔒 Cybersecurity\n• ☁️ Cloud Engineer\n• 📱 Mobile Developer\n• ⚙️ DevOps\n• 🎮 Game Dev\n• ⛓️ Blockchain\n• 🎨 UI/UX Design\n\n` +
+            `Just tell me which path excites you!`;
+    },
+
+    handleRoadmap(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            return `📍 **${kb.title} — Step-by-Step Roadmap:**\n\n${kb.roadmap.join('\n')}\n\n` +
+                `⏱️ **Estimated Time:** ${kb.timeToLearn}\n\n` +
+                `💡 Pro tip: Use ZAARA's roadmap generator above to get a **day-by-day personalized plan** with curated resources!`;
+        }
+        return `I can build you a detailed roadmap! First, tell me:\n\n` +
+            `1️⃣ What career goal are you targeting?\n` +
+            `2️⃣ What's your current skill level (beginner/intermediate)?\n\n` +
+            `Or use the **roadmap generator** above — select your career goal and hit "Initialize Sequence" for a full day-by-day plan! 🎯`;
+    },
+
+    handleSkills(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            return `🧠 **Core Skills for ${kb.title}:**\n\n${kb.roadmap.map(r => `• ${r.split('—')[0].replace(/^\d+\.\s*/, '').trim()}`).join('\n')}\n\n` +
+                `🔑 **Prerequisites:** ${kb.prerequisite}\n\n` +
+                `Want me to suggest **specific projects** to build these skills?`;
+        }
+        return `To suggest the right skills, I need to know your career goal!\n\n` +
+            `For example, try asking:\n• "What skills do I need for AI?"\n• "Skills required for web development"`;
+    },
+
+    handleTools(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            return `🛠️ **Recommended Tech Stack for ${kb.title}:**\n\n${kb.tools.map(t => `• ${t}`).join('\n')}\n\n` +
+                `💡 Start with the first 2-3 tools and expand as you progress. Mastery > breadth!`;
+        }
+        return `Which career are you building your toolkit for? Let me know your path and I'll suggest the perfect tech stack! 🔧`;
+    },
+
+    handleProjects(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            return `🚀 **Project Ideas for ${kb.title}:**\n\n${kb.projects.join('\n')}\n\n` +
+                `🎯 **Pro Tips:**\n• Push all projects to GitHub\n• Write a solid README for each\n• Deploy live demos when possible\n• Document your learning journey\n\nThese will make your **portfolio stand out** to recruiters!`;
+        }
+        return `Building projects is the #1 way to learn! 💪\n\n` +
+            `Tell me your career goal and I'll suggest specific projects that'll impress recruiters.\n\n` +
+            `For example: "project ideas for web development"`;
+    },
+
+    handleSalary(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            return `💰 **${kb.title} — Salary Range:**\n\n${kb.salaryRange}\n\n` +
+                `📈 **Salary boosters:**\n• Strong portfolio & GitHub presence\n• Certifications & specialized skills\n• Open source contributions\n• Negotiation skills matter — always negotiate!\n\n` +
+                `Remember: Your first role sets the trajectory. Focus on skill-building first, and the compensation will follow.`;
+        }
+        return `Salaries vary by role, experience, and location. Tell me which career you're curious about and I'll give you a range! 💰`;
+    },
+
+    handleTime(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        if (career && CAREER_KB[career]) {
+            const kb = CAREER_KB[career];
+            return `⏱️ **Time to Job-Ready for ${kb.title}:**\n\n${kb.timeToLearn}\n\n` +
+                `📋 **This depends on:**\n• Your starting skill level\n• Hours dedicated per week\n• Quality of practice (projects > tutorials)\n• Consistency — daily practice beats weekend marathons\n\n` +
+                `Use ZAARA's time commitment selector in the generator to get a plan tailored to YOUR schedule!`;
+        }
+        return `The timeline depends on the career path and your dedication!\n\n` +
+            `As a rough guide:\n• **Beginner → Job-ready:** 4-12 months\n• **Part-time study:** Add 50-100% more time\n• **Full-time grind:** 3-6 months is realistic\n\nWhich career are you targeting? I'll give you a specific estimate.`;
+    },
+
+    handleMotivation(msg) {
+        const motivationalResponses = [
+            `I hear you, and what you're feeling is completely normal. 💛\n\n` +
+            `Every expert was once a beginner. Here's what helps:\n\n` +
+            `• **Break it down** — Don't look at the mountain, just take the next step\n` +
+            `• **Celebrate small wins** — Finished a tutorial? That counts!\n` +
+            `• **Compare to yesterday-you** — not to others online\n` +
+            `• **Consistency > intensity** — 30 min/day beats 8-hour weekends\n` +
+            `• **Build something fun** — Learning sticks when you enjoy it\n\n` +
+            `You're already ahead of 90% of people because you started. Keep going! 🚀`,
+
+            `Burnout and doubt hit everyone — it means you're pushing yourself, which is good! 🔥\n\n` +
+            `**Quick recharge strategy:**\n` +
+            `• Take a 24-hour break (seriously, step away)\n` +
+            `• Then start ONE small task — just 15 minutes\n` +
+            `• Reconnect with why you started this journey\n` +
+            `• Join a community (Discord, Reddit, Twitter/X)\n\n` +
+            `Remember: The roadmap is a guide, not a prison. Go at YOUR pace. You've got this! 💪`,
+
+            `Impostor syndrome? That's actually a sign you're growing! Here's a secret: even senior engineers Google basic stuff daily. 🤫\n\n` +
+            `**What really matters:**\n` +
+            `• You're showing up and learning — that's rare\n` +
+            `• Confusion is temporary, growth is permanent\n` +
+            `• Every "stuck" moment teaches resilience\n` +
+            `• Your unique background is your superpower\n\n` +
+            `I believe in you. Now let's get back to building! 🚀`
+        ];
+        return motivationalResponses[Math.floor(Math.random() * motivationalResponses.length)];
+    },
+
+    handleComparison(msg) {
+        const msgLower = msg.toLowerCase();
+        if (msgLower.includes('python') && msgLower.includes('javascript')) {
+            return `**Python vs JavaScript — Quick Comparison:**\n\n` +
+                `🐍 **Python:** Best for AI/ML, Data Science, automation, backend\n` +
+                `⚡ **JavaScript:** Best for web dev (frontend + backend), mobile apps\n\n` +
+                `**Choose Python if:** You want AI/ML, data, or scripting\n` +
+                `**Choose JS if:** You love building websites and web apps\n\n` +
+                `💡 Both are incredible languages. You can't go wrong! Start with whichever excites you more — motivation > "best language."`;
+        }
+        if (msgLower.includes('react') && (msgLower.includes('vue') || msgLower.includes('angular'))) {
+            return `**React vs Vue vs Angular:**\n\n` +
+                `⚛️ **React:** Most popular, huge ecosystem, JSX-based (by Meta)\n` +
+                `💚 **Vue:** Easiest to learn, elegant, great docs (by Evan You)\n` +
+                `🔴 **Angular:** Enterprise-grade, TypeScript-first (by Google)\n\n` +
+                `**Recommendation:** Start with **React** for job market demand, or **Vue** if you want the gentlest learning curve.\n\n` +
+                `All three will land you a job — pick one and master it! 🎯`;
+        }
+        return `I'd love to help you compare! Tell me specifically which two things you're comparing.\n\n` +
+            `For example:\n• "Python vs JavaScript"\n• "React vs Vue"\n• "Web Dev vs Data Science"\n• "AWS vs Azure"`;
+    },
+
+    handlePython(msg) {
+        return `🐍 **Python — The Swiss Army Knife of Programming:**\n\n` +
+            `**Best for:** AI/ML, Data Science, Web Backend, Automation, Scripting\n\n` +
+            `**Learning Path:**\n` +
+            `1. Basics — variables, loops, functions, OOP\n` +
+            `2. Libraries — NumPy, Pandas, Matplotlib\n` +
+            `3. Frameworks — Django/Flask (web) or PyTorch (AI)\n` +
+            `4. Projects — build real things!\n\n` +
+            `**Free Resources:**\n` +
+            `• python.org official tutorial\n` +
+            `• Automate the Boring Stuff (free book)\n` +
+            `• FreeCodeCamp Python course\n\n` +
+            `Python is used by Google, Netflix, NASA, and countless AI startups. Excellent choice! 🚀`;
+    },
+
+    handleReact(msg) {
+        return `⚛️ **React — #1 Frontend Framework:**\n\n` +
+            `**Used by:** Meta, Netflix, Airbnb, Discord, and many more\n\n` +
+            `**Learning Path:**\n` +
+            `1. Master JS fundamentals first (ES6+)\n` +
+            `2. Components, Props, State\n` +
+            `3. Hooks — useState, useEffect, useContext\n` +
+            `4. Routing with React Router\n` +
+            `5. State management (Zustand or Redux)\n` +
+            `6. Next.js for production apps\n\n` +
+            `**Free Resources:**\n` +
+            `• react.dev (official docs — best in class!)\n` +
+            `• FreeCodeCamp React course\n\n` +
+            `Start building small components from Day 1! 💡`;
+    },
+
+    handleJavaScript(msg) {
+        return `⚡ **JavaScript — The Language of the Web:**\n\n` +
+            `**Where it runs:** Browsers, servers (Node.js), mobile (React Native), desktop (Electron)\n\n` +
+            `**Learning Path:**\n` +
+            `1. Variables, data types, functions\n` +
+            `2. DOM manipulation & events\n` +
+            `3. ES6+ — arrow functions, destructuring, modules\n` +
+            `4. Async programming — Promises, async/await\n` +
+            `5. Pick a framework — React, Vue, or Svelte\n\n` +
+            `**Free Resources:**\n` +
+            `• javascript.info (amazing free tutorial)\n` +
+            `• FreeCodeCamp JS curriculum\n` +
+            `• The Odin Project\n\n` +
+            `JS is the only language that runs natively in every browser — a superpower! 🌐`;
+    },
+
+    handleWebsiteHelp(msg) {
+        return `🗺️ **How ZAARA Works — Your AI Career Architect:**\n\n` +
+            `**Step 1:** Select your **skill level** (Beginner or Intermediate)\n` +
+            `**Step 2:** Choose your **career goal** from 17+ career paths\n` +
+            `**Step 3:** Set your **time commitment** and duration (30/60 days)\n` +
+            `**Step 4:** Hit **"Initialize Sequence"** to generate your matrix!\n\n` +
+            `**What you get:**\n` +
+            `• 🧠 Career Identity profile\n` +
+            `• 🔧 Recommended tech stack\n` +
+            `• 🚀 Project ideas\n` +
+            `• 📅 Day-by-day timeline with curated resources\n` +
+            `• 📄 Export your roadmap as a **PDF**\n\n` +
+            `**Pro Features:**\n` +
+            `• Your roadmap is auto-saved to local storage\n` +
+            `• Load previous roadmaps anytime\n` +
+            `• Chat with me anytime for guidance! 💬\n\n` +
+            `Try generating a roadmap now — you'll be amazed! ✨`;
+    },
+
+    handleGreeting(msg) {
+        const greetings = [
+            `Hey there! 👋 I'm your AI Career Mentor, ZAARA.\n\nI can help you with:\n• 🗺️ Career roadmaps\n• 🧠 Skill recommendations\n• 🔧 Tool suggestions\n• 💡 Project ideas\n• 🚀 Motivation & guidance\n\nWhat are you working on?`,
+            `Hello! 🌟 Welcome to ZAARA — your neural career architect.\n\nTell me: What's your career dream? I'll help you build a path to get there!\n\nYou can ask me anything about tech careers, skills, or learning strategies.`,
+            `Hi! 🚀 Great to have you here.\n\nI'm ZAARA — think of me as your personal AI career advisor. I know about 15+ career paths, hundreds of tools, and can build you a custom plan.\n\nWhat's on your mind?`
+        ];
+        return greetings[Math.floor(Math.random() * greetings.length)];
+    },
+
+    handleThanks(msg) {
+        const replies = [
+            `You're welcome! 🙌 That's what I'm here for.\n\nKeep pushing forward — you're building something amazing. Come back anytime you need guidance!`,
+            `Happy to help! ✨ Remember, consistency beats intensity. Keep showing up daily and you'll surprise yourself.\n\nAnything else on your mind?`,
+            `Glad I could help! 🚀 Your dedication to learning is what will set you apart. Don't stop now!\n\nFeel free to ask anything else whenever you need.`
+        ];
+        return replies[Math.floor(Math.random() * replies.length)];
+    },
+
+    handleInternship(msg) {
+        return `🎓 **Landing Your First Internship — Action Plan:**\n\n` +
+            `**1. Build a Portfolio (Week 1-4):**\n• 2-3 solid projects on GitHub\n• Clean README files, deployed demos\n• Personal portfolio website\n\n` +
+            `**2. Sharpen Your Resume (Week 2):**\n• One page, clean format\n• Lead with projects, not just coursework\n• Quantify impact where possible\n\n` +
+            `**3. Apply Strategically (Week 3+):**\n• LinkedIn, AngelList, company career pages\n• Target startups — they hire more beginners\n• Apply to 5-10 roles per week minimum\n\n` +
+            `**4. Prep for Interviews:**\n• Practice DSA on LeetCode (Easy → Medium)\n• Mock interviews with peers\n• Know your projects inside-out\n\n` +
+            `💡 **Secret weapon:** Cold DM hiring managers on LinkedIn with a personalized message + link to your project. Works better than most applications!`;
+    },
+
+    handleFreelance(msg) {
+        return `💸 **Freelancing as a Developer — Getting Started:**\n\n` +
+            `**Step 1: Pick Your Niche**\n• Web development is the easiest entry point\n• Specialize — "React developer" > "I do everything"\n\n` +
+            `**Step 2: Build Proof of Work**\n• 3-5 portfolio projects\n• Client testimonials (even from free projects)\n• Active GitHub profile\n\n` +
+            `**Step 3: Find Clients**\n• Start on Upwork, Fiverr, or Toptal\n• Network on Twitter/X and LinkedIn\n• Join freelancer communities\n\n` +
+            `**Step 4: Price Yourself Right**\n• Research market rates for your skill\n• Start slightly below market, raise after 5 clients\n• Always charge per project, not per hour\n\n` +
+            `💡 The first client is the hardest. After that, referrals do the work for you! 🚀`;
+    },
+
+    handleCertification(msg) {
+        const career = detectCareer(msg) || userContext.careerGoal || getActiveCareer();
+        const certMap = {
+            cloud_engineer: '• AWS Solutions Architect Associate\n• Azure AZ-104\n• Google Cloud Associate Engineer',
+            cybersecurity: '• CompTIA Security+ (best starter)\n• CEH (Certified Ethical Hacker)\n• OSCP (advanced, highly respected)',
+            devops: '• AWS DevOps Professional\n• CKA (Certified Kubernetes Admin)\n• HashiCorp Terraform Associate',
+            data_scientist: '• Google Data Analytics Professional\n• IBM Data Science Professional\n• AWS Machine Learning Specialty',
+            ai_engineer: '• Google TensorFlow Developer\n• AWS Machine Learning Specialty\n• DeepLearning.AI Specializations'
+        };
+        if (career && certMap[career]) {
+            return `🏆 **Top Certifications for ${CAREER_KB[career]?.title || career}:**\n\n${certMap[career]}\n\n` +
+                `💡 **Tips:**\n• Certifications supplement skills, they don't replace them\n• Real projects + certs = unstoppable combo\n• Free prep resources exist for most certs online`;
+        }
+        return `🏆 **Popular & Valuable Certifications:**\n\n` +
+            `☁️ **Cloud:** AWS Solutions Architect, Azure AZ-104\n` +
+            `🔒 **Security:** CompTIA Security+, CEH\n` +
+            `📊 **Data:** Google Data Analytics\n` +
+            `🤖 **AI:** TensorFlow Developer, DeepLearning.AI\n\n` +
+            `Tell me your career goal and I'll recommend the most impactful ones! 🎯`;
+    }
+};
+
+// ── Career Detection from Natural Language ────────────────────────────
+function detectCareer(msg) {
+    const m = msg.toLowerCase();
+    const map = [
+        { keys: ['artificial intelligence', 'machine learning', 'deep learning', 'neural network', 'llm', 'nlp'], regex: [/\bai\b/, /\bml\b/], career: 'ai_engineer' },
+        { keys: ['web dev', 'web develop', 'full stack', 'fullstack', 'frontend', 'front end', 'back end', 'web application'], regex: [/\bwebsite\b/], career: 'web_dev' },
+        { keys: ['data scien', 'data analy', 'analytics', 'exploratory data', 'statistics'], regex: [/\beda\b/], career: 'data_scientist' },
+        { keys: ['cybersecurity', 'cyber security', 'ethical hack', 'pen test', 'infosec', 'penetration test'], regex: [/\bhacking\b/], career: 'cybersecurity' },
+        { keys: ['cloud engineer', 'cloud computing', 'google cloud'], regex: [/\baws\b/, /\bazure\b/, /\bgcp\b/], career: 'cloud_engineer' },
+        { keys: ['mobile dev', 'mobile app', 'app develop', 'react native'], regex: [/\bandroid\b/, /\bios\b/, /\bflutter\b/], career: 'mobile_dev' },
+        { keys: ['devops', 'dev ops', 'ci/cd', 'ci cd', 'continuous integration'], regex: [/\binfrastructure\b/], career: 'devops' },
+        { keys: ['game dev', 'game develop', 'game design', 'unreal engine'], regex: [/\bunity\b/, /\bgodot\b/, /\bgaming\b/], career: 'game_dev' },
+        { keys: ['blockchain', 'web3', 'solidity', 'smart contract', 'defi', 'decentralized'], regex: [/\bnft\b/, /\bcrypto\b/], career: 'blockchain' },
+        { keys: ['ui/ux', 'ui ux', 'user interface', 'user experience', 'ux design', 'ui design'], regex: [/\bfigma\b/], career: 'ui_ux' },
+    ];
+    for (const entry of map) {
+        // Check full string keys first
+        for (const key of entry.keys) {
+            if (m.includes(key)) return entry.career;
+        }
+        // Then check regex patterns for short/ambiguous keywords
+        if (entry.regex) {
+            for (const rx of entry.regex) {
+                if (rx.test(m)) return entry.career;
+            }
+        }
+    }
+    return null;
+}
+
+// ── Get Active Career from Generated Roadmap ──────────────────────────
+function getActiveCareer() {
+    const goalEl = document.getElementById('career-goal');
+    if (goalEl && goalEl.value) return goalEl.value;
+    // Check if a roadmap is currently displayed
+    const saved = localStorage.getItem('zaara_last_roadmap');
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            if (data.title) {
+                // Try to detect career from title
+                return detectCareer(data.title);
+            }
+        } catch(e) {}
+    }
+    return null;
+}
+
+// ── Main Intent Router ────────────────────────────────────────────────
+function classifyAndRespond(message) {
+    const msg = message.trim();
+    
+    // Try each intent pattern
+    for (const intent of INTENT_PATTERNS) {
+        for (const pattern of intent.patterns) {
+            if (pattern.test(msg)) {
+                const handler = HANDLERS[intent.handler];
+                if (handler) {
+                    chatHistory.push({ role: 'user', msg });
+                    return handler(msg);
+                }
+            }
+        }
+    }
+    
+    // Fallback — smart default based on context
+    return getFallbackResponse(msg);
+}
+
+function getFallbackResponse(msg) {
+    const activeCareer = getActiveCareer();
+    if (activeCareer && CAREER_KB[activeCareer]) {
+        return `I'm not sure I understood that, but I see you're exploring **${CAREER_KB[activeCareer].title}** — great choice! 🎯\n\n` +
+            `Here's what I can help with:\n` +
+            `• "Show me a roadmap"\n` +
+            `• "What skills do I need?"\n` +
+            `• "Suggest project ideas"\n` +
+            `• "What tools should I learn?"\n` +
+            `• "How long will it take?"\n\n` +
+            `Just ask! I'm your AI career architect. 🚀`;
+    }
+    return `I'm here to help you navigate your career journey! 🧭\n\n` +
+        `Try asking me:\n` +
+        `• "I want to become an AI engineer"\n` +
+        `• "What should I learn for web dev?"\n` +
+        `• "Give me project ideas"\n` +
+        `• "How does this website work?"\n` +
+        `• "I'm feeling stuck" (I give great pep talks! 💪)\n\n` +
+        `What would you like to explore?`;
+}
+
+// ── Toggle Chatbot ────────────────────────────────────────────────────
 function toggleChatbot() {
     chatOpen = !chatOpen;
     const cw = document.getElementById('chatbot-window');
     const toggleIcon = document.querySelector('#chatbot-toggle-btn i');
-    if(chatOpen) {
+    if (chatOpen) {
         cw.classList.add('open');
         toggleIcon.className = 'fa-solid fa-xmark';
+        // Focus the input field
+        setTimeout(() => document.getElementById('chatbot-input').focus(), 350);
     } else {
         cw.classList.remove('open');
         toggleIcon.className = 'fa-solid fa-message';
@@ -568,34 +1253,122 @@ function toggleChatbot() {
 }
 
 function handleChatKeyPress(e) {
-    if(e.key === 'Enter') sendChatbotMessage();
+    if (e.key === 'Enter') sendChatbotMessage();
 }
 
+// ── Send Message & Get AI Response ────────────────────────────────────
 function sendChatbotMessage() {
     const input = document.getElementById('chatbot-input');
     const text = input.value.trim();
-    if(!text) return;
-    
+    if (!text) return;
+
     addChatMessage('user', text);
     input.value = '';
-    
+
+    // Show typing indicator
+    const typingId = showTypingIndicator();
+
+    // Simulate processing delay for natural feel
+    const delay = 400 + Math.random() * 600;
     setTimeout(() => {
-        const responses = [
-            "Your career matrix is designed dynamically. Focusing on core fundamentals like data structures or architectural patterns will yield the highest ROI.",
-            "I recommend starting with the 'Tools & Tech Stack' recommendations before jumping into the timeline.",
-            "That's a great question. As an AI Architect, my directive is to guide you step-by-step. Keep following the monthly plan outlined.",
-            "Networking is just as important as code. Don't forget to push your roadmap projects to GitHub and share your progress."
-        ];
-        const res = responses[Math.floor(Math.random() * responses.length)];
-        addChatMessage('bot', res);
-    }, 800);
+        removeTypingIndicator(typingId);
+        const response = classifyAndRespond(text);
+        addChatMessage('bot', response);
+        
+        // Show quick action chips after certain responses
+        showQuickActions(text);
+    }, delay);
 }
 
+// ── Typing Indicator ──────────────────────────────────────────────────
+function showTypingIndicator() {
+    const messages = document.getElementById('chatbot-messages');
+    const indicator = document.createElement('div');
+    const id = 'typing-' + Date.now();
+    indicator.id = id;
+    indicator.className = 'chat-msg bot typing-indicator';
+    indicator.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    messages.appendChild(indicator);
+    messages.scrollTop = messages.scrollHeight;
+    return id;
+}
+
+function removeTypingIndicator(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+// ── Quick Action Chips ────────────────────────────────────────────────
+function showQuickActions(lastMsg) {
+    const messages = document.getElementById('chatbot-messages');
+    
+    // Remove any existing chips
+    const existing = messages.querySelector('.quick-actions');
+    if (existing) existing.remove();
+    
+    const career = detectCareer(lastMsg) || userContext.careerGoal || getActiveCareer();
+    
+    let chips = [];
+    if (career) {
+        chips = [
+            { label: '📍 Full Roadmap', msg: `Show me the full roadmap for ${career}` },
+            { label: '🛠️ Tools', msg: `What tools do I need for ${career}?` },
+            { label: '🚀 Projects', msg: `Project ideas for ${career}` },
+            { label: '💰 Salary', msg: `What's the salary for ${career}?` }
+        ];
+    } else {
+        chips = [
+            { label: '🤖 AI Career', msg: 'I want to become an AI engineer' },
+            { label: '🌐 Web Dev', msg: 'How to become a web developer?' },
+            { label: '📊 Data Science', msg: 'Tell me about data science' },
+            { label: '🗺️ How ZAARA works', msg: 'How does this website help me?' }
+        ];
+    }
+    
+    const container = document.createElement('div');
+    container.className = 'quick-actions';
+    chips.forEach(chip => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-chip';
+        btn.textContent = chip.label;
+        btn.onclick = () => {
+            container.remove();
+            document.getElementById('chatbot-input').value = chip.msg;
+            sendChatbotMessage();
+        };
+        container.appendChild(btn);
+    });
+    
+    messages.appendChild(container);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+// ── Render Chat Messages with Markdown-like Formatting ────────────────
 function addChatMessage(sender, text) {
     const messages = document.getElementById('chatbot-messages');
+    
+    // Remove quick actions on new message
+    const existingChips = messages.querySelector('.quick-actions');
+    if (existingChips) existingChips.remove();
+    
     const div = document.createElement('div');
     div.className = `chat-msg ${sender}`;
-    div.innerText = text;
+    
+    if (sender === 'bot') {
+        // Render simple markdown formatting
+        div.innerHTML = renderChatMarkdown(text);
+    } else {
+        div.innerText = text;
+    }
+    
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
+}
+
+// ── Simple Markdown Renderer for Chat ─────────────────────────────────
+function renderChatMarkdown(text) {
+    return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
 }
