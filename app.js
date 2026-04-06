@@ -1240,7 +1240,7 @@ function classifyAndRespond(message) {
 function getFallbackResponse(msg) {
     const activeCareer = getActiveCareer();
     if (activeCareer && CAREER_KB[activeCareer]) {
-        return `I'm not sure I understood that, but I see you're exploring **${CAREER_KB[activeCareer].title}** — great choice! 🎯\n\n` +
+        return `I see you're exploring **${CAREER_KB[activeCareer].title}** — great choice! 🎯\n\n` +
             `Here's what I can help with:\n` +
             `• "Show me a roadmap"\n` +
             `• "What skills do I need?"\n` +
