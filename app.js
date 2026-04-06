@@ -788,7 +788,21 @@ const CAREER_KB = {
 const INTENT_PATTERNS = [
     {
         intent: 'career_path',
-        patterns: [/become\s+(an?\s+)?(.+)/i, /how\s+to\s+be(come)?\s+(an?\s+)?(.+)/i, /want\s+to\s+(be|become)\s+(an?\s+)?(.+)/i, /career\s+(in|as|path|for)\s+(.+)/i, /interested\s+in\s+(.+)/i, /get\s+into\s+(.+)/i],
+        patterns: [
+            /become\s+(an?\s+)?(.+)/i,
+            /how\s+to\s+be(come)?\s+(an?\s+)?(.+)/i,
+            /want\s+to\s+(be|become)\s+(an?\s+)?(.+)/i,
+            /career\s+(in|as|path|for)\s+(.+)/i,
+            /interested\s+in\s+(.+)/i,
+            /get\s+into\s+(.+)/i,
+            /about\s+(.+)/i,
+            /tell\s+me\s+about\s+(.+)/i,
+            /know\s+about\s+(.+)/i,
+            /learn\s+about\s+(.+)/i,
+            /explore\s+(.+)/i,
+            /what\s+is\s+(.+)/i,
+            /^(cybersecurity|cyber\s*security|ai|machine\s+learning|web\s+dev|data\s+scien|cloud|devops|blockchain|game\s+dev|mobile\s+dev|ui.?ux)/i
+        ],
         handler: 'handleCareerPath'
     },
     {
@@ -886,11 +900,12 @@ const HANDLERS = {
             const kb = CAREER_KB[career];
             userContext.careerGoal = career;
             userContext.askedAbout.push(career);
-            return `Great choice! Here's what it takes to become a **${kb.title}**:\n\n` +
+            return `Got it — you're exploring **${kb.title}** 🎯\n\n` +
                 `📌 ${kb.description}\n\n` +
+                `**Here's how you can start:**\n${kb.roadmap.slice(0, 4).map(s => '• ' + s.replace(/^\d+\.\s*/, '')).join('\n')}\n\n` +
+                `🛠️ **Key Tools:** ${kb.tools.slice(0, 5).join(', ')}\n\n` +
                 `🔑 **Prerequisite:** ${kb.prerequisite}\n\n` +
-                `**Quick Roadmap:**\n${kb.roadmap.slice(0, 4).join('\n')}\n\n` +
-                `💡 Want me to go deeper into **skills**, **projects**, or **tools** for this path?`;
+                `Do you want a **full roadmap**, **project ideas**, or **salary info**?`;
         }
         return `I'd love to help you explore a career path! 🚀\n\n` +
             `Which of these interests you most?\n` +
@@ -1208,6 +1223,14 @@ function classifyAndRespond(message) {
                 }
             }
         }
+    }
+    
+    // Safety net: if no intent matched but a career keyword is detected,
+    // route to handleCareerPath instead of generic fallback
+    const detectedCareer = detectCareer(msg);
+    if (detectedCareer && CAREER_KB[detectedCareer]) {
+        chatHistory.push({ role: 'user', msg });
+        return HANDLERS.handleCareerPath(msg);
     }
     
     // Fallback — smart default based on context
