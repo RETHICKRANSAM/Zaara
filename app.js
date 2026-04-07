@@ -1657,139 +1657,7 @@ function runComparison() {
     `;
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// FEATURE: Pomodoro Focus Timer
-// ═══════════════════════════════════════════════════════════════════════
 
-let pomoOpen = false;
-let pomoInterval = null;
-let pomoTimeLeft = 25 * 60; // seconds
-let pomoTotalTime = 25 * 60;
-let pomoRunning = false;
-let pomoSessions = parseInt(localStorage.getItem('zaara_pomo_sessions') || '0');
-let pomoTotalFocus = parseInt(localStorage.getItem('zaara_focus_minutes') || '0');
-let pomoCurrentMode = 'focus'; // 'focus', 'short', 'long'
-
-function togglePomodoro() {
-    pomoOpen = !pomoOpen;
-    const pw = document.getElementById('pomodoro-window');
-    if (pomoOpen) {
-        pw.classList.add('open');
-    } else {
-        pw.classList.remove('open');
-    }
-}
-
-function setPomodoroMode(mode) {
-    if (pomoRunning) return; // don't change while running
-    
-    pomoCurrentMode = mode;
-    const times = { focus: 25, short: 5, long: 15 };
-    pomoTotalTime = times[mode] * 60;
-    pomoTimeLeft = pomoTotalTime;
-    
-    // Update button states
-    document.querySelectorAll('.pomo-mode-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`pomo-mode-${mode}`).classList.add('active');
-    
-    // Update mode label
-    const labels = { focus: 'FOCUS MODE', short: 'SHORT BREAK', long: 'LONG BREAK' };
-    document.getElementById('pomodoro-mode').textContent = labels[mode];
-    
-    updatePomodoroDisplay();
-}
-
-function startPomodoro() {
-    if (pomoRunning) return;
-    pomoRunning = true;
-    
-    document.getElementById('pomo-start-btn').classList.add('hidden');
-    document.getElementById('pomo-pause-btn').classList.remove('hidden');
-    document.getElementById('pomodoro-toggle-btn').classList.add('active-timer');
-    
-    pomoInterval = setInterval(() => {
-        pomoTimeLeft--;
-        updatePomodoroDisplay();
-        updatePomodoroRing();
-        
-        if (pomoTimeLeft <= 0) {
-            clearInterval(pomoInterval);
-            pomoRunning = false;
-            document.getElementById('pomo-start-btn').classList.remove('hidden');
-            document.getElementById('pomo-pause-btn').classList.add('hidden');
-            document.getElementById('pomodoro-toggle-btn').classList.remove('active-timer');
-            
-            // Track completed sessions
-            if (pomoCurrentMode === 'focus') {
-                pomoSessions++;
-                pomoTotalFocus += Math.round(pomoTotalTime / 60);
-                localStorage.setItem('zaara_pomo_sessions', pomoSessions);
-                localStorage.setItem('zaara_focus_minutes', pomoTotalFocus);
-                document.getElementById('pomo-sessions').textContent = `Sessions: ${pomoSessions}`;
-                logActivity(`Completed ${pomoTotalTime / 60}m focus session`);
-            }
-            
-            // Play completion sound
-            playPomodoroComplete();
-            showToast(pomoCurrentMode === 'focus' ? '⏰ Focus session complete! Take a break.' : '☕ Break over! Time to focus.', 'success');
-            
-            // Auto-suggest next mode
-            if (pomoCurrentMode === 'focus') {
-                setPomodoroMode(pomoSessions % 4 === 0 ? 'long' : 'short');
-            } else {
-                setPomodoroMode('focus');
-            }
-        }
-    }, 1000);
-}
-
-function pausePomodoro() {
-    pomoRunning = false;
-    clearInterval(pomoInterval);
-    document.getElementById('pomo-start-btn').classList.remove('hidden');
-    document.getElementById('pomo-pause-btn').classList.add('hidden');
-    document.getElementById('pomodoro-toggle-btn').classList.remove('active-timer');
-}
-
-function resetPomodoro() {
-    pausePomodoro();
-    pomoTimeLeft = pomoTotalTime;
-    updatePomodoroDisplay();
-    updatePomodoroRing();
-}
-
-function updatePomodoroDisplay() {
-    const mins = Math.floor(pomoTimeLeft / 60);
-    const secs = pomoTimeLeft % 60;
-    document.getElementById('pomodoro-display').textContent = 
-        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
-
-function updatePomodoroRing() {
-    const circumference = 2 * Math.PI * 45; // r=45
-    const progress = pomoTimeLeft / pomoTotalTime;
-    const offset = circumference * (1 - progress);
-    const ring = document.getElementById('pomodoro-ring-fill');
-    if (ring) ring.style.strokeDashoffset = offset;
-}
-
-function playPomodoroComplete() {
-    if (typeof initAudio !== 'undefined' && typeof audioCtx !== 'undefined') {
-        try {
-            initAudio();
-            const notes = [523, 659, 784, 1047];
-            notes.forEach((freq, i) => {
-                setTimeout(() => playTone(freq, 'square', 0.15, 0.04), i * 150);
-            });
-        } catch(e) {}
-    }
-}
-
-// Initialize pomo session count display
-document.addEventListener('DOMContentLoaded', () => {
-    const el = document.getElementById('pomo-sessions');
-    if (el) el.textContent = `Sessions: ${pomoSessions}`;
-});
 
 // ═══════════════════════════════════════════════════════════════════════
 // FEATURE: Stats Dashboard
@@ -1807,13 +1675,13 @@ function closeStatsModal() {
 function refreshStats() {
     const roadmapCount = parseInt(localStorage.getItem('zaara_roadmap_count') || '0');
     const completionRate = parseInt(localStorage.getItem('zaara_completion_rate') || '0');
-    const focusMinutes = parseInt(localStorage.getItem('zaara_focus_minutes') || '0');
+
     const streak = calculateStreak();
     
     // Animate counters
     animateCounter('stat-roadmaps', roadmapCount);
     animateCounter('stat-completion', completionRate, '%');
-    animateCounter('stat-focus-time', focusMinutes, 'm');
+
     document.getElementById('stat-streak').textContent = `${streak} 🔥`;
     
     // Populate activity log
@@ -1894,13 +1762,9 @@ function resetStats() {
     if (!confirm('This will reset all your tracked stats. Are you sure?')) return;
     localStorage.removeItem('zaara_roadmap_count');
     localStorage.removeItem('zaara_completion_rate');
-    localStorage.removeItem('zaara_focus_minutes');
-    localStorage.removeItem('zaara_pomo_sessions');
     localStorage.removeItem('zaara_activity_log');
     localStorage.removeItem('zaara_progress');
     localStorage.removeItem('zaara_last_active');
-    pomoSessions = 0;
-    pomoTotalFocus = 0;
     refreshStats();
     showToast('All stats have been reset.', 'info');
 }

@@ -585,10 +585,7 @@
                     <div class="text-3xl font-bold gradient-text" id="stat-completion">0%</div>
                     <div class="text-xs text-zinc-400 mt-1">Completion Rate</div>
                 </div>
-                <div class="glass-card p-5 text-center">
-                    <div class="text-3xl font-bold gradient-text" id="stat-focus-time">0m</div>
-                    <div class="text-xs text-zinc-400 mt-1">Focus Time</div>
-                </div>
+
                 <div class="glass-card p-5 text-center">
                     <div class="text-3xl font-bold gradient-text" id="stat-streak">0 🔥</div>
                     <div class="text-xs text-zinc-400 mt-1">Day Streak</div>
@@ -604,39 +601,7 @@
         </div>
     </div>
 
-    <!-- Pomodoro Focus Timer Widget -->
-    <div class="pomodoro-widget" id="pomodoro-widget">
-        <button class="pomodoro-toggle" onclick="togglePomodoro()" id="pomodoro-toggle-btn" title="Focus Timer">
-            <i class="fa-solid fa-hourglass-half"></i>
-        </button>
-        <div class="pomodoro-window" id="pomodoro-window">
-            <div class="pomodoro-header">
-                <span class="font-bold text-white text-sm"><i class="fa-solid fa-fire text-orange-400"></i> Focus Timer</span>
-                <button onclick="togglePomodoro()" class="text-zinc-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="pomodoro-body">
-                <div id="pomodoro-mode" class="text-xs text-zinc-400 tracking-wider mb-2">FOCUS MODE</div>
-                <div id="pomodoro-display" class="pomodoro-time">25:00</div>
-                <div class="pomodoro-ring-container">
-                    <svg class="pomodoro-ring" viewBox="0 0 100 100">
-                        <circle class="pomodoro-ring-bg" cx="50" cy="50" r="45"/>
-                        <circle class="pomodoro-ring-fill" id="pomodoro-ring-fill" cx="50" cy="50" r="45"/>
-                    </svg>
-                </div>
-                <div class="flex gap-2 mt-4">
-                    <button onclick="startPomodoro()" id="pomo-start-btn" class="pomo-btn pomo-btn-primary"><i class="fa-solid fa-play"></i> Start</button>
-                    <button onclick="pausePomodoro()" id="pomo-pause-btn" class="pomo-btn pomo-btn-secondary hidden"><i class="fa-solid fa-pause"></i></button>
-                    <button onclick="resetPomodoro()" class="pomo-btn pomo-btn-secondary"><i class="fa-solid fa-rotate-right"></i></button>
-                </div>
-                <div class="flex gap-2 mt-3">
-                    <button onclick="setPomodoroMode('focus')" class="pomo-mode-btn active" id="pomo-mode-focus">25m Focus</button>
-                    <button onclick="setPomodoroMode('short')" class="pomo-mode-btn" id="pomo-mode-short">5m Break</button>
-                    <button onclick="setPomodoroMode('long')" class="pomo-mode-btn" id="pomo-mode-long">15m Break</button>
-                </div>
-                <div class="text-xs text-zinc-500 mt-3" id="pomo-sessions">Sessions: 0</div>
-            </div>
-        </div>
-    </div>
+
 
 
     <!-- Magnetic Cursor Engine -->
