@@ -325,11 +325,21 @@ function renderTimeline(roadmap) {
     const timeline = document.getElementById('timeline');
     timeline.innerHTML = '';
 
+    // Load completion state
+    const completionState = JSON.parse(localStorage.getItem('zaara_progress') || '{}');
+
     roadmap.forEach((item, i) => {
         const card = document.createElement('div');
-        card.className = 'timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)] roadmap-section';
+        const isCompleted = completionState[`day_${item.day}`] === true;
+        card.className = `timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)] roadmap-section${isCompleted ? ' completed' : ''}`;
+        card.dataset.day = item.day;
+        card.dataset.topic = item.topic.toLowerCase();
+        card.dataset.description = item.description.toLowerCase();
         card.innerHTML = `
             <div class="timeline-node"></div>
+            <div class="completion-check" onclick="event.stopPropagation(); toggleCardCompletion(${item.day}, this)" title="Mark complete">
+                <i class="fa-solid fa-check"></i>
+            </div>
             <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
                 <span class="text-neon-purple text-[11px] font-bold tracking-wider">MONTH ${Math.ceil(item.day / 30) || 1} / STEP ${item.day}</span>
                 <span class="font-bold text-[15px] gradient-text">${item.topic}</span>
@@ -342,6 +352,8 @@ function renderTimeline(roadmap) {
         timeline.appendChild(card);
         setTimeout(() => card.classList.add('animate'), i * 50);
     });
+
+    updateProgressBar();
 }
 
 function goHome() {
@@ -1395,3 +1407,474 @@ function renderChatMarkdown(text) {
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>');
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Progress Tracker
+// ═══════════════════════════════════════════════════════════════════════
+
+function toggleCardCompletion(day, el) {
+    const state = JSON.parse(localStorage.getItem('zaara_progress') || '{}');
+    const card = el.closest('.timeline-card');
+    
+    if (state[`day_${day}`]) {
+        delete state[`day_${day}`];
+        card.classList.remove('completed');
+    } else {
+        state[`day_${day}`] = true;
+        card.classList.add('completed');
+        // Play subtle completion sound
+        if (typeof playSelect === 'function') playSelect();
+    }
+    
+    localStorage.setItem('zaara_progress', JSON.stringify(state));
+    updateProgressBar();
+    logActivity(`Toggled Step ${day}`);
+}
+
+function updateProgressBar() {
+    const timeline = document.getElementById('timeline');
+    if (!timeline) return;
+    
+    const cards = timeline.querySelectorAll('.timeline-card');
+    const completed = timeline.querySelectorAll('.timeline-card.completed');
+    const total = cards.length;
+    
+    if (total === 0) return;
+    
+    const pct = Math.round((completed.length / total) * 100);
+    
+    const fill = document.getElementById('progress-bar-fill');
+    const label = document.getElementById('progress-percent');
+    const desc = document.getElementById('progress-label');
+    
+    if (fill) fill.style.width = pct + '%';
+    if (label) label.textContent = pct + '%';
+    if (desc) {
+        if (pct === 100) desc.textContent = '🎉 All steps complete! You are unstoppable!';
+        else if (pct >= 75) desc.textContent = `🔥 ${completed.length}/${total} — Almost there! Keep going!`;
+        else if (pct >= 50) desc.textContent = `⚡ ${completed.length}/${total} — Halfway warrior!`;
+        else if (pct > 0) desc.textContent = `📈 ${completed.length}/${total} — Great start! Keep pushing!`;
+        else desc.textContent = 'Click timeline cards to mark them complete';
+    }
+    
+    // Save completion rate for stats
+    localStorage.setItem('zaara_completion_rate', pct);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Search & Filter Timeline
+// ═══════════════════════════════════════════════════════════════════════
+
+function filterTimeline(query) {
+    const q = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('#timeline .timeline-card');
+    
+    cards.forEach(card => {
+        const topic = card.dataset.topic || '';
+        const desc = card.dataset.description || '';
+        
+        if (!q || topic.includes(q) || desc.includes(q)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Career Comparison Modal
+// ═══════════════════════════════════════════════════════════════════════
+
+function openCompareModal() {
+    document.getElementById('compare-modal').classList.remove('hidden');
+    logActivity('Opened Career Comparison');
+}
+
+function closeCompareModal() {
+    document.getElementById('compare-modal').classList.add('hidden');
+}
+
+function runComparison() {
+    const a = document.getElementById('compare-career-1').value;
+    const b = document.getElementById('compare-career-2').value;
+    const container = document.getElementById('compare-result');
+    
+    if (!a || !b) {
+        container.innerHTML = '<p class="text-zinc-500 text-sm text-center">Select two careers to compare</p>';
+        return;
+    }
+    
+    if (a === b) {
+        container.innerHTML = '<p class="text-zinc-500 text-sm text-center">Please select two different careers</p>';
+        return;
+    }
+    
+    const kbA = CAREER_KB[a];
+    const kbB = CAREER_KB[b];
+    
+    if (!kbA || !kbB) {
+        container.innerHTML = '<p class="text-zinc-500 text-sm text-center">Career data not available</p>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th class="compare-label">Attribute</th>
+                    <th>${kbA.title}</th>
+                    <th>${kbB.title}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="compare-label">💰 Salary</td>
+                    <td>${kbA.salaryRange}</td>
+                    <td>${kbB.salaryRange}</td>
+                </tr>
+                <tr>
+                    <td class="compare-label">⏱️ Time to Learn</td>
+                    <td>${kbA.timeToLearn}</td>
+                    <td>${kbB.timeToLearn}</td>
+                </tr>
+                <tr>
+                    <td class="compare-label">🔑 Prerequisites</td>
+                    <td>${kbA.prerequisite}</td>
+                    <td>${kbB.prerequisite}</td>
+                </tr>
+                <tr>
+                    <td class="compare-label">🛠️ Key Tools</td>
+                    <td>${kbA.tools.slice(0, 4).join(', ')}</td>
+                    <td>${kbB.tools.slice(0, 4).join(', ')}</td>
+                </tr>
+                <tr>
+                    <td class="compare-label">📝 Steps</td>
+                    <td>${kbA.roadmap.length} phases</td>
+                    <td>${kbB.roadmap.length} phases</td>
+                </tr>
+                <tr>
+                    <td class="compare-label">🚀 Top Projects</td>
+                    <td>${kbA.projects.slice(0, 2).map(p => p.replace(/^•\s*/, '')).join('<br>')}</td>
+                    <td>${kbB.projects.slice(0, 2).map(p => p.replace(/^•\s*/, '')).join('<br>')}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Pomodoro Focus Timer
+// ═══════════════════════════════════════════════════════════════════════
+
+let pomoOpen = false;
+let pomoInterval = null;
+let pomoTimeLeft = 25 * 60; // seconds
+let pomoTotalTime = 25 * 60;
+let pomoRunning = false;
+let pomoSessions = parseInt(localStorage.getItem('zaara_pomo_sessions') || '0');
+let pomoTotalFocus = parseInt(localStorage.getItem('zaara_focus_minutes') || '0');
+let pomoCurrentMode = 'focus'; // 'focus', 'short', 'long'
+
+function togglePomodoro() {
+    pomoOpen = !pomoOpen;
+    const pw = document.getElementById('pomodoro-window');
+    if (pomoOpen) {
+        pw.classList.add('open');
+    } else {
+        pw.classList.remove('open');
+    }
+}
+
+function setPomodoroMode(mode) {
+    if (pomoRunning) return; // don't change while running
+    
+    pomoCurrentMode = mode;
+    const times = { focus: 25, short: 5, long: 15 };
+    pomoTotalTime = times[mode] * 60;
+    pomoTimeLeft = pomoTotalTime;
+    
+    // Update button states
+    document.querySelectorAll('.pomo-mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`pomo-mode-${mode}`).classList.add('active');
+    
+    // Update mode label
+    const labels = { focus: 'FOCUS MODE', short: 'SHORT BREAK', long: 'LONG BREAK' };
+    document.getElementById('pomodoro-mode').textContent = labels[mode];
+    
+    updatePomodoroDisplay();
+}
+
+function startPomodoro() {
+    if (pomoRunning) return;
+    pomoRunning = true;
+    
+    document.getElementById('pomo-start-btn').classList.add('hidden');
+    document.getElementById('pomo-pause-btn').classList.remove('hidden');
+    document.getElementById('pomodoro-toggle-btn').classList.add('active-timer');
+    
+    pomoInterval = setInterval(() => {
+        pomoTimeLeft--;
+        updatePomodoroDisplay();
+        updatePomodoroRing();
+        
+        if (pomoTimeLeft <= 0) {
+            clearInterval(pomoInterval);
+            pomoRunning = false;
+            document.getElementById('pomo-start-btn').classList.remove('hidden');
+            document.getElementById('pomo-pause-btn').classList.add('hidden');
+            document.getElementById('pomodoro-toggle-btn').classList.remove('active-timer');
+            
+            // Track completed sessions
+            if (pomoCurrentMode === 'focus') {
+                pomoSessions++;
+                pomoTotalFocus += Math.round(pomoTotalTime / 60);
+                localStorage.setItem('zaara_pomo_sessions', pomoSessions);
+                localStorage.setItem('zaara_focus_minutes', pomoTotalFocus);
+                document.getElementById('pomo-sessions').textContent = `Sessions: ${pomoSessions}`;
+                logActivity(`Completed ${pomoTotalTime / 60}m focus session`);
+            }
+            
+            // Play completion sound
+            playPomodoroComplete();
+            showToast(pomoCurrentMode === 'focus' ? '⏰ Focus session complete! Take a break.' : '☕ Break over! Time to focus.', 'success');
+            
+            // Auto-suggest next mode
+            if (pomoCurrentMode === 'focus') {
+                setPomodoroMode(pomoSessions % 4 === 0 ? 'long' : 'short');
+            } else {
+                setPomodoroMode('focus');
+            }
+        }
+    }, 1000);
+}
+
+function pausePomodoro() {
+    pomoRunning = false;
+    clearInterval(pomoInterval);
+    document.getElementById('pomo-start-btn').classList.remove('hidden');
+    document.getElementById('pomo-pause-btn').classList.add('hidden');
+    document.getElementById('pomodoro-toggle-btn').classList.remove('active-timer');
+}
+
+function resetPomodoro() {
+    pausePomodoro();
+    pomoTimeLeft = pomoTotalTime;
+    updatePomodoroDisplay();
+    updatePomodoroRing();
+}
+
+function updatePomodoroDisplay() {
+    const mins = Math.floor(pomoTimeLeft / 60);
+    const secs = pomoTimeLeft % 60;
+    document.getElementById('pomodoro-display').textContent = 
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function updatePomodoroRing() {
+    const circumference = 2 * Math.PI * 45; // r=45
+    const progress = pomoTimeLeft / pomoTotalTime;
+    const offset = circumference * (1 - progress);
+    const ring = document.getElementById('pomodoro-ring-fill');
+    if (ring) ring.style.strokeDashoffset = offset;
+}
+
+function playPomodoroComplete() {
+    if (typeof initAudio !== 'undefined' && typeof audioCtx !== 'undefined') {
+        try {
+            initAudio();
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playTone(freq, 'square', 0.15, 0.04), i * 150);
+            });
+        } catch(e) {}
+    }
+}
+
+// Initialize pomo session count display
+document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('pomo-sessions');
+    if (el) el.textContent = `Sessions: ${pomoSessions}`;
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Stats Dashboard
+// ═══════════════════════════════════════════════════════════════════════
+
+function openStatsModal() {
+    refreshStats();
+    document.getElementById('stats-modal').classList.remove('hidden');
+}
+
+function closeStatsModal() {
+    document.getElementById('stats-modal').classList.add('hidden');
+}
+
+function refreshStats() {
+    const roadmapCount = parseInt(localStorage.getItem('zaara_roadmap_count') || '0');
+    const completionRate = parseInt(localStorage.getItem('zaara_completion_rate') || '0');
+    const focusMinutes = parseInt(localStorage.getItem('zaara_focus_minutes') || '0');
+    const streak = calculateStreak();
+    
+    // Animate counters
+    animateCounter('stat-roadmaps', roadmapCount);
+    animateCounter('stat-completion', completionRate, '%');
+    animateCounter('stat-focus-time', focusMinutes, 'm');
+    document.getElementById('stat-streak').textContent = `${streak} 🔥`;
+    
+    // Populate activity log
+    const log = JSON.parse(localStorage.getItem('zaara_activity_log') || '[]');
+    const logContainer = document.getElementById('stats-activity-log');
+    if (log.length === 0) {
+        logContainer.innerHTML = '<p class="text-zinc-500 text-xs">No activity yet. Generate a roadmap to get started!</p>';
+    } else {
+        logContainer.innerHTML = log.slice(-10).reverse().map(entry => {
+            const date = new Date(entry.timestamp);
+            const timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            return `<div class="flex justify-between items-center">
+                <span class="text-zinc-300">${entry.action}</span>
+                <span class="text-zinc-600 text-xs">${timeStr}</span>
+            </div>`;
+        }).join('');
+    }
+}
+
+function animateCounter(elementId, target, suffix = '') {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 30));
+    const interval = setInterval(() => {
+        current += step;
+        if (current >= target) {
+            current = target;
+            clearInterval(interval);
+        }
+        el.textContent = current + suffix;
+    }, 30);
+}
+
+function calculateStreak() {
+    const log = JSON.parse(localStorage.getItem('zaara_activity_log') || '[]');
+    if (log.length === 0) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get unique days
+    const days = [...new Set(log.map(e => {
+        const d = new Date(e.timestamp);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    }))].sort((a, b) => b - a);
+    
+    let streak = 0;
+    let checkDate = today.getTime();
+    
+    for (const day of days) {
+        if (day === checkDate || day === checkDate - 86400000) {
+            streak++;
+            checkDate = day - 86400000;
+        } else if (day < checkDate - 86400000) {
+            break;
+        }
+    }
+    
+    return streak;
+}
+
+function logActivity(action) {
+    const log = JSON.parse(localStorage.getItem('zaara_activity_log') || '[]');
+    log.push({ action, timestamp: new Date().toISOString() });
+    // Keep last 50 entries
+    if (log.length > 50) log.splice(0, log.length - 50);
+    localStorage.setItem('zaara_activity_log', JSON.stringify(log));
+    
+    // Update streak
+    const today = new Date().toDateString();
+    localStorage.setItem('zaara_last_active', today);
+}
+
+function resetStats() {
+    if (!confirm('This will reset all your tracked stats. Are you sure?')) return;
+    localStorage.removeItem('zaara_roadmap_count');
+    localStorage.removeItem('zaara_completion_rate');
+    localStorage.removeItem('zaara_focus_minutes');
+    localStorage.removeItem('zaara_pomo_sessions');
+    localStorage.removeItem('zaara_activity_log');
+    localStorage.removeItem('zaara_progress');
+    localStorage.removeItem('zaara_last_active');
+    pomoSessions = 0;
+    pomoTotalFocus = 0;
+    refreshStats();
+    showToast('All stats have been reset.', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Share Roadmap
+// ═══════════════════════════════════════════════════════════════════════
+
+function shareRoadmap() {
+    const saved = localStorage.getItem('zaara_last_roadmap');
+    if (!saved) {
+        showToast('Generate a roadmap first before sharing!', 'info');
+        return;
+    }
+    
+    try {
+        const data = JSON.parse(saved);
+        const skills = (data.skills_tree || []).join(', ');
+        const tools = (data.tools_stack || []).join(', ');
+        const projects = (data.projects || []).map(p => `• ${p}`).join('\n');
+        
+        const text = `🚀 My Career Roadmap (via ZAARA AI)\n\n` +
+            `📌 ${data.title}\n` +
+            `🧠 Identity: ${data.career_identity}\n\n` +
+            `🔧 Skills: ${skills}\n\n` +
+            `🛠️ Tools: ${tools}\n\n` +
+            `💡 Projects:\n${projects}\n\n` +
+            `✨ AI Tip: ${data.ai_recommendation}\n\n` +
+            `Built with ZAARA — AI Career Neural Matrix 🤖`;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('📋 Roadmap copied to clipboard! Paste anywhere to share.', 'success');
+            logActivity('Shared roadmap to clipboard');
+        }).catch(() => {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            showToast('📋 Roadmap copied to clipboard!', 'success');
+        });
+    } catch(e) {
+        showToast('Failed to generate shareable text.', 'error');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FEATURE: Track Roadmap Generation Count
+// ═══════════════════════════════════════════════════════════════════════
+
+// Wrap the original generate to track stats
+const _origGenerate = generate;
+window._origGenerateWrapped = true;
+
+// Patch: increment roadmap count on generation
+document.addEventListener('DOMContentLoaded', () => {
+    const origShowToast = showToast;
+    const origSetItem = localStorage.setItem.bind(localStorage);
+    
+    // We watch for the roadmap save to increment count
+    const _origLSSI = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key, value) {
+        _origLSSI.call(this, key, value);
+        if (key === 'zaara_last_roadmap') {
+            const count = parseInt(localStorage.getItem('zaara_roadmap_count') || '0') + 1;
+            _origLSSI.call(localStorage, 'zaara_roadmap_count', count.toString());
+            logActivity('Generated a new roadmap');
+        }
+    };
+});
