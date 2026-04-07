@@ -399,12 +399,32 @@
             </div>
         </div>
 
-        <!-- Loader View -->
-        <div id="loader-view" class="hidden flex-col items-center justify-center p-20 text-center glass-panel w-full fade-in" style="min-height: 400px; margin: 40px auto; max-width: 800px;">
-            <div class="loader-dots mb-6">
-                <span></span><span></span><span></span>
+        <!-- Loader View — Cinematic AI Processing -->
+        <div id="loader-view" class="hidden flex-col items-center justify-center p-10 text-center glass-panel w-full fade-in" style="min-height: 480px; margin: 40px auto; max-width: 800px;">
+            <!-- Neural Orb -->
+            <div class="neural-orb mb-6">
+                <div class="neural-orb-core"></div>
+                <div class="neural-orb-ring"></div>
+                <div class="neural-orb-ring ring-2"></div>
             </div>
-            <h2 id="loader-text" class="text-2xl font-bold gradient-text">Analyzing your career path...</h2>
+
+            <h2 id="loader-text" class="text-2xl font-bold gradient-text mb-2">Analyzing your career path...</h2>
+            <p id="loader-subtext" class="text-xs text-zinc-500 tracking-wider mb-6">ZAARA NEURAL ENGINE v2.0</p>
+            
+            <!-- Loading Progress Bar -->
+            <div class="loader-progress-track mb-6" style="width:80%; max-width:400px;">
+                <div id="loader-progress-fill" class="loader-progress-fill" style="width: 0%"></div>
+            </div>
+            <span id="loader-percent" class="text-xs text-zinc-500 font-mono mb-6">0%</span>
+
+            <!-- Processing Phases -->
+            <div class="loader-phases" id="loader-phases">
+                <div class="loader-phase" id="phase-1"><i class="fa-solid fa-circle-notch fa-spin"></i> Scanning career database...</div>
+                <div class="loader-phase" id="phase-2"><i class="fa-solid fa-clock"></i> Mapping skill dependencies...</div>
+                <div class="loader-phase" id="phase-3"><i class="fa-solid fa-clock"></i> Curating learning resources...</div>
+                <div class="loader-phase" id="phase-4"><i class="fa-solid fa-clock"></i> Building personalized matrix...</div>
+                <div class="loader-phase" id="phase-5"><i class="fa-solid fa-clock"></i> Finalizing AI recommendations...</div>
+            </div>
         </div>
 
         <!-- Roadmap View -->

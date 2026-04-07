@@ -223,12 +223,62 @@ async function generate() {
     
     const loaderView = document.getElementById('loader-view');
     const loaderText = document.getElementById('loader-text');
+    const loaderSubtext = document.getElementById('loader-subtext');
+    const loaderFill = document.getElementById('loader-progress-fill');
+    const loaderPercent = document.getElementById('loader-percent');
     loaderView.classList.remove('hidden');
     loaderView.style.display = 'flex';
     
-    loaderText.innerText = "Analyzing your career path...";
-    setTimeout(() => loaderText.innerText = "Generating Career Matrix...", 800);
-    setTimeout(() => loaderText.innerText = "Syncing with ZAARA R-7...", 1600);
+    // Reset loader state
+    loaderText.innerText = "Initializing Neural Engine...";
+    if (loaderSubtext) loaderSubtext.innerText = 'ZAARA NEURAL ENGINE v2.0';
+    if (loaderFill) loaderFill.style.width = '0%';
+    if (loaderPercent) loaderPercent.innerText = '0%';
+    document.querySelectorAll('.loader-phase').forEach(p => { p.className = 'loader-phase'; p.querySelector('i').className = 'fa-solid fa-clock'; });
+
+    // Phase animation sequence
+    const phases = [
+        { id: 'phase-1', text: 'Scanning career database...', pct: 15, mainText: 'Analyzing your career path...' },
+        { id: 'phase-2', text: 'Mapping skill dependencies...', pct: 35, mainText: 'Mapping skill graph...' },
+        { id: 'phase-3', text: 'Curating learning resources...', pct: 55, mainText: 'Curating resources...' },
+        { id: 'phase-4', text: 'Building personalized matrix...', pct: 80, mainText: 'Building your matrix...' },
+        { id: 'phase-5', text: 'Finalizing AI recommendations...', pct: 100, mainText: 'Finalizing recommendations...' },
+    ];
+
+    let currentPhase = 0;
+    function advancePhase() {
+        if (currentPhase > 0) {
+            const prev = document.getElementById(phases[currentPhase - 1].id);
+            prev.classList.remove('active');
+            prev.classList.add('done');
+            prev.querySelector('i').className = 'fa-solid fa-check';
+        }
+        if (currentPhase < phases.length) {
+            const phase = phases[currentPhase];
+            const el = document.getElementById(phase.id);
+            el.classList.add('active');
+            el.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
+            if (loaderFill) loaderFill.style.width = phase.pct + '%';
+            if (loaderPercent) loaderPercent.innerText = phase.pct + '%';
+            loaderText.innerText = phase.mainText;
+            currentPhase++;
+        }
+    }
+
+    advancePhase();
+    setTimeout(() => advancePhase(), 600);
+    setTimeout(() => advancePhase(), 1300);
+    setTimeout(() => advancePhase(), 2000);
+    setTimeout(() => advancePhase(), 2700);
+    // Mark last phase done
+    setTimeout(() => {
+        const last = document.getElementById(phases[4].id);
+        last.classList.remove('active');
+        last.classList.add('done');
+        last.querySelector('i').className = 'fa-solid fa-check';
+        loaderText.innerText = 'Matrix Ready!';
+        if (loaderSubtext) loaderSubtext.innerText = 'SEQUENCE COMPLETE';
+    }, 3200);
 
     try {
         // --- OFFLINE AI LOGIC ENGINE ---
@@ -279,9 +329,6 @@ async function generate() {
                 document.getElementById('roadmap-view').classList.remove('hidden');
                 document.getElementById('roadmap-title').innerText = data.title;
                 
-                // Advanced Result Payload
-                document.getElementById('roadmap-title').innerText = data.title;
-                
                 // Typing effect wrapper instead of direct assignment
                 typewriterEffect('identity-text', data.career_identity || 'Specialist Mode Engaged');
                 
@@ -301,14 +348,14 @@ async function generate() {
                 // Save to localStorage
                 data.created_at = new Date().toISOString();
                 localStorage.setItem('zaara_last_roadmap', JSON.stringify(data));
-                showToast('Roadmap automatically saved to Secure Matrix.', 'success');
+                showToast('\u2705 Neural Matrix deployed successfully.', 'success');
                 
             } else {
                 document.getElementById('landing-view').classList.remove('hidden');
                 errObj.innerText = `Error: ${data.message}`;
                 errObj.classList.remove('hidden');
             }
-        }, 2400); // 2.4s cinematic delay
+        }, 3600); // Extended for cinematic phases
 
     } catch (e) {
         setTimeout(() => {
@@ -328,20 +375,59 @@ function renderTimeline(roadmap) {
     // Load completion state
     const completionState = JSON.parse(localStorage.getItem('zaara_progress') || '{}');
 
+    // Calculate current day based on roadmap creation date
+    const saved = localStorage.getItem('zaara_last_roadmap');
+    let currentDay = 1;
+    if (saved) {
+        try {
+            const savedData = JSON.parse(saved);
+            if (savedData.created_at) {
+                const created = new Date(savedData.created_at);
+                const now = new Date();
+                const daysDiff = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+                currentDay = Math.min(Math.max(daysDiff + 1, 1), roadmap.length);
+            }
+        } catch(e) {}
+    }
+
+    let scrollTarget = null;
+
     roadmap.forEach((item, i) => {
         const card = document.createElement('div');
         const isCompleted = completionState[`day_${item.day}`] === true;
-        card.className = `timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)] roadmap-section${isCompleted ? ' completed' : ''}`;
+        const isCurrentDay = item.day === currentDay && !isCompleted;
+        const isUpcoming = item.day > currentDay && !isCompleted;
+        
+        let statusClass = '';
+        if (isCompleted) statusClass = ' completed';
+        else if (isCurrentDay) statusClass = ' current-day';
+        
+        card.className = `timeline-card slide-in-card mb-6 pl-8 ml-4 w-[calc(100%-1rem)] roadmap-section${statusClass}`;
         card.dataset.day = item.day;
         card.dataset.topic = item.topic.toLowerCase();
         card.dataset.description = item.description.toLowerCase();
+
+        // Determine status badge
+        let statusBadge = '';
+        if (isCompleted) {
+            statusBadge = '<span class="status-badge badge-completed"><i class="fa-solid fa-check"></i> Completed</span>';
+        } else if (isCurrentDay) {
+            statusBadge = '<span class="status-badge badge-in-progress"><i class="fa-solid fa-bolt"></i> In Progress</span>';
+        } else if (isUpcoming) {
+            statusBadge = '<span class="status-badge badge-upcoming"><i class="fa-regular fa-clock"></i> Upcoming</span>';
+        } else {
+            statusBadge = '<span class="status-badge badge-in-progress"><i class="fa-solid fa-bolt"></i> In Progress</span>';
+        }
+
         card.innerHTML = `
             <div class="timeline-node"></div>
-            <div class="completion-check" onclick="event.stopPropagation(); toggleCardCompletion(${item.day}, this)" title="Mark complete">
+            ${isCurrentDay ? '<div class="current-day-arrow">YOU ▸</div>' : ''}
+            <div class="completion-check" onclick="event.stopPropagation(); toggleCardCompletion(${item.day}, this)" title="${isCompleted ? 'Mark incomplete' : 'Mark complete'}">
                 <i class="fa-solid fa-check"></i>
             </div>
-            <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2">
+            <div class="flex items-center gap-2 mb-2 border-b border-white/10 pb-2 flex-wrap">
                 <span class="text-neon-purple text-[11px] font-bold tracking-wider">MONTH ${Math.ceil(item.day / 30) || 1} / STEP ${item.day}</span>
+                ${statusBadge}
                 <span class="font-bold text-[15px] gradient-text">${item.topic}</span>
             </div>
             <p class="text-zinc-400 text-sm mb-3 leading-relaxed">${item.description}</p>
@@ -351,9 +437,18 @@ function renderTimeline(roadmap) {
         `;
         timeline.appendChild(card);
         setTimeout(() => card.classList.add('animate'), i * 50);
+
+        if (isCurrentDay) scrollTarget = card;
     });
 
     updateProgressBar();
+
+    // Auto-scroll to current day after animation settles
+    if (scrollTarget) {
+        setTimeout(() => {
+            scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, roadmap.length * 50 + 500);
+    }
 }
 
 function goHome() {
