@@ -10,10 +10,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js?v=1" defer></script>
     <script src="app.js?v=2" defer></script>
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=3">
     <style>
-        :root { --neon-purple: #b026ff; --neon-pink: #ec4899; }
+        :root { --neon-purple: #8B5CF6; --neon-pink: #EC4899; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; font-size: 1.1rem; cursor: none; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
         
@@ -91,10 +93,7 @@
         button { cursor: none; border: none; font-family: 'Inter', sans-serif; border: 2px solid transparent; }
         button:hover { border-color: rgba(255, 255, 255, 0.2); }
 
-        .gradient-text {
-            color: var(--neon-pink);
-            text-shadow: 2px 2px 0px var(--neon-purple);
-        }
+
         
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -254,6 +253,112 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- AUTH VIEW — Supabase Login / Signup / Forgot Password  -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="auth-view">
+        <canvas id="auth-particles"></canvas>
+        <div class="auth-card">
+            <img src="zaara-logo-2d.png" alt="ZAARA" class="auth-logo">
+            <h1 class="auth-title" id="auth-title">Neural Link Access</h1>
+            <p class="auth-subtitle" id="auth-subtitle">Authenticate to access your career matrix</p>
+
+            <!-- Error / Success Messages -->
+            <div id="auth-error" class="auth-error hidden"></div>
+            <div id="auth-success" class="auth-success hidden"></div>
+
+            <form class="auth-form" id="auth-form" onsubmit="handleAuthSubmit(event)">
+                <!-- Name (Signup only) -->
+                <div class="auth-input-group hidden" id="auth-name-group">
+                    <label>Agent Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" class="auth-input" id="auth-name" placeholder="Enter your full name" autocomplete="name">
+                        <i class="fa-solid fa-user input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="auth-input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" class="auth-input" id="auth-email" placeholder="agent@zaara.dev" autocomplete="email" required>
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="auth-input-group">
+                    <label>Access Key</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="auth-input" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <button type="button" class="password-toggle-btn" id="password-toggle" onclick="togglePasswordVisibility()">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirm Password (Signup only) -->
+                <div class="auth-input-group hidden" id="auth-confirm-group">
+                    <label>Confirm Access Key</label>
+                    <div class="input-wrapper">
+                        <input type="password" class="auth-input" id="auth-confirm-password" placeholder="••••••••" autocomplete="new-password">
+                        <i class="fa-solid fa-shield-halved input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Forgot Password Link -->
+                <div class="auth-forgot" id="auth-forgot-link">
+                    <span class="auth-link" onclick="switchAuthMode('forgot')">Forgot access key?</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="auth-submit-btn" id="auth-submit-btn">
+                    <div class="auth-spinner" id="auth-spinner"></div>
+                    <span id="auth-submit-text">Initialize Link</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <!-- Back to Login (Forgot mode) -->
+                <div class="auth-back-link hidden" id="auth-back-to-login" onclick="switchAuthMode('login')">
+                    <i class="fa-solid fa-arrow-left"></i> Back to login
+                </div>
+            </form>
+
+            <!-- OAuth Divider -->
+            <div class="auth-divider">
+                <span>or continue with</span>
+            </div>
+
+            <!-- OAuth Buttons -->
+            <div class="auth-oauth-row">
+                <button type="button" class="auth-oauth-btn oauth-google" onclick="loginWithGoogle()">
+                    <i class="fa-brands fa-google"></i> Google
+                </button>
+                <button type="button" class="auth-oauth-btn oauth-github" onclick="loginWithGitHub()">
+                    <i class="fa-brands fa-github"></i> GitHub
+                </button>
+            </div>
+
+            <!-- Switch Mode -->
+            <div class="auth-footer" id="auth-switch-text">
+                New agent? <span class="auth-link" id="auth-switch-link" onclick="switchAuthMode('signup')">Create Neural ID</span>
+            </div>
+
+            <!-- Security Badge -->
+            <div class="auth-security-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                Secured by Supabase · End-to-End Encrypted
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- APP CONTENT — Main Application (hidden until auth)     -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="app-content" class="hidden">
+
     <!-- Holographic System Status -->
     <div class="status-labels hidden md:block crt-flicker">
         NEURAL LINK: <span class="text-white">ENCRYPTED</span><br>
@@ -276,6 +381,15 @@
     <!-- Interactive Background Canvas -->
     <canvas id="canvas-bg" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"></canvas>
     <div id="main-container" class="max-w-6xl mx-auto">
+
+        <!-- User Bar -->
+        <div class="user-bar">
+            <div class="user-avatar" id="user-avatar">Z</div>
+            <span class="user-display-name" id="user-display-name">Agent</span>
+            <button class="logout-btn" id="logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
 
         <!-- Landing View -->
         <div id="landing-view">
@@ -649,7 +763,7 @@
                 
                 ctx.beginPath();
                 ctx.rect(x, y, p.size * 2, p.size * 2);
-                ctx.fillStyle = `rgba(176, 38, 255, ${p.opacity > 0.3 ? 1.0 : 0.4})`; // flatter opacity
+                ctx.fillStyle = `rgba(139, 92, 246, ${p.opacity > 0.3 ? 1.0 : 0.4})`; // flatter opacity
                 ctx.fill();
             });
             requestAnimationFrame(drawBackground);
@@ -828,6 +942,17 @@
         const initBtn = document.querySelector('button[onclick="generate()"]');
         if (initBtn) initBtn.addEventListener('click', playPowerup);
 
+        // ── Logout Handler ──────────────────────────────────────────
+        async function handleLogout() {
+            const result = await ZaaraAuth.signOut();
+            if (result.success) {
+                window.location.href = 'auth.html';
+            } else {
+                alert('Logout failed: ' + result.message);
+            }
+        }
     </script>
+
+    </div><!-- END #app-content -->
 </body>
 </html>
