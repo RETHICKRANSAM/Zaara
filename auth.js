@@ -8,8 +8,15 @@
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';       // e.g. https://xyzcompany.supabase.co
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // public anon key from Supabase dashboard
 
-// Initialize the Supabase client
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize the Supabase client safely
+let _supabase;
+try {
+    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('[ZAARA Auth] Supabase client initialized.');
+} catch (err) {
+    console.error('[ZAARA Auth] CRITICAL: Supabase client initialization failed.', err);
+    console.warn('Did you forget to replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY?');
+}
 
 // ──────────────────────────────────────────────────────────────────────
 // Auth State Manager
@@ -20,9 +27,15 @@ const ZaaraAuth = {
 
     async init() {
         try {
+            if (!_supabase) throw new Error("Supabase client is not initialized.");
+
             const { data: { session }, error } = await _supabase.auth.getSession();
-            if (error) throw error;
+            if (error) {
+                console.error('[ZAARA Auth] Session retrieval error:', error);
+                throw error;
+            }
             if (session) {
+                console.log('[ZAARA Auth] Active session found for:', session.user?.email);
                 this.currentUser = session.user;
             }
             this.isInitialized = true;
@@ -72,11 +85,33 @@ const ZaaraAuth = {
 
     async signIn(email, password) {
         try {
-            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-            if (error) throw error;
+            if (!_supabase) throw new Error("Supabase client is not initialized.");
+
+            // 🧪 Debug Log: Start login flow
+            console.log(`[ZAARA Auth] Attempting login for email: ${email}`);
+
+            const { data, error } = await _supabase.auth.signInWithPassword({ 
+                email: email, 
+                password: password 
+            });
+
+            // 🧪 Debug Log: Check for specific Supabase errors
+            if (error) {
+                console.error('[ZAARA Auth] Raw Supabase Login Error:', error);
+                throw error;
+            }
+
+            // 🧪 Debug Log: Verify session persistence
+            if (!data.session) {
+                console.warn('[ZAARA Auth] Warning: Login succeeded but no session was returned.');
+            } else {
+                console.log('[ZAARA Auth] Login successful. Session established and persisted.');
+            }
+
             this.currentUser = data.user;
             return { success: true, user: data.user, message: 'Welcome back, agent.' };
         } catch (err) {
+            console.error('[ZAARA Auth] Caught error during signIn:', err);
             return { success: false, message: this._parseError(err.message) };
         }
     },
