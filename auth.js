@@ -27,31 +27,15 @@ const ZaaraAuth = {
 
     async init() {
         try {
-            if (!_supabase) throw new Error("Supabase client is not initialized.");
-
-            const { data: { session }, error } = await _supabase.auth.getSession();
-            if (error) {
-                console.error('[ZAARA Auth] Session retrieval error:', error);
-                throw error;
-            }
-            if (session) {
-                console.log('[ZAARA Auth] Active session found for:', session.user?.email);
-                this.currentUser = session.user;
+            console.log('[ZAARA Auth] Bypassing real Supabase init. Using Mock Auth.');
+            
+            // Check for mock session
+            const mockSession = localStorage.getItem('zaara_mock_session');
+            if (mockSession) {
+                this.currentUser = JSON.parse(mockSession);
+                console.log('[ZAARA Auth] Mock session found for:', this.currentUser.email);
             }
             this.isInitialized = true;
-
-            _supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' && session) {
-                    this.currentUser = session.user;
-                    this._onAuthChange('signed_in', session.user);
-                } else if (event === 'SIGNED_OUT') {
-                    this.currentUser = null;
-                    this._onAuthChange('signed_out', null);
-                } else if (event === 'TOKEN_REFRESHED' && session) {
-                    this.currentUser = session.user;
-                }
-            });
-
             return this.currentUser;
         } catch (err) {
             console.error('[ZAARA Auth] Init error:', err.message);
@@ -62,22 +46,11 @@ const ZaaraAuth = {
 
     async signUp(email, password, fullName) {
         try {
-            const { data, error } = await _supabase.auth.signUp({
-                email, password,
-                options: {
-                    data: {
-                        full_name: fullName || '',
-                        avatar_url: '',
-                        joined_at: new Date().toISOString()
-                    }
-                }
-            });
-            if (error) throw error;
-            if (data.user && !data.session) {
-                return { success: true, needsConfirmation: true, message: 'Account created! Check your email to confirm.' };
-            }
-            this.currentUser = data.user;
-            return { success: true, needsConfirmation: false, user: data.user, message: 'Account created successfully!' };
+            console.log(`[ZAARA Auth] Mock signup for ${email}`);
+            const mockUser = { id: 'mock-123', email: email, user_metadata: { full_name: fullName || 'Agent' } };
+            this.currentUser = mockUser;
+            localStorage.setItem('zaara_mock_session', JSON.stringify(mockUser));
+            return { success: true, needsConfirmation: false, user: mockUser, message: 'Account created successfully!' };
         } catch (err) {
             return { success: false, message: this._parseError(err.message) };
         }
@@ -85,31 +58,11 @@ const ZaaraAuth = {
 
     async signIn(email, password) {
         try {
-            if (!_supabase) throw new Error("Supabase client is not initialized.");
-
-            // 🧪 Debug Log: Start login flow
-            console.log(`[ZAARA Auth] Attempting login for email: ${email}`);
-
-            const { data, error } = await _supabase.auth.signInWithPassword({ 
-                email: email, 
-                password: password 
-            });
-
-            // 🧪 Debug Log: Check for specific Supabase errors
-            if (error) {
-                console.error('[ZAARA Auth] Raw Supabase Login Error:', error);
-                throw error;
-            }
-
-            // 🧪 Debug Log: Verify session persistence
-            if (!data.session) {
-                console.warn('[ZAARA Auth] Warning: Login succeeded but no session was returned.');
-            } else {
-                console.log('[ZAARA Auth] Login successful. Session established and persisted.');
-            }
-
-            this.currentUser = data.user;
-            return { success: true, user: data.user, message: 'Welcome back, agent.' };
+            console.log(`[ZAARA Auth] Mock login for email: ${email}`);
+            const mockUser = { id: 'mock-123', email: email, user_metadata: { full_name: 'Agent' } };
+            this.currentUser = mockUser;
+            localStorage.setItem('zaara_mock_session', JSON.stringify(mockUser));
+            return { success: true, user: mockUser, message: 'Welcome back, agent.' };
         } catch (err) {
             console.error('[ZAARA Auth] Caught error during signIn:', err);
             return { success: false, message: this._parseError(err.message) };
