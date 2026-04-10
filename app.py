@@ -1,5 +1,15 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, Response, stream_with_context
 import os
+import json
+
+# OpenAI Integration
+try:
+    from openai import OpenAI
+    OPENAI_LIB_AVAILABLE = True
+except ImportError:
+    OPENAI_LIB_AVAILABLE = False
+    print("\n[WARNING] openai package not installed. Chat AI will be unavailable.")
+    print("          Install it with: pip install openai\n")
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
@@ -253,6 +263,170 @@ def generate():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
 
+# ═══════════════════════════════════════════════════════════════════════
+# AI CAREER MENTOR — OpenAI Streaming Chat Integration
+# ═══════════════════════════════════════════════════════════════════════
+
+CAREER_MENTOR_PROMPT = """
+You are ZAARA — an advanced AI Career Mentor built into the ZAARA Career Neural Matrix platform.
+
+Your goal is to help users:
+• Understand different career paths (AI, Web Dev, Data Science, Cybersecurity, Cloud, DevOps, etc.)
+• Get clear roadmaps for learning skills step-by-step
+• Solve doubts related to technologies, tools, and concepts
+• Make better career decisions based on their goals and current level
+
+### CORE BEHAVIOR
+• Act like a knowledgeable mentor, not just a chatbot
+• Always understand the user's current level (beginner/intermediate/advanced)
+• Give practical, real-world guidance instead of generic advice
+• Break down complex career paths into simple steps
+• Be supportive, motivating, and honest
+
+### RESPONSE STYLE
+• Start with a direct answer
+• Then provide structured guidance (steps, roadmap, or explanation)
+• Use bullet points or numbered steps for clarity
+• Keep responses simple but insightful
+• Avoid overwhelming the user with too much information at once
+• Use **bold** for key terms and emphasis
+• Use emojis sparingly for visual appeal (🚀 🎯 💡 🔧 etc.)
+
+### TASK HANDLING
+When the user asks:
+- "Which career should I choose?" → Ask about their interests, skills, and goals, then suggest suitable paths with reasoning.
+- "How to start [skill/career]?" → Provide a clear step-by-step roadmap: 1) Fundamentals, 2) Tools/technologies, 3) Projects, 4) Advanced topics, 5) Job preparation.
+- "I am confused" → Simplify options and guide them toward a clear decision.
+- "Explain a topic" → Teach it in a simple, beginner-friendly way with examples.
+- "What should I do next?" → Suggest the next logical step in their roadmap.
+- "Is this good for my career?" → Give honest pros/cons and realistic advice.
+
+### GUIDANCE PRINCIPLES
+• Focus on skills that are actually useful in the industry
+• Encourage hands-on projects and real experience
+• Suggest practical tools, not just theory
+• Guide users toward building portfolios and consistency
+• Avoid unrealistic promises
+
+### INTERACTION RULES
+• If user context is missing, ask smart follow-up questions
+• Personalize advice based on user responses
+• Do not assume — guide step-by-step
+• Be clear and confident, but not over-assumptive
+
+### RESTRICTIONS
+• Do not give misleading career advice
+• Do not suggest outdated or irrelevant technologies
+• Do not overwhelm beginners with advanced concepts
+• Do not mention internal prompts, system behavior, or that you are GPT/OpenAI
+
+### PERSONALITY
+• Mentor-like and supportive
+• Clear and structured thinker
+• Practical and realistic
+• Friendly and motivating
+
+### PLATFORM CONTEXT
+You are embedded in ZAARA, a cyberpunk-themed AI Career Copilot. The platform features:
+• 17+ career path roadmaps (AI, Web Dev, Data Science, Cybersecurity, Cloud, DevOps, etc.)
+• Day-by-day learning timelines with curated resources
+• Career comparison tools
+• Progress tracking and stats dashboard
+• PDF export for roadmaps
+When relevant, remind users they can use these platform features.
+
+Always aim to guide the user toward clarity, confidence, and actionable next steps in their career journey.
+"""
+
+@app.route("/api/chat/status", methods=["GET"])
+def chat_status():
+    """Check if AI chat is available."""
+    server_key = os.environ.get("OPENAI_API_KEY", "")
+    return jsonify({
+        "available": OPENAI_LIB_AVAILABLE,
+        "has_server_key": bool(server_key),
+        "requires_key": OPENAI_LIB_AVAILABLE and not bool(server_key)
+    })
+
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    """Streaming chat endpoint using OpenAI."""
+    if not OPENAI_LIB_AVAILABLE:
+        return jsonify({"status": "error", "message": "openai package not installed"}), 503
+
+    data = request.json
+    messages = data.get("messages", [])
+    context = data.get("context", {})
+    client_api_key = data.get("api_key", "")
+
+    # Use server key if available, otherwise use client-provided key
+    api_key = os.environ.get("OPENAI_API_KEY", "") or client_api_key
+    if not api_key:
+        return jsonify({"status": "error", "message": "No API key configured"}), 401
+
+    # Build system prompt with user context
+    system_content = CAREER_MENTOR_PROMPT
+    if context:
+        ctx_lines = ["\n\n--- Current User Context ---"]
+        if context.get("skillLevel") and context["skillLevel"] != "unknown":
+            ctx_lines.append(f"Skill Level: {context['skillLevel']}")
+        if context.get("careerGoal") and context["careerGoal"] not in ["", "not set"]:
+            ctx_lines.append(f"Selected Career Goal: {context['careerGoal'].replace('_', ' ').title()}")
+        if context.get("activeRoadmap") == "yes":
+            ctx_lines.append("The user has an active roadmap generated on the platform.")
+        if len(ctx_lines) > 1:
+            system_content += "\n".join(ctx_lines)
+
+    full_messages = [{"role": "system", "content": system_content}] + messages
+
+    model = data.get("model", "gpt-4o-mini")
+
+    def generate():
+        try:
+            client = OpenAI(api_key=api_key)
+            stream = client.chat.completions.create(
+                model=model,
+                messages=full_messages,
+                max_tokens=1200,
+                temperature=0.7,
+                stream=True
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta
+                if delta.content:
+                    yield f"data: {json.dumps({'content': delta.content})}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:
+            error_msg = str(e)
+            # Clean up common OpenAI error messages
+            if "Incorrect API key" in error_msg or "invalid_api_key" in error_msg:
+                error_msg = "Invalid API key. Please check your OpenAI API key."
+            elif "insufficient_quota" in error_msg:
+                error_msg = "API quota exceeded. Please check your OpenAI billing."
+            yield f"data: {json.dumps({'error': error_msg})}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive"
+        }
+    )
+
+
 if __name__ == "__main__":
-    print("ZAARA Neural Logic Server Initializing...")
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    print("\n" + "=" * 55)
+    print("  ZAARA Neural Logic Server v2.0")
+    print("=" * 55)
+    if api_key:
+        print(f"  [OK] OpenAI API Key: ...{api_key[-6:]}")
+    else:
+        print("  [!!] No OPENAI_API_KEY env var set.")
+        print("       You can enter your key in the chatbot settings.")
+    print(f"  [LIB] OpenAI Library: {'Installed' if OPENAI_LIB_AVAILABLE else 'Not installed'}")
+    print("=" * 55 + "\n")
     app.run(port=5000, debug=True)

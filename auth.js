@@ -3,23 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 
 // ──────────────────────────────────────────────────────────────────────
-// 🔑  CONFIGURATION — Replace these with your actual Supabase keys
-// ──────────────────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://upsrxckrqrprprrmyeab.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_n63KU5FtBOybvtYqzHXPaA_vqZIG00M'; // PASTE YOUR PUBLISHABLE KEY HERE
-
-// Initialize the Supabase client safely
-let _supabase;
-try {
-    _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('[ZAARA Auth] Supabase client initialized.');
-} catch (err) {
-    console.error('[ZAARA Auth] CRITICAL: Supabase client initialization failed.', err);
-    console.warn('Did you forget to replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY?');
-}
-
-// ──────────────────────────────────────────────────────────────────────
-// Auth State Manager
+// 🔑  CONFIGURATION — Mock Auth (Bypassing Supabase for now)
 // ──────────────────────────────────────────────────────────────────────
 const ZaaraAuth = {
     currentUser: null,
@@ -27,139 +11,87 @@ const ZaaraAuth = {
 
     async init() {
         try {
-            if (!_supabase) throw new Error("Supabase client is not initialized.");
-
-            const { data: { session }, error } = await _supabase.auth.getSession();
-            if (error) {
-                console.error('[ZAARA Auth] Session retrieval error:', error);
-                throw error;
-            }
-            if (session) {
-                console.log('[ZAARA Auth] Active session found for:', session.user?.email);
-                this.currentUser = session.user;
+            const savedUser = localStorage.getItem('zaara_mock_user');
+            if (savedUser) {
+                this.currentUser = JSON.parse(savedUser);
+                console.log('[ZAARA Auth] Mock session found for:', this.currentUser.email);
             }
             this.isInitialized = true;
-
-            _supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' && session) {
-                    this.currentUser = session.user;
-                    this._onAuthChange('signed_in', session.user);
-                } else if (event === 'SIGNED_OUT') {
-                    this.currentUser = null;
-                    this._onAuthChange('signed_out', null);
-                } else if (event === 'TOKEN_REFRESHED' && session) {
-                    this.currentUser = session.user;
-                }
-            });
-
             return this.currentUser;
         } catch (err) {
-            console.error('[ZAARA Auth] Init error:', err.message);
+            console.error('[ZAARA Auth] Mock Init error:', err.message);
             this.isInitialized = true;
             return null;
         }
     },
 
     async signUp(email, password, fullName) {
-        try {
-            const { data, error } = await _supabase.auth.signUp({
-                email, password,
-                options: {
-                    data: {
-                        full_name: fullName || '',
-                        avatar_url: '',
-                        joined_at: new Date().toISOString()
-                    }
-                }
-            });
-            if (error) throw error;
-            if (data.user && !data.session) {
-                return { success: true, needsConfirmation: true, message: 'Account created! Check your email to confirm.' };
-            }
-            this.currentUser = data.user;
-            return { success: true, needsConfirmation: false, user: data.user, message: 'Account created successfully!' };
-        } catch (err) {
-            return { success: false, message: this._parseError(err.message) };
+        if (!email || !password) {
+            return { success: false, message: 'Email and password are required.' };
         }
+        
+        const existingUsers = JSON.parse(localStorage.getItem('zaara_mock_users_db') || '{}');
+        if (existingUsers[email]) {
+            return { success: false, message: 'User already exists with this email. Try logging in.' };
+        }
+        
+        const newUser = {
+            id: 'mock-id-' + Date.now(),
+            email: email,
+            user_metadata: {
+                full_name: fullName || email.split('@')[0],
+                avatar_url: ''
+            }
+        };
+        
+        existingUsers[email] = { ...newUser, password }; // Store in mock DB
+        localStorage.setItem('zaara_mock_users_db', JSON.stringify(existingUsers));
+        
+        this.currentUser = newUser;
+        localStorage.setItem('zaara_mock_user', JSON.stringify(newUser));
+        
+        return { success: true, needsConfirmation: false, user: newUser, message: 'Account created successfully!' };
     },
 
     async signIn(email, password) {
         try {
-            if (!_supabase) throw new Error("Supabase client is not initialized.");
-
-            // 🧪 Debug Log: Start login flow
-            console.log(`[ZAARA Auth] Attempting login for email: ${email}`);
-
-            const { data, error } = await _supabase.auth.signInWithPassword({ 
-                email: email, 
-                password: password 
-            });
-
-            // 🧪 Debug Log: Check for specific Supabase errors
-            if (error) {
-                console.error('[ZAARA Auth] Raw Supabase Login Error:', error);
-                throw error;
+            console.log(`[ZAARA Auth] Attempting mock login for email: ${email}`);
+            
+            const existingUsers = JSON.parse(localStorage.getItem('zaara_mock_users_db') || '{}');
+            const userRecord = existingUsers[email];
+            
+            if (!userRecord || userRecord.password !== password) {
+                return { success: false, message: 'Invalid email or password. Please try again.' };
             }
 
-            // 🧪 Debug Log: Verify session persistence
-            if (!data.session) {
-                console.warn('[ZAARA Auth] Warning: Login succeeded but no session was returned.');
-            } else {
-                console.log('[ZAARA Auth] Login successful. Session established and persisted.');
-            }
-
-            this.currentUser = data.user;
-            return { success: true, user: data.user, message: 'Welcome back, agent.' };
+            const { password: _, ...userData } = userRecord;
+            this.currentUser = userData;
+            localStorage.setItem('zaara_mock_user', JSON.stringify(userData));
+            
+            console.log('[ZAARA Auth] Mock login successful.');
+            return { success: true, user: userData, message: 'Welcome back, agent.' };
         } catch (err) {
-            console.error('[ZAARA Auth] Caught error during signIn:', err);
-            return { success: false, message: this._parseError(err.message) };
+            console.error('[ZAARA Auth] Caught error during mock signIn:', err);
+            return { success: false, message: 'An unexpected error occurred.' };
         }
     },
 
     async signInWithOAuth(provider) {
-        try {
-            const { data, error } = await _supabase.auth.signInWithOAuth({
-                provider,
-                options: { redirectTo: window.location.origin + window.location.pathname }
-            });
-            if (error) throw error;
-            return { success: true };
-        } catch (err) {
-            return { success: false, message: this._parseError(err.message) };
-        }
+        return { success: false, message: 'OAuth login is not configured in mock mode.' };
     },
 
     async resetPassword(email) {
-        try {
-            const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + window.location.pathname
-            });
-            if (error) throw error;
-            return { success: true, message: 'Password reset link sent to your email.' };
-        } catch (err) {
-            return { success: false, message: this._parseError(err.message) };
-        }
+        return { success: true, message: 'Mock mode: Password reset link sent to your email.' };
     },
 
     async updatePassword(newPassword) {
-        try {
-            const { error } = await _supabase.auth.updateUser({ password: newPassword });
-            if (error) throw error;
-            return { success: true, message: 'Password updated successfully!' };
-        } catch (err) {
-            return { success: false, message: this._parseError(err.message) };
-        }
+        return { success: true, message: 'Mock mode: Password updated successfully!' };
     },
 
     async signOut() {
-        try {
-            const { error } = await _supabase.auth.signOut();
-            if (error) throw error;
-            this.currentUser = null;
-            return { success: true };
-        } catch (err) {
-            return { success: false, message: err.message };
-        }
+        this.currentUser = null;
+        localStorage.removeItem('zaara_mock_user');
+        return { success: true };
     },
 
     getUser() { return this.currentUser; },
@@ -183,21 +115,9 @@ const ZaaraAuth = {
     _authChangeCallbacks: [],
     onAuthChange(callback) { this._authChangeCallbacks.push(callback); },
     _onAuthChange(event, user) { this._authChangeCallbacks.forEach(cb => cb(event, user)); },
-
+    
     _parseError(msg) {
-        const m = {
-            'Invalid login credentials': 'Invalid email or password. Please try again.',
-            'Email not confirmed': 'Please confirm your email before logging in.',
-            'User already registered': 'This email is already registered. Try logging in.',
-            'Password should be at least 6 characters': 'Password must be at least 6 characters.',
-            'Unable to validate email address: invalid format': 'Please enter a valid email address.',
-            'Email rate limit exceeded': 'Too many attempts. Please try again later.',
-            'Signup requires a valid password': 'Please enter a valid password.',
-        };
-        for (const [key, value] of Object.entries(m)) {
-            if (msg.includes(key)) return value;
-        }
-        return msg || 'An unexpected error occurred.';
+        return msg;
     }
 };
 

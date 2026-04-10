@@ -667,6 +667,13 @@ let chatOpen = false;
 let chatHistory = [];
 let userContext = { askedAbout: [], skillLevel: null, careerGoal: null };
 
+// ── AI Chat Configuration ─────────────────────────────────────────────
+let AI_ENABLED = false;
+let AI_HAS_KEY = false;
+let conversationMessages = [];
+const AI_MODEL = 'gpt-4o-mini';
+const MAX_HISTORY_MESSAGES = 20;
+
 // ── Career Knowledge Base ─────────────────────────────────────────────
 const CAREER_KB = {
     ai_engineer: {
@@ -1386,7 +1393,7 @@ function handleChatKeyPress(e) {
     if (e.key === 'Enter') sendChatbotMessage();
 }
 
-// ── Send Message & Get AI Response ────────────────────────────────────
+// ── Send Message — Routes to AI or Offline Engine ─────────────────────
 function sendChatbotMessage() {
     const input = document.getElementById('chatbot-input');
     const text = input.value.trim();
@@ -1394,20 +1401,21 @@ function sendChatbotMessage() {
 
     addChatMessage('user', text);
     input.value = '';
+    input.focus();
 
-    // Show typing indicator
-    const typingId = showTypingIndicator();
-
-    // Simulate processing delay for natural feel
-    const delay = 400 + Math.random() * 600;
-    setTimeout(() => {
-        removeTypingIndicator(typingId);
-        const response = classifyAndRespond(text);
-        addChatMessage('bot', response);
-        
-        // Show quick action chips after certain responses
-        showQuickActions(text);
-    }, delay);
+    if (AI_ENABLED && AI_HAS_KEY) {
+        sendAIMessage(text);
+    } else {
+        // Offline fallback engine
+        const typingId = showTypingIndicator();
+        const delay = 400 + Math.random() * 600;
+        setTimeout(() => {
+            removeTypingIndicator(typingId);
+            const response = classifyAndRespond(text);
+            addChatMessage('bot', response);
+            showQuickActions(text);
+        }, delay);
+    }
 }
 
 // ── Typing Indicator ──────────────────────────────────────────────────
@@ -1502,6 +1510,215 @@ function renderChatMarkdown(text) {
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>');
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// AI CHAT ENGINE — OpenAI Streaming Integration
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── Check AI Availability on Load ─────────────────────────────────────
+async function checkAIStatus() {
+    try {
+        const res = await fetch('/api/chat/status');
+        if (!res.ok) throw new Error('API not available');
+        const data = await res.json();
+        AI_ENABLED = data.available;
+
+        // Check if server has key or if user has one in localStorage
+        const localKey = localStorage.getItem('zaara_openai_key') || '';
+        AI_HAS_KEY = data.has_server_key || !!localKey;
+
+        updateAIStatusUI();
+    } catch (e) {
+        AI_ENABLED = false;
+        AI_HAS_KEY = false;
+        updateAIStatusUI();
+    }
+}
+
+function updateAIStatusUI() {
+    const indicator = document.getElementById('ai-status-indicator');
+    if (!indicator) return;
+
+    if (AI_ENABLED && AI_HAS_KEY) {
+        indicator.innerHTML = '<span class="ai-status-dot connected"></span><span class="ai-status-label">GPT-4o Connected</span>';
+        indicator.title = 'AI-powered responses active';
+    } else if (AI_ENABLED && !AI_HAS_KEY) {
+        indicator.innerHTML = '<span class="ai-status-dot needs-key"></span><span class="ai-status-label">API Key Needed</span>';
+        indicator.title = 'Click the settings icon to add your OpenAI API key';
+    } else {
+        indicator.innerHTML = '<span class="ai-status-dot offline"></span><span class="ai-status-label">Offline Mode</span>';
+        indicator.title = 'Using built-in career knowledge base';
+    }
+}
+
+// ── Send Message via OpenAI Streaming API ─────────────────────────────
+async function sendAIMessage(text) {
+    // Add user message to conversation history
+    conversationMessages.push({ role: 'user', content: text });
+
+    // Trim history to prevent token overflow
+    if (conversationMessages.length > MAX_HISTORY_MESSAGES) {
+        conversationMessages = conversationMessages.slice(-MAX_HISTORY_MESSAGES);
+    }
+
+    // Gather platform context for richer AI responses
+    const context = {
+        skillLevel: document.getElementById('skill-level')?.value || 'unknown',
+        careerGoal: document.getElementById('career-goal')?.value || '',
+        activeRoadmap: localStorage.getItem('zaara_last_roadmap') ? 'yes' : 'no'
+    };
+
+    const typingId = showTypingIndicator();
+
+    try {
+        const apiKey = localStorage.getItem('zaara_openai_key') || '';
+
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: conversationMessages,
+                context: context,
+                model: AI_MODEL,
+                api_key: apiKey
+            })
+        });
+
+        removeTypingIndicator(typingId);
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || `Server error ${response.status}`);
+        }
+
+        // Create streaming bot message element
+        const messages = document.getElementById('chatbot-messages');
+        const existingChips = messages.querySelector('.quick-actions');
+        if (existingChips) existingChips.remove();
+
+        const div = document.createElement('div');
+        div.className = 'chat-msg bot streaming';
+        messages.appendChild(div);
+
+        let fullResponse = '';
+
+        // Read SSE stream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // Keep incomplete line in buffer
+
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.content) {
+                        fullResponse += data.content;
+                        div.innerHTML = renderChatMarkdown(fullResponse);
+                        messages.scrollTop = messages.scrollHeight;
+                    }
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                } catch (parseErr) {
+                    if (parseErr.message && !parseErr.message.includes('JSON')) {
+                        throw parseErr; // Re-throw actual API errors
+                    }
+                }
+            }
+        }
+
+        // Finalize
+        div.classList.remove('streaming');
+
+        // Save assistant response to history
+        if (fullResponse) {
+            conversationMessages.push({ role: 'assistant', content: fullResponse });
+        }
+
+        // Show contextual quick actions
+        showQuickActions(text);
+
+    } catch (e) {
+        removeTypingIndicator(typingId);
+        console.error('[ZAARA AI] Chat error:', e.message);
+
+        // Remove the failed user message from history
+        conversationMessages.pop();
+
+        // Fallback to offline engine
+        const offlineResponse = classifyAndRespond(text);
+        addChatMessage('bot', offlineResponse + '\n\n---\n*⚡ Using offline knowledge base — AI temporarily unavailable*');
+        showQuickActions(text);
+    }
+}
+
+// ── API Key Settings Panel ────────────────────────────────────────────
+function toggleAISettings() {
+    const panel = document.getElementById('ai-settings-panel');
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        const input = document.getElementById('ai-key-input');
+        const stored = localStorage.getItem('zaara_openai_key') || '';
+        if (stored) {
+            input.value = stored.slice(0, 7) + '...' + stored.slice(-4);
+            input.dataset.masked = 'true';
+        }
+    } else {
+        panel.classList.add('hidden');
+    }
+}
+
+function saveAIKey() {
+    const input = document.getElementById('ai-key-input');
+    let key = input.value.trim();
+
+    // Don't save the masked version
+    if (input.dataset.masked === 'true' && key.includes('...')) {
+        toggleAISettings();
+        return;
+    }
+
+    if (!key.startsWith('sk-')) {
+        showToast('Invalid key format. OpenAI keys start with sk-', 'error');
+        return;
+    }
+
+    localStorage.setItem('zaara_openai_key', key);
+    AI_HAS_KEY = true;
+    updateAIStatusUI();
+    toggleAISettings();
+    showToast('✅ API Key saved! AI mode activated.', 'success');
+}
+
+function clearAIKey() {
+    localStorage.removeItem('zaara_openai_key');
+    document.getElementById('ai-key-input').value = '';
+    document.getElementById('ai-key-input').dataset.masked = 'false';
+    AI_HAS_KEY = false;
+    checkAIStatus(); // Re-check (server key might still exist)
+    showToast('API Key removed.', 'info');
+}
+
+// ── Clear Conversation History ────────────────────────────────────────
+function clearChatHistory() {
+    conversationMessages = [];
+    const messages = document.getElementById('chatbot-messages');
+    messages.innerHTML = `<div class="chat-msg bot">Hey! 👋 I'm <strong>ZAARA</strong>, your AI Career Mentor.<br><br>I can help with:<br>• 🗺️ Career roadmaps<br>• 🧠 Skills & tools<br>• 🚀 Project ideas<br>• 💪 Motivation<br><br>What's your career goal?</div>`;
+    showToast('Chat history cleared.', 'info');
+}
+
+// ── Initialize AI on Page Load ────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    checkAIStatus();
+});
 
 // ═══════════════════════════════════════════════════════════════════════
 // FEATURE: Progress Tracker

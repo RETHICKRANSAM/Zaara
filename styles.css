@@ -1391,3 +1391,209 @@ body {
     }
 }
 
+/* ═══════════════════════════════════════════════════ */
+/* AI Chat Integration — Status, Settings, Streaming   */
+/* ═══════════════════════════════════════════════════ */
+
+/* Status Indicator */
+.ai-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ai-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.ai-status-dot.connected {
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+    animation: statusGlow 2s ease-in-out infinite;
+}
+
+.ai-status-dot.needs-key {
+    background: #f59e0b;
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+    animation: statusGlow 2s ease-in-out infinite;
+}
+
+.ai-status-dot.offline {
+    background: #52525b;
+    box-shadow: none;
+}
+
+@keyframes statusGlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.ai-status-label {
+    font-size: 0.62rem;
+    color: #a1a1aa;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* Header Action Buttons */
+.chatbot-header-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #71717a;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chatbot-header-btn:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #d8b4fe;
+}
+
+/* Settings Panel */
+.ai-settings-panel {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    animation: settingsSlide 0.25s ease;
+}
+
+.ai-settings-panel.hidden {
+    display: none;
+}
+
+@keyframes settingsSlide {
+    from { max-height: 0; opacity: 0; }
+    to { max-height: 150px; opacity: 1; }
+}
+
+.ai-settings-inner {
+    padding: 14px 30px 16px;
+    background: rgba(139, 92, 246, 0.03);
+}
+
+.ai-settings-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #a78bfa;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.ai-key-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #fff;
+    padding: 9px 14px;
+    font-family: 'Inter', monospace;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ai-key-input:focus {
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.12);
+}
+
+.ai-key-input::placeholder {
+    color: #3f3f46;
+}
+
+.ai-key-save-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: var(--neon-purple);
+    border: none;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.ai-key-save-btn:hover {
+    background: #7c3aed;
+    transform: scale(1.05);
+}
+
+.ai-key-clear-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.65rem;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.ai-key-clear-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.ai-settings-hint {
+    font-size: 0.6rem;
+    color: #52525b;
+    font-style: italic;
+}
+
+/* Streaming Cursor Animation */
+.chat-msg.bot.streaming::after {
+    content: '▊';
+    color: var(--neon-purple);
+    animation: streamCursor 0.6s step-end infinite;
+    margin-left: 1px;
+}
+
+@keyframes streamCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Mobile adjustments for chatbot header */
+@media (max-width: 640px) {
+    .chatbot-header {
+        padding: 14px 16px;
+    }
+
+    .ai-status-indicator {
+        display: none;
+    }
+
+    .ai-settings-inner {
+        padding: 12px 16px 14px;
+    }
+
+    .chatbot-messages {
+        padding: 20px 16px;
+    }
+
+    .chatbot-input-area {
+        padding: 16px;
+    }
+}

@@ -627,11 +627,37 @@
         </button>
         <div class="chatbot-window" id="chatbot-window">
             <div class="chatbot-header">
-                <span class="font-bold text-white"><i class="fa-solid fa-robot text-purple-400"></i> ZAARA Assistant</span>
-                <button onclick="toggleChatbot()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="font-bold text-white"><i class="fa-solid fa-robot text-purple-400"></i> ZAARA AI</span>
+                    <div id="ai-status-indicator" class="ai-status-indicator">
+                        <span class="ai-status-dot offline"></span>
+                        <span class="ai-status-label">Checking...</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button onclick="clearChatHistory()" class="chatbot-header-btn" title="New Chat"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button onclick="toggleAISettings()" class="chatbot-header-btn" title="AI Settings"><i class="fa-solid fa-gear"></i></button>
+                    <button onclick="toggleChatbot()" class="chatbot-header-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+                </div>
             </div>
+
+            <!-- API Key Settings Panel (hidden by default) -->
+            <div id="ai-settings-panel" class="ai-settings-panel hidden">
+                <div class="ai-settings-inner">
+                    <label class="ai-settings-label"><i class="fa-solid fa-key"></i> OpenAI API Key</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="password" id="ai-key-input" class="ai-key-input" placeholder="sk-..." onfocus="if(this.dataset.masked==='true'){this.value='';this.dataset.masked='false';}">
+                        <button onclick="saveAIKey()" class="ai-key-save-btn"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                        <span class="ai-settings-hint">Your key is stored locally and never shared.</span>
+                        <button onclick="clearAIKey()" class="ai-key-clear-btn">Clear Key</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="chatbot-messages" id="chatbot-messages">
-                <div class="chat-msg bot">Hey! 👋 I'm <strong>ZAARA</strong>, your AI Career Mentor.<br><br>I can help with:<br>• 🗺️ Career roadmaps<br>• 🧠 Skills & tools<br>• 🚀 Project ideas<br>• 💪 Motivation<br><br>What's your career goal?</div>
+                <div class="chat-msg bot">Hey! 👋 I'm <strong>ZAARA</strong>, your AI Career Mentor.<br><br>I can help with:<br>• 🗺️ Career roadmaps<br>• 🧠 Skills &amp; tools<br>• 🚀 Project ideas<br>• 💪 Motivation<br><br>What's your career goal?</div>
             </div>
             <div class="chatbot-input-area">
                 <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Ask about career paths..." onkeypress="handleChatKeyPress(event)">
