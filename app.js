@@ -895,6 +895,160 @@ const CAREER_KB = {
         ],
         salaryRange: '$70K - $140K+',
         timeToLearn: '3-6 months'
+    },
+    backend: {
+        title: 'Backend Engineer',
+        description: 'Build robust server-side applications, APIs, and database systems.',
+        prerequisite: 'Basic programming in any language + understanding of HTTP',
+        roadmap: [
+            '1. Master a backend language — Python, Node.js, Go, or Java',
+            '2. Learn databases — SQL (PostgreSQL, MySQL) + NoSQL (MongoDB, Redis)',
+            '3. Build RESTful APIs & understand GraphQL',
+            '4. Authentication & security — JWT, OAuth, HTTPS',
+            '5. System design — caching, load balancing, message queues',
+            '6. Deploy & scale — Docker, Kubernetes, CI/CD, cloud'
+        ],
+        tools: ['Node.js', 'Python', 'PostgreSQL', 'Redis', 'Docker', 'Nginx', 'GraphQL'],
+        projects: [
+            '• REST API with authentication & rate limiting',
+            '• Real-time WebSocket chat server',
+            '• Microservices architecture with message queue',
+            '• URL shortener with analytics dashboard'
+        ],
+        salaryRange: '$80K - $160K+',
+        timeToLearn: '5-10 months'
+    },
+    data_engineer: {
+        title: 'Data Engineer',
+        description: 'Design and build data pipelines, warehouses, and ETL systems.',
+        prerequisite: 'SQL proficiency + Python basics + understanding of databases',
+        roadmap: [
+            '1. Master SQL & relational databases deeply',
+            '2. Python for data processing — Pandas, PySpark',
+            '3. ETL/ELT pipeline design & orchestration',
+            '4. Data warehousing — Snowflake, BigQuery, Redshift',
+            '5. Streaming data — Kafka, Apache Flink',
+            '6. Cloud data platforms & infrastructure as code'
+        ],
+        tools: ['Apache Spark', 'Airflow', 'Kafka', 'Snowflake', 'dbt', 'Python', 'SQL'],
+        projects: [
+            '• End-to-end ETL pipeline with Airflow',
+            '• Real-time streaming dashboard with Kafka',
+            '• Data lake architecture on AWS/GCP',
+            '• Data quality monitoring system'
+        ],
+        salaryRange: '$90K - $170K+',
+        timeToLearn: '6-10 months'
+    },
+    software_engineer: {
+        title: 'Software Engineer (Job Prep)',
+        description: 'Prepare for software engineering roles with DSA, system design, and interview skills.',
+        prerequisite: 'Proficiency in at least one programming language',
+        roadmap: [
+            '1. Data Structures — arrays, linked lists, trees, graphs, heaps',
+            '2. Algorithms — sorting, searching, dynamic programming, greedy',
+            '3. Problem solving — LeetCode (Easy → Medium → Hard)',
+            '4. System Design — scalability, distributed systems, databases',
+            '5. Object-Oriented Design & design patterns',
+            '6. Behavioral interviews & resume optimization'
+        ],
+        tools: ['LeetCode', 'HackerRank', 'VS Code', 'Git', 'Excalidraw', 'Pramp'],
+        projects: [
+            '• Build your own HTTP server from scratch',
+            '• Implement a key-value store (like Redis)',
+            '• Design a URL shortener end-to-end',
+            '• Open-source contribution to a real project'
+        ],
+        salaryRange: '$85K - $180K+',
+        timeToLearn: '3-6 months (interview prep focus)'
+    },
+    embedded_systems: {
+        title: 'Embedded Systems Engineer (ECE)',
+        description: 'Bridge hardware and software — build firmware for microcontrollers and IoT devices.',
+        prerequisite: 'Basic electronics knowledge + C programming fundamentals',
+        roadmap: [
+            '1. Digital electronics — logic gates, flip-flops, counters',
+            '2. C/C++ programming for constrained environments',
+            '3. Microcontroller architecture — ARM, AVR, registers, memory mapping',
+            '4. Peripheral protocols — I2C, SPI, UART, GPIO',
+            '5. RTOS concepts — FreeRTOS, scheduling, interrupts',
+            '6. PCB design basics & hardware debugging tools'
+        ],
+        tools: ['STM32', 'Arduino', 'PlatformIO', 'KiCad', 'Oscilloscope', 'Logic Analyzer'],
+        projects: [
+            '• Custom weather station with sensors',
+            '• Motor controller with PID feedback',
+            '• IoT device with MQTT communication',
+            '• Custom PCB keyboard firmware'
+        ],
+        salaryRange: '$75K - $140K+',
+        timeToLearn: '8-14 months'
+    },
+    medical_doctor: {
+        title: 'Medical Doctor / Specialist',
+        description: 'Navigate the medical education pathway from fundamentals to specialization.',
+        prerequisite: 'Strong foundation in biology, chemistry, and dedication to continuous learning',
+        roadmap: [
+            '1. Pre-med foundations — anatomy, physiology, biochemistry',
+            '2. Clinical sciences — pathology, pharmacology, microbiology',
+            '3. Clinical rotations & hands-on patient care',
+            '4. Board exams & licensing (USMLE/NEET/PLAB)',
+            '5. Residency & specialization training',
+            '6. Continuous medical education & research'
+        ],
+        tools: ['Stethoscope', 'EHR Systems', 'Diagnostic Imaging (MRI/CT)', 'PubMed', 'UpToDate'],
+        projects: [
+            '• Clinical case study presentations',
+            '• Research meta-analysis or literature review',
+            '• Community health awareness campaign',
+            '• Medical volunteer rotation'
+        ],
+        salaryRange: '$60K - $350K+ (varies by specialty)',
+        timeToLearn: '8-15 years (medical education pipeline)'
+    },
+    internship: {
+        title: 'Land an Internship',
+        description: 'Strategic preparation to secure your first tech internship or entry-level role.',
+        prerequisite: 'Basic programming skills + willingness to learn fast',
+        roadmap: [
+            '1. Pick a tech stack and build 2-3 solid projects',
+            '2. Create a professional GitHub profile & portfolio site',
+            '3. Craft a one-page resume highlighting projects & skills',
+            '4. Practice DSA on LeetCode (Easy → Medium)',
+            '5. Network on LinkedIn & apply strategically (startups + companies)',
+            '6. Prepare for behavioral & technical interviews'
+        ],
+        tools: ['GitHub', 'LinkedIn', 'LeetCode', 'VS Code', 'Notion', 'AngelList'],
+        projects: [
+            '• Personal portfolio website with deployed projects',
+            '• Full-stack CRUD application',
+            '• Open-source contribution (even small ones count)',
+            '• Hackathon participation project'
+        ],
+        salaryRange: '$15K - $50K (internship stipend varies)',
+        timeToLearn: '2-4 months (focused prep)'
+    },
+    freelance: {
+        title: 'Freelance Developer',
+        description: 'Build a sustainable freelance career in tech with clients and recurring income.',
+        prerequisite: 'Solid skills in one tech stack + basic business communication',
+        roadmap: [
+            '1. Pick a niche — web dev, mobile, automation, etc.',
+            '2. Build a portfolio with 3-5 strong projects',
+            '3. Set up profiles on Upwork, Fiverr, or Toptal',
+            '4. Learn pricing, contracts, and client communication',
+            '5. Build a personal brand on Twitter/X & LinkedIn',
+            '6. Scale with referrals, retainers, and productized services'
+        ],
+        tools: ['Upwork', 'Fiverr', 'Notion', 'Stripe', 'Calendly', 'GitHub'],
+        projects: [
+            '• Client-ready portfolio website',
+            '• Landing page template business',
+            '• Automation tool for a specific niche',
+            '• SaaS micro-product'
+        ],
+        salaryRange: '$30K - $150K+ (depends on niche & clients)',
+        timeToLearn: '2-4 months (to land first client)'
     }
 };
 
@@ -1288,6 +1442,13 @@ function detectCareer(msg) {
         { keys: ['game dev', 'game develop', 'game design', 'unreal engine'], regex: [/\bunity\b/, /\bgodot\b/, /\bgaming\b/], career: 'game_dev' },
         { keys: ['blockchain', 'web3', 'solidity', 'smart contract', 'defi', 'decentralized'], regex: [/\bnft\b/, /\bcrypto\b/], career: 'blockchain' },
         { keys: ['ui/ux', 'ui ux', 'user interface', 'user experience', 'ux design', 'ui design'], regex: [/\bfigma\b/], career: 'ui_ux' },
+        { keys: ['backend engineer', 'backend dev', 'server side', 'server-side', 'api develop'], regex: [/\bbackend\b/, /\brest\s*api\b/], career: 'backend' },
+        { keys: ['data engineer', 'data pipeline', 'data warehouse', 'etl', 'data lake'], regex: [/\bairflow\b/, /\bspark\b/, /\bsnowflake\b/], career: 'data_engineer' },
+        { keys: ['software engineer', 'swe prep', 'job prep', 'interview prep', 'dsa', 'data structure', 'leetcode', 'algorithm'], regex: [/\bswe\b/], career: 'software_engineer' },
+        { keys: ['embedded system', 'embedded dev', 'firmware', 'microcontroller', 'iot', 'hardware program'], regex: [/\bece\b/, /\bstm32\b/, /\barduino\b/, /\brtos\b/], career: 'embedded_systems' },
+        { keys: ['medical doctor', 'doctor', 'medicine', 'medical', 'mbbs', 'usmle', 'neet', 'clinical', 'surgeon'], regex: [/\bmd\b/], career: 'medical_doctor' },
+        { keys: ['internship', 'intern', 'first job', 'entry level', 'entry-level', 'fresher', 'new grad', 'campus', 'placement'], regex: [], career: 'internship' },
+        { keys: ['freelanc', 'remote work', 'work from home', 'gig', 'upwork', 'fiverr', 'self employ', 'client work'], regex: [], career: 'freelance' },
     ];
     for (const entry of map) {
         // Check full string keys first

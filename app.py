@@ -189,6 +189,83 @@ def get_mock_insights(goal):
             'tools': ["Stethoscope", "Electronic Health Records (EHR)", "Diagnostic Imaging (MRI/CT/X-Ray)", "Differential Diagnosis Matrix"],
             'projects': ["Clinical Case Studies", "Research Meta-Analysis", "Medical Volunteer Rotation"],
             'ai_recommendation': "Medicine is a marathon of continuous learning. Focus heavily on mastering the fundamentals of anatomy and pathology before specializing."
+        },
+        'cloud_engineer': {
+            'identity': "Cloud Infrastructure Architect",
+            'skills': ["Cloud Platforms (AWS/Azure/GCP)", "Infrastructure as Code", "Networking & Security", "Containerization", "Serverless Architecture"],
+            'tools': ["AWS", "Terraform", "Docker", "Kubernetes", "CloudFormation", "Ansible"],
+            'projects': ["Multi-tier Cloud Architecture", "Serverless API with Lambda", "Auto-scaling Deployment Pipeline"],
+            'ai_recommendation': "Get hands-on with free tier accounts on AWS or GCP. Certifications like AWS Solutions Architect carry real weight in the job market."
+        },
+        'mobile_dev': {
+            'identity': "Cross-Platform Mobile Engineer",
+            'skills': ["UI/UX for Mobile", "State Management", "API Integration", "Native Platform APIs", "App Store Deployment"],
+            'tools': ["Flutter", "React Native", "Swift", "Kotlin", "Firebase", "Xcode"],
+            'projects': ["Cross-Platform To-Do App", "Real-time Location Tracker", "Social Media Clone"],
+            'ai_recommendation': "Pick either Flutter or React Native to start, master it deeply, then consider native development. Ship to app stores early to learn the full lifecycle."
+        },
+        'devops': {
+            'identity': "DevOps & SRE Pipeline Architect",
+            'skills': ["Linux Administration", "CI/CD Pipelines", "Container Orchestration", "Monitoring & Logging", "Infrastructure as Code"],
+            'tools': ["Docker", "Kubernetes", "Jenkins", "Terraform", "Prometheus", "GitHub Actions"],
+            'projects': ["Fully Automated CI/CD Pipeline", "Kubernetes Cluster Deployment", "Infrastructure Monitoring Dashboard"],
+            'ai_recommendation': "DevOps is about culture as much as tools. Automate everything, measure everything, and always think about reliability and scalability."
+        },
+        'game_dev': {
+            'identity': "Game Systems & Engine Developer",
+            'skills': ["Game Physics & Math", "C#/C++ Programming", "3D Modeling Basics", "Game Design Patterns", "Shader Programming"],
+            'tools': ["Unity", "Unreal Engine", "Godot", "Blender", "C#", "Visual Studio"],
+            'projects': ["2D Platformer Game", "3D First-Person Exploration", "Multiplayer Online Game Prototype"],
+            'ai_recommendation': "Start small with game jams and 2D games. Scope creep is the #1 killer of game projects. Finish small games before attempting large ones."
+        },
+        'blockchain': {
+            'identity': "Web3 & Smart Contract Engineer",
+            'skills': ["Blockchain Fundamentals", "Solidity Programming", "Smart Contract Security", "DeFi Protocols", "Tokenomics"],
+            'tools': ["Solidity", "Hardhat", "Ethers.js", "MetaMask", "IPFS", "OpenZeppelin"],
+            'projects': ["ERC-20 Token Contract", "NFT Minting DApp", "Decentralized Voting System"],
+            'ai_recommendation': "Security is paramount in blockchain. Learn common vulnerabilities (reentrancy, overflow) before deploying any smart contracts."
+        },
+        'ui_ux': {
+            'identity': "User Experience & Interface Designer",
+            'skills': ["Design Thinking", "Wireframing & Prototyping", "Visual Design", "Interaction Design", "User Research"],
+            'tools': ["Figma", "Adobe XD", "Sketch", "Miro", "Maze", "Framer"],
+            'projects': ["Mobile App Redesign", "Design System from Scratch", "E-Commerce UX Flow"],
+            'ai_recommendation': "Great design is invisible. Study real products you love, understand why they work, and practice recreating existing designs before creating original ones."
+        },
+        'backend': {
+            'identity': "Server-Side Systems Architect",
+            'skills': ["API Design (REST/GraphQL)", "Database Engineering", "Authentication & Security", "System Design", "Scalability Patterns"],
+            'tools': ["Node.js", "Python", "PostgreSQL", "Redis", "Docker", "Nginx"],
+            'projects': ["REST API with Auth & Rate Limiting", "WebSocket Chat Server", "Microservices Architecture"],
+            'ai_recommendation': "Backend is about reliability and performance. Master fundamentals like caching, indexing, and connection pooling before chasing new frameworks."
+        },
+        'data_engineer': {
+            'identity': "Data Pipeline & Platform Engineer",
+            'skills': ["Advanced SQL", "ETL/ELT Design", "Data Warehousing", "Stream Processing", "Cloud Data Platforms"],
+            'tools': ["Apache Spark", "Airflow", "Kafka", "Snowflake", "dbt", "Python"],
+            'projects': ["End-to-End ETL Pipeline", "Real-time Streaming Dashboard", "Data Lake Architecture"],
+            'ai_recommendation': "Data engineering is about scale and reliability. Learn to think in terms of data quality, lineage, and pipeline observability from day one."
+        },
+        'software_engineer': {
+            'identity': "Interview-Ready Software Engineer",
+            'skills': ["Data Structures & Algorithms", "System Design", "Object-Oriented Design", "Problem Solving", "Behavioral Interview Skills"],
+            'tools': ["LeetCode", "HackerRank", "VS Code", "Git", "Excalidraw", "Pramp"],
+            'projects': ["HTTP Server from Scratch", "Key-Value Store (Redis Clone)", "Open-Source Contribution"],
+            'ai_recommendation': "Consistency beats intensity. Solve 2-3 problems daily rather than cramming 20 in a weekend. Focus on understanding patterns, not memorizing solutions."
+        },
+        'internship': {
+            'identity': "Internship-Ready Developer",
+            'skills': ["Project Building", "Resume & Portfolio", "DSA Fundamentals", "Networking", "Interview Preparation"],
+            'tools': ["GitHub", "LinkedIn", "LeetCode", "VS Code", "Notion", "AngelList"],
+            'projects': ["Portfolio Website", "Full-Stack CRUD App", "Open-Source Contribution", "Hackathon Project"],
+            'ai_recommendation': "Quality over quantity. 3 polished, deployed projects on your resume are worth more than 15 incomplete ones. Apply broadly and start early."
+        },
+        'freelance': {
+            'identity': "Independent Tech Consultant",
+            'skills': ["Client Communication", "Project Scoping", "Pricing Strategy", "Personal Branding", "Time Management"],
+            'tools': ["Upwork", "Fiverr", "Notion", "Stripe", "Calendly", "GitHub"],
+            'projects': ["Client-Ready Portfolio", "Landing Page Template Business", "Niche Automation Tool"],
+            'ai_recommendation': "Start with underpriced small projects to build reviews and reputation. Once you have 10+ positive reviews, you can charge your true rate."
         }
     }
     
