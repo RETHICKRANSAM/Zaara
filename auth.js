@@ -8,8 +8,15 @@
 const SUPABASE_URL = 'https://upsrxckrqrprprrmyeab.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_n63KU5FtBOybvtYqzHXPaA_vqZIG00M';
 
-// Initialize the Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize the Supabase client variable
+let _supabaseInstance = null;
+
+function getSupabase() {
+    if (!_supabaseInstance && window.supabase) {
+        _supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    return _supabaseInstance;
+}
 
 const ZaaraAuth = {
     currentUser: null,
@@ -17,15 +24,18 @@ const ZaaraAuth = {
 
     async init() {
         try {
-            // Get initial session
-            const { data: { session }, error } = await supabase.auth.getSession();
+            const client = getSupabase();
+            if (!client) {
+                console.error('[ZAARA Auth] Supabase not loaded yet.');
+                return null;
+            }
+            const { data: { session }, error } = await client.auth.getSession();
             if (error) throw error;
             
             this.currentUser = session?.user || null;
             this.isInitialized = true;
 
-            // Setup real-time auth state listener
-            supabase.auth.onAuthStateChange((event, session) => {
+            client.auth.onAuthStateChange((event, session) => {
                 this.currentUser = session?.user || null;
                 this._onAuthChange(event, this.currentUser);
             });
@@ -39,79 +49,97 @@ const ZaaraAuth = {
     },
 
     async signUp(email, password, fullName) {
-        if (!email || !password) {
-            return { success: false, message: 'Email and password are required.' };
-        }
-        
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    full_name: fullName || email.split('@')[0],
-                    avatar_url: ''
+        try {
+            const client = getSupabase();
+            if (!client) throw new Error('System offline. Matrix disconnected.');
+
+            if (!email || !password) return { success: false, message: 'Email and password are required.' };
+            
+            const { data, error } = await client.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: { full_name: fullName || email.split('@')[0], avatar_url: '' }
                 }
+            });
+
+            if (error) return { success: false, message: this._parseError(error.message) };
+            
+            if (data.user && data.user.identities && data.user.identities.length === 0) {
+               return { success: false, message: 'User already exists. Try logging in instead.' };
             }
-        });
 
-        if (error) return { success: false, message: this._parseError(error.message) };
-        
-        // Check if email confirmation is required
-        if (data.user && data.user.identities && data.user.identities.length === 0) {
-           return { success: false, message: 'User already exists. Try logging in instead.' };
+            return { 
+                success: true, 
+                needsConfirmation: !data.session, 
+                user: data.user, 
+                message: !data.session ? 'Verification email sent. Please check your inbox.' : 'Account created successfully!' 
+            };
+        } catch (err) {
+            return { success: false, message: err.message };
         }
-
-        return { 
-            success: true, 
-            needsConfirmation: !data.session, 
-            user: data.user, 
-            message: !data.session ? 'Verification email sent. Please check your inbox.' : 'Account created successfully!' 
-        };
     },
 
     async signIn(email, password) {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const client = getSupabase();
+            if (!client) throw new Error('System offline. Matrix disconnected.');
+
+            const { data, error } = await client.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
 
-            if (error) {
-                return { success: false, message: this._parseError(error.message) };
-            }
+            if (error) return { success: false, message: this._parseError(error.message) };
 
             this.currentUser = data.user;
             return { success: true, user: data.user, message: 'Welcome back, agent.' };
         } catch (err) {
             console.error('[ZAARA Auth] Caught error during signIn:', err);
-            return { success: false, message: 'An unexpected error occurred.' };
+            return { success: false, message: err.message || 'An unexpected error occurred.' };
         }
     },
 
     async signInWithOAuth(provider) {
-        const { error } = await supabase.auth.signInWithOAuth({ provider: provider });
-        if (error) return { success: false, message: this._parseError(error.message) };
-        return { success: true, message: `Redirecting to ${provider}...` };
+        try {
+            const client = getSupabase();
+            if (!client) throw new Error('System offline.');
+            const { error } = await client.auth.signInWithOAuth({ provider: provider });
+            if (error) return { success: false, message: this._parseError(error.message) };
+            return { success: true, message: `Redirecting to ${provider}...` };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
     },
 
     async resetPassword(email) {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + window.location.pathname,
-        });
-        if (error) return { success: false, message: this._parseError(error.message) };
-        return { success: true, message: 'Password reset link sent to your email.' };
+        try {
+            const client = getSupabase();
+            if (!client) throw new Error('System offline.');
+            const { error } = await client.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + window.location.pathname,
+            });
+            if (error) return { success: false, message: this._parseError(error.message) };
+            return { success: true, message: 'Password reset link sent to your email.' };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
     },
 
     async updatePassword(newPassword) {
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        const client = getSupabase();
+        if (!client) return { success: false, message: 'Offline.' };
+        const { error } = await client.auth.updateUser({ password: newPassword });
         if (error) return { success: false, message: this._parseError(error.message) };
         return { success: true, message: 'Password updated successfully!' };
     },
 
     async signOut() {
-        const { error } = await supabase.auth.signOut();
-        if (error) return { success: false, message: this._parseError(error.message) };
-        
+        const client = getSupabase();
+        if (client) {
+            const { error } = await client.auth.signOut();
+            if (error) return { success: false, message: this._parseError(error.message) };
+        }
         this.currentUser = null;
         return { success: true };
     },
@@ -161,10 +189,8 @@ async function initAuthGate() {
     const appContent = document.getElementById('app-content');
 
     if (ZaaraAuth.isAuthenticated()) {
-        // Already logged in → show app
         showAppContent();
     } else {
-        // Not logged in → show auth
         if (authView) authView.classList.remove('hidden');
         if (appContent) appContent.classList.add('hidden');
         initAuthParticles();
@@ -178,7 +204,6 @@ function showAppContent() {
     if (authView) authView.classList.add('hidden');
     if (appContent) appContent.classList.remove('hidden');
 
-    // Update user bar
     const nameEl = document.getElementById('user-display-name');
     const avatarEl = document.getElementById('user-avatar');
     if (nameEl) nameEl.textContent = ZaaraAuth.getUserDisplayName();
@@ -209,7 +234,6 @@ function switchAuthMode(mode) {
     const oauthButtons = document.querySelector('.auth-oauth-row');
     const passwordGroup = document.querySelector('#auth-password')?.closest('.auth-input-group');
 
-    // Clear messages
     hideAuthMessages();
 
     if (mode === 'login') {
@@ -257,77 +281,62 @@ function switchAuthMode(mode) {
     }
 }
 
-// ── Form Submit Handler ─────────────────────────────────────────────
+// ── Form Submit Handler (index.html legacy/dual use) ─────────────────
 async function handleAuthSubmit(e) {
     e.preventDefault();
     hideAuthMessages();
 
-    const email = document.getElementById('auth-email')?.value.trim();
-    const password = document.getElementById('auth-password')?.value;
-    const name = document.getElementById('auth-name')?.value.trim();
-    const confirmPw = document.getElementById('auth-confirm-password')?.value;
-    const btn = document.getElementById('auth-submit-btn');
-    const spinner = document.getElementById('auth-spinner');
-
-    // Validation
-    if (!email) {
-        showAuthError('Please enter your email address.');
-        return;
+    // Fix for ID mismatches based on which page is active
+    const isAuthPage = !!document.getElementById('login-email');
+    
+    let email, password, name, confirmPw;
+    if (isAuthPage) {
+        const modePrefix = currentAuthMode === 'login' ? 'login' : (currentAuthMode === 'signup' ? 'signup' : 'reset');
+        email = document.getElementById(`${modePrefix}-email`)?.value.trim();
+        password = document.getElementById(`${modePrefix}-password`)?.value;
+        name = document.getElementById('signup-name')?.value.trim();
+        confirmPw = document.getElementById('signup-confirm')?.value;
+    } else {
+        email = document.getElementById('auth-email')?.value.trim();
+        password = document.getElementById('auth-password')?.value;
+        name = document.getElementById('auth-name')?.value.trim();
+        confirmPw = document.getElementById('auth-confirm-password')?.value;
     }
 
-    if (currentAuthMode !== 'forgot' && !password) {
-        showAuthError('Please enter your access key (password).');
-        return;
+    const btn = document.getElementById('auth-submit-btn') || document.getElementById(`${currentAuthMode}-btn`);
+    const spinner = document.getElementById('auth-spinner') || (btn ? btn.querySelector('.spinner') : null);
+
+    if (!email) return showAuthError('Please enter your email address.');
+    if (currentAuthMode !== 'forgot' && !password) return showAuthError('Please enter your password.');
+    if (currentAuthMode === 'signup' && (password.length < 6 || password !== confirmPw)) {
+        return showAuthError(password.length < 6 ? 'Password must be at least 6 characters.' : 'Passwords do not match.');
     }
 
-    if (currentAuthMode === 'signup') {
-        if (password.length < 6) {
-            showAuthError('Access key must be at least 6 characters.');
-            return;
-        }
-        if (password !== confirmPw) {
-            showAuthError('Access keys do not match.');
-            return;
-        }
-    }
-
-    // Show loading state
     if (btn) btn.disabled = true;
+    if (btn && btn.classList) btn.classList.add('loading');
     if (spinner) spinner.classList.add('visible');
 
     let result;
-
     if (currentAuthMode === 'login') {
         result = await ZaaraAuth.signIn(email, password);
         if (result.success) {
             showAuthSuccess('Access granted. Initializing neural link...');
-            setTimeout(() => showAppContent(), 1200);
-        } else {
-            showAuthError(result.message);
-        }
+            setTimeout(() => { window.location.href = isAuthPage ? 'index.html' : '#'; showAppContent(); }, 1200);
+        } else showAuthError(result.message);
     } else if (currentAuthMode === 'signup') {
         result = await ZaaraAuth.signUp(email, password, name);
         if (result.success) {
-            if (result.needsConfirmation) {
-                showAuthSuccess(result.message);
-            } else {
-                showAuthSuccess('Neural ID created. Entering the matrix...');
-                setTimeout(() => showAppContent(), 1200);
-            }
-        } else {
-            showAuthError(result.message);
-        }
+            showAuthSuccess(result.needsConfirmation ? result.message : 'Neural ID created. Entering matrix...');
+            if (!result.needsConfirmation) setTimeout(() => { window.location.href = isAuthPage ? 'index.html' : '#'; showAppContent(); }, 1200);
+        } else showAuthError(result.message);
     } else if (currentAuthMode === 'forgot') {
         result = await ZaaraAuth.resetPassword(email);
-        if (result.success) {
-            showAuthSuccess(result.message);
-        } else {
-            showAuthError(result.message);
-        }
+        if (result.success) showAuthSuccess(result.message);
+        else showAuthError(result.message);
     }
 
-    // Reset loading state
     if (btn) btn.disabled = false;
+    if (btn && btn.classList) btn.classList.remove('loading');
     if (spinner) spinner.classList.remove('visible');
 }
 
