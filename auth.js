@@ -58,10 +58,21 @@ const ZaaraAuth = {
             console.log(`[ZAARA Auth] Attempting mock login for email: ${email}`);
             
             const existingUsers = JSON.parse(localStorage.getItem('zaara_mock_users_db') || '{}');
-            const userRecord = existingUsers[email];
+            let userRecord = existingUsers[email];
             
-            if (!userRecord || userRecord.password !== password) {
-                return { success: false, message: 'Invalid email or password. Please try again.' };
+            // Auto-create missing user to allow ANY email to log in
+            if (!userRecord) {
+                userRecord = {
+                    id: 'mock-id-' + Date.now(),
+                    email: email,
+                    user_metadata: {
+                        full_name: email.split('@')[0],
+                        avatar_url: ''
+                    },
+                    password: password
+                };
+                existingUsers[email] = userRecord;
+                localStorage.setItem('zaara_mock_users_db', JSON.stringify(existingUsers));
             }
 
             const { password: _, ...userData } = userRecord;
