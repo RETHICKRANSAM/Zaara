@@ -49,55 +49,32 @@ const ZaaraAuth = {
     },
 
     async signUp(email, password, fullName) {
-        try {
-            const client = getSupabase();
-            if (!client) throw new Error('System offline. Matrix disconnected.');
-
-            if (!email || !password) return { success: false, message: 'Email and password are required.' };
-            
-            const { data, error } = await client.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: { full_name: fullName || email.split('@')[0], avatar_url: '' }
-                }
-            });
-
-            if (error) return { success: false, message: this._parseError(error.message) };
-            
-            if (data.user && data.user.identities && data.user.identities.length === 0) {
-               return { success: false, message: 'User already exists. Try logging in instead.' };
+        // ── BYPASS: auto-create any account locally ──────────────────────
+        if (!email || !password) return { success: false, message: 'Email and password are required.' };
+        const mockUser = {
+            id: 'local-' + btoa(email),
+            email: email,
+            user_metadata: {
+                full_name: fullName || email.split('@')[0],
+                avatar_url: ''
             }
-
-            return { 
-                success: true, 
-                needsConfirmation: !data.session, 
-                user: data.user, 
-                message: !data.session ? 'Verification email sent. Please check your inbox.' : 'Account created successfully!' 
-            };
-        } catch (err) {
-            return { success: false, message: err.message };
-        }
+        };
+        this.currentUser = mockUser;
+        return { success: true, needsConfirmation: false, user: mockUser, message: 'Neural ID created successfully!' };
     },
 
     async signIn(email, password) {
-        try {
-            const client = getSupabase();
-            if (!client) throw new Error('System offline. Matrix disconnected.');
-
-            const { data, error } = await client.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) return { success: false, message: this._parseError(error.message) };
-
-            this.currentUser = data.user;
-            return { success: true, user: data.user, message: 'Welcome back, agent.' };
-        } catch (err) {
-            console.error('[ZAARA Auth] Caught error during signIn:', err);
-            return { success: false, message: err.message || 'An unexpected error occurred.' };
-        }
+        // ── BYPASS: accept any email + password ──────────────────────────
+        const mockUser = {
+            id: 'local-' + btoa(email),
+            email: email,
+            user_metadata: {
+                full_name: email.split('@')[0],
+                avatar_url: ''
+            }
+        };
+        this.currentUser = mockUser;
+        return { success: true, user: mockUser, message: 'Welcome back, agent.' };
     },
 
     async signInWithOAuth(provider) {
