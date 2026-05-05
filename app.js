@@ -529,130 +529,121 @@ function loadPreviousRoadmap() {
     }
 }
 
-// PDF Export — Print-based (preserves real clickable links)
+// PDF Export — Opens a clean standalone print page (fully clickable links guaranteed)
 function downloadPDF() {
-    showToast('Opening print dialog — save as PDF to keep links clickable!', 'info');
+    const saved = localStorage.getItem('zaara_last_roadmap');
+    if (!saved) { showToast('No roadmap found. Generate one first!', 'error'); return; }
 
-    // ── 1. Inject print styles ───────────────────────────────────────
-    const printStyle = document.createElement('style');
-    printStyle.id = 'zaara-print-style';
-    printStyle.textContent = `
-        @media print {
-            /* Hide everything except the roadmap */
-            body > *:not(#app-content):not(#roadmap-view) { display: none !important; }
-            #landing-view, #loader-view, #chat-widget,
-            #toast-container, .auth-view,
-            header nav, .roadmap-controls,
-            #pdf-print-btn, [data-magnetic],
-            .fixed, .sticky { display: none !important; }
+    let data;
+    try { data = JSON.parse(saved); } catch(e) { showToast('Roadmap data corrupted.', 'error'); return; }
 
-            /* Reset page */
-            html, body {
-                background: #fff !important;
-                color: #111 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                font-family: 'Inter', sans-serif !important;
-            }
+    const rows = (data.roadmap || []).map(item => `
+        <div class="card">
+            <div class="card-header">
+                <span class="step-label">MONTH ${Math.ceil(item.day/30) || 1} / STEP ${item.day}</span>
+                <strong class="topic">${item.topic}</strong>
+            </div>
+            <p class="desc">${item.description}</p>
+            <a href="${item.resource}" class="resource-link" target="_blank">
+                🔗 ${item.resource}
+            </a>
+        </div>`).join('');
 
-            /* Show roadmap full-width */
-            #roadmap-view, #app-content {
-                display: block !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                background: #fff !important;
-            }
+    const skills  = (data.skills_tree  || []).map(s => `<span class="badge">${s}</span>`).join('');
+    const tools   = (data.tools_stack  || []).map(t => `<span class="badge tool">${t}</span>`).join('');
+    const projects= (data.projects     || []).map(p => `<li>${p}</li>`).join('');
 
-            #exportable-roadmap {
-                display: block !important;
-                width: 100% !important;
-                padding: 16px !important;
-                background: #fff !important;
-            }
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ZAARA Roadmap — ${data.title || 'Career Path'}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',Arial,sans-serif;background:#fff;color:#111;padding:32px;max-width:860px;margin:0 auto}
+  .header{background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;padding:28px 32px;border-radius:12px;margin-bottom:28px}
+  .header h1{font-size:1.6rem;font-weight:700;margin-bottom:6px}
+  .header p{color:#ddd6fe;font-size:0.9rem}
+  .section{border:1px solid #e5e7eb;border-radius:10px;padding:18px 22px;margin-bottom:18px}
+  .section h2{font-size:0.7rem;color:#6d28d9;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700}
+  .section p{color:#374151;font-size:0.9rem;line-height:1.6}
+  .badge{display:inline-block;padding:3px 10px;background:#ede9fe;color:#4c1d95;border-radius:20px;font-size:0.75rem;margin:3px;font-weight:600}
+  .badge.tool{background:#fdf4ff;color:#7e22ce}
+  ul{padding-left:20px;color:#374151;font-size:0.9rem;line-height:2}
+  h2.timeline-heading{font-size:0.75rem;color:#4c1d95;text-transform:uppercase;letter-spacing:2px;margin:28px 0 14px;font-weight:700}
+  .card{border:1px solid #e5e7eb;border-radius:10px;padding:16px 20px;margin-bottom:12px;page-break-inside:avoid;break-inside:avoid}
+  .card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+  .step-label{font-size:0.65rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;background:#ede9fe;padding:2px 8px;border-radius:20px}
+  .topic{font-size:1rem;color:#1f2937;font-weight:700}
+  .desc{color:#6b7280;font-size:0.85rem;line-height:1.55;margin-bottom:10px}
+  .resource-link{display:block;color:#5b21b6;text-decoration:underline;font-size:0.8rem;word-break:break-all;padding:8px 12px;background:#f5f3ff;border-radius:6px;border-left:3px solid #7c3aed}
+  .resource-link:hover{background:#ede9fe}
+  .footer{margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;color:#9ca3af;font-size:0.75rem}
+  @page{margin:15mm;size:A4 portrait}
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .header{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .no-print{display:none!important}
+    a{color:#5b21b6!important;text-decoration:underline!important}
+  }
+</style>
+</head>
+<body>
+  <div class="no-print" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:0.85rem;color:#92400e">
+    💡 <strong>To save as PDF with clickable links:</strong> Press <kbd>Ctrl+P</kbd> → Change destination to <strong>"Save as PDF"</strong> (Chrome/Edge) → Click Save.
+  </div>
 
-            /* Make cards readable on white */
-            .timeline-card, .roadmap-section {
-                background: #f9f9f9 !important;
-                border: 1px solid #ddd !important;
-                border-radius: 8px !important;
-                padding: 12px !important;
-                margin-bottom: 12px !important;
-                page-break-inside: avoid !important;
-                opacity: 1 !important;
-                transform: none !important;
-            }
+  <div class="header">
+    <h1>ZAARA Career Neural Matrix</h1>
+    <p>${data.title || 'Your Personalized Career Roadmap'}</p>
+  </div>
 
-            /* Force text to be visible */
-            * {
-                color: #111 !important;
-                text-shadow: none !important;
-                box-shadow: none !important;
-                animation: none !important;
-                transition: none !important;
-                -webkit-text-fill-color: #111 !important;
-            }
+  <div class="section">
+    <h2>🧬 Career Identity</h2>
+    <p>${data.career_identity || ''}</p>
+  </div>
 
-            h1, h2, h3, .gradient-text {
-                color: #4c1d95 !important;
-                -webkit-text-fill-color: #4c1d95 !important;
-                background: none !important;
-            }
+  <div class="section">
+    <h2>🌱 Skills Tree</h2>
+    ${skills}
+  </div>
 
-            .text-neon-purple, .text-purple-300 {
-                color: #6d28d9 !important;
-                -webkit-text-fill-color: #6d28d9 !important;
-            }
+  <div class="section">
+    <h2>🛠️ Recommended Tech Stack</h2>
+    ${tools}
+  </div>
 
-            .text-zinc-400 { color: #555 !important; -webkit-text-fill-color: #555 !important; }
+  ${projects ? `<div class="section"><h2>🔬 Suggested Projects</h2><ul>${projects}</ul></div>` : ''}
 
-            /* ─── KEEP LINKS VISIBLE AND CLICKABLE ─── */
-            a, a * {
-                color: #5b21b6 !important;
-                -webkit-text-fill-color: #5b21b6 !important;
-                text-decoration: underline !important;
-                background: #ede9fe !important;
-                border-radius: 4px !important;
-                padding: 2px 4px !important;
-            }
+  <div class="section">
+    <h2>⚡ AI Recommendation</h2>
+    <p><em>${data.ai_recommendation || ''}</em></p>
+  </div>
 
-            /* Show URL next to links */
-            a[href]::after {
-                content: " (" attr(href) ")";
-                font-size: 8px;
-                color: #888 !important;
-                -webkit-text-fill-color: #888 !important;
-                word-break: break-all;
-            }
+  <h2 class="timeline-heading">📋 Learning Timeline</h2>
+  ${rows}
 
-            .status-badge { border: 1px solid #ccc !important; padding: 2px 6px !important; border-radius: 4px !important; }
-            .tech-badge   { border: 1px solid #c4b5fd !important; padding: 2px 6px !important; border-radius: 4px !important; background: #ede9fe !important; }
+  <div class="footer">Generated by ZAARA — Career Neural Matrix &nbsp;|&nbsp; rethickransam.github.io/Zaara</div>
 
-            @page {
-                margin: 15mm;
-                size: A4 portrait;
-            }
-        }
-    `;
-    document.head.appendChild(printStyle);
+  <script>
+    // Auto-open print dialog after fonts load
+    window.onload = () => setTimeout(() => window.print(), 500);
+  <\/script>
+</body>
+</html>`;
 
-    // ── 2. Ensure all cards are visible before printing ──────────────
-    document.querySelectorAll('.slide-in-card, .fade-in').forEach(el => {
-        el.style.opacity = '1';
-        el.style.transform = 'none';
-    });
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        showToast('Popup blocked! Allow popups for this site and try again.', 'error');
+        return;
+    }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    showToast('Print page opened — choose "Save as PDF" in the dialog!', 'success');
 
-    // ── 3. Open print dialog ─────────────────────────────────────────
-    setTimeout(() => {
-        window.print();
-
-        // ── 4. Restore after print ───────────────────────────────────
-        setTimeout(() => {
-            const s = document.getElementById('zaara-print-style');
-            if (s) s.remove();
-        }, 1000);
-    }, 300);
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════
 // ZAARA AI CAREER MENTOR — Intelligent Chatbot Engine v2.0
