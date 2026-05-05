@@ -641,6 +641,31 @@ async function downloadPDF() {
             pdf.text(`Page ${i + 1} of ${totalPages}`, PAGE_W - M - 20, PAGE_H - 5);
         }
 
+        // ── 3.5 Add Clickable Links ─────────────────────────────────
+        const containerRect = container.getBoundingClientRect();
+        const domToMm = contentW / containerRect.width;
+        const links = container.querySelectorAll('a[href]');
+
+        links.forEach(link => {
+            const rect = link.getBoundingClientRect();
+            const xPx = rect.left - containerRect.left;
+            const yPx = rect.top - containerRect.top;
+
+            const x_mm = xPx * domToMm;
+            const y_mm = yPx * domToMm;
+            const w_mm = rect.width * domToMm;
+            const h_mm = rect.height * domToMm;
+
+            const pageIndex = Math.floor(y_mm / contentH);
+            const pageY = (y_mm % contentH) + M;
+
+            if (pageIndex < totalPages) {
+                pdf.setPage(pageIndex + 1);
+                // jsPDF link overlay
+                pdf.link(x_mm + M, pageY, w_mm, h_mm, { url: link.href });
+            }
+        });
+
         // ── 4. Save ─────────────────────────────────────────────────
         pdf.save('zaara-career-roadmap.pdf');
         showToast(`PDF exported — ${totalPages} pages`, 'success');
