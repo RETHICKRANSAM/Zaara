@@ -23,29 +23,13 @@ const ZaaraAuth = {
     isInitialized: false,
 
     async init() {
+        // ── BYPASS: restore session from localStorage (no Supabase) ────
         try {
-            const client = getSupabase();
-            if (!client) {
-                console.error('[ZAARA Auth] Supabase not loaded yet.');
-                return null;
-            }
-            const { data: { session }, error } = await client.auth.getSession();
-            if (error) throw error;
-            
-            this.currentUser = session?.user || null;
-            this.isInitialized = true;
-
-            client.auth.onAuthStateChange((event, session) => {
-                this.currentUser = session?.user || null;
-                this._onAuthChange(event, this.currentUser);
-            });
-
-            return this.currentUser;
-        } catch (err) {
-            console.error('[ZAARA Auth] Init error:', err.message);
-            this.isInitialized = true;
-            return null;
-        }
+            const saved = localStorage.getItem('zaara_local_user');
+            if (saved) this.currentUser = JSON.parse(saved);
+        } catch(e) { this.currentUser = null; }
+        this.isInitialized = true;
+        return this.currentUser;
     },
 
     async signUp(email, password, fullName) {
@@ -60,6 +44,7 @@ const ZaaraAuth = {
             }
         };
         this.currentUser = mockUser;
+        localStorage.setItem('zaara_local_user', JSON.stringify(mockUser));
         return { success: true, needsConfirmation: false, user: mockUser, message: 'Neural ID created successfully!' };
     },
 
@@ -74,6 +59,7 @@ const ZaaraAuth = {
             }
         };
         this.currentUser = mockUser;
+        localStorage.setItem('zaara_local_user', JSON.stringify(mockUser));
         return { success: true, user: mockUser, message: 'Welcome back, agent.' };
     },
 
@@ -112,12 +98,9 @@ const ZaaraAuth = {
     },
 
     async signOut() {
-        const client = getSupabase();
-        if (client) {
-            const { error } = await client.auth.signOut();
-            if (error) return { success: false, message: this._parseError(error.message) };
-        }
+        // ── BYPASS: clear local session ───────────────────────────────
         this.currentUser = null;
+        localStorage.removeItem('zaara_local_user');
         return { success: true };
     },
 
