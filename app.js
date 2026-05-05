@@ -529,159 +529,129 @@ function loadPreviousRoadmap() {
     }
 }
 
-// PDF Export — Full-Container Canvas Capture with Page Slicing
-async function downloadPDF() {
-    showToast('Preparing PDF document...', 'info');
+// PDF Export — Print-based (preserves real clickable links)
+function downloadPDF() {
+    showToast('Opening print dialog — save as PDF to keep links clickable!', 'info');
 
-    // ── 1. Pre-Capture DOM Preparation ──────────────────────────────
-    document.body.classList.add('pdf-exporting');
+    // ── 1. Inject print styles ───────────────────────────────────────
+    const printStyle = document.createElement('style');
+    printStyle.id = 'zaara-print-style';
+    printStyle.textContent = `
+        @media print {
+            /* Hide everything except the roadmap */
+            body > *:not(#app-content):not(#roadmap-view) { display: none !important; }
+            #landing-view, #loader-view, #chat-widget,
+            #toast-container, .auth-view,
+            header nav, .roadmap-controls,
+            #pdf-print-btn, [data-magnetic],
+            .fixed, .sticky { display: none !important; }
 
-    // Remove typing cursors
-    const cursors = document.querySelectorAll('.typing-cursor');
-    cursors.forEach(el => el.classList.remove('typing-cursor'));
+            /* Reset page */
+            html, body {
+                background: #fff !important;
+                color: #111 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: 'Inter', sans-serif !important;
+            }
 
-    // Save originals
-    const savedOverflow = document.body.style.overflow;
-    const savedHtmlOverflow = document.documentElement.style.overflow;
-    document.body.style.overflow = 'visible';
-    document.documentElement.style.overflow = 'visible';
+            /* Show roadmap full-width */
+            #roadmap-view, #app-content {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #fff !important;
+            }
 
-    // Force ALL animated cards to be fully visible
-    // This is critical: .slide-in-card starts at opacity:0
-    const prepStyle = document.createElement('style');
-    prepStyle.id = 'pdf-prep-style';
-    prepStyle.textContent = `
-        body.pdf-exporting .slide-in-card,
-        body.pdf-exporting .fade-in {
-            opacity: 1 !important;
-            transform: none !important;
-            animation: none !important;
-            transition: none !important;
-        }
-        body.pdf-exporting #exportable-roadmap,
-        body.pdf-exporting #exportable-roadmap * {
-            overflow: visible !important;
+            #exportable-roadmap {
+                display: block !important;
+                width: 100% !important;
+                padding: 16px !important;
+                background: #fff !important;
+            }
+
+            /* Make cards readable on white */
+            .timeline-card, .roadmap-section {
+                background: #f9f9f9 !important;
+                border: 1px solid #ddd !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+                margin-bottom: 12px !important;
+                page-break-inside: avoid !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            /* Force text to be visible */
+            * {
+                color: #111 !important;
+                text-shadow: none !important;
+                box-shadow: none !important;
+                animation: none !important;
+                transition: none !important;
+                -webkit-text-fill-color: #111 !important;
+            }
+
+            h1, h2, h3, .gradient-text {
+                color: #4c1d95 !important;
+                -webkit-text-fill-color: #4c1d95 !important;
+                background: none !important;
+            }
+
+            .text-neon-purple, .text-purple-300 {
+                color: #6d28d9 !important;
+                -webkit-text-fill-color: #6d28d9 !important;
+            }
+
+            .text-zinc-400 { color: #555 !important; -webkit-text-fill-color: #555 !important; }
+
+            /* ─── KEEP LINKS VISIBLE AND CLICKABLE ─── */
+            a, a * {
+                color: #5b21b6 !important;
+                -webkit-text-fill-color: #5b21b6 !important;
+                text-decoration: underline !important;
+                background: #ede9fe !important;
+                border-radius: 4px !important;
+                padding: 2px 4px !important;
+            }
+
+            /* Show URL next to links */
+            a[href]::after {
+                content: " (" attr(href) ")";
+                font-size: 8px;
+                color: #888 !important;
+                -webkit-text-fill-color: #888 !important;
+                word-break: break-all;
+            }
+
+            .status-badge { border: 1px solid #ccc !important; padding: 2px 6px !important; border-radius: 4px !important; }
+            .tech-badge   { border: 1px solid #c4b5fd !important; padding: 2px 6px !important; border-radius: 4px !important; background: #ede9fe !important; }
+
+            @page {
+                margin: 15mm;
+                size: A4 portrait;
+            }
         }
     `;
-    document.head.appendChild(prepStyle);
+    document.head.appendChild(printStyle);
 
-    // Wait for repaint
-    await new Promise(r => setTimeout(r, 500));
+    // ── 2. Ensure all cards are visible before printing ──────────────
+    document.querySelectorAll('.slide-in-card, .fade-in').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+    });
 
-    const container = document.getElementById('exportable-roadmap');
+    // ── 3. Open print dialog ─────────────────────────────────────────
+    setTimeout(() => {
+        window.print();
 
-    // DEBUG: log dimensions
-    console.log('[PDF] Container offsetHeight:', container.offsetHeight);
-    console.log('[PDF] Container scrollHeight:', container.scrollHeight);
-    console.log('[PDF] .roadmap-section count:', container.querySelectorAll('.roadmap-section').length);
-
-    try {
-        // ── 2. Capture entire container as ONE canvas ────────────────
-        const canvas = await html2canvas(container, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            scrollX: 0,
-            scrollY: -window.scrollY,
-            width: container.scrollWidth,
-            height: container.scrollHeight,
-            windowWidth: container.scrollWidth,
-            windowHeight: container.scrollHeight,
-        });
-
-        console.log('[PDF] Canvas size:', canvas.width, 'x', canvas.height);
-
-        // ── 3. Slice canvas into A4 pages ───────────────────────────
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-        const PAGE_W = 210;
-        const PAGE_H = 297;
-        const M = 10; // margin mm
-
-        const contentW = PAGE_W - M * 2;
-        const contentH = PAGE_H - M * 2;
-
-        // The full image scaled to A4 width
-        const imgW = contentW;
-        const imgH = (canvas.height / canvas.width) * contentW;
-
-        // How many px of canvas correspond to one page of content
-        const pxPerMm = canvas.width / contentW;
-        const pageContentPx = contentH * pxPerMm;
-
-        const totalPages = Math.ceil(canvas.height / pageContentPx);
-        console.log('[PDF] Total pages to generate:', totalPages);
-
-        for (let i = 0; i < totalPages; i++) {
-            if (i > 0) pdf.addPage();
-
-            // Slice out a chunk of the canvas for this page
-            const srcY = i * pageContentPx;
-            const srcH = Math.min(pageContentPx, canvas.height - srcY);
-
-            // Create a temporary canvas for this slice
-            const sliceCanvas = document.createElement('canvas');
-            sliceCanvas.width = canvas.width;
-            sliceCanvas.height = srcH;
-            const ctx = sliceCanvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-            ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-
-            const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
-            const sliceImgH = (srcH / canvas.width) * contentW;
-
-            pdf.addImage(sliceData, 'JPEG', M, M, contentW, sliceImgH);
-
-            // Header & footer
-            pdf.setFontSize(7);
-            pdf.setTextColor(160, 160, 160);
-            pdf.text('ZAARA — Career Neural Matrix', M, 7);
-            pdf.text(`Page ${i + 1} of ${totalPages}`, PAGE_W - M - 20, PAGE_H - 5);
-        }
-
-        // ── 3.5 Add Clickable Links ─────────────────────────────────
-        const containerRect = container.getBoundingClientRect();
-        const domToMm = contentW / containerRect.width;
-        const links = container.querySelectorAll('a[href]');
-
-        links.forEach(link => {
-            const rect = link.getBoundingClientRect();
-            const xPx = rect.left - containerRect.left;
-            const yPx = rect.top - containerRect.top;
-
-            const x_mm = xPx * domToMm;
-            const y_mm = yPx * domToMm;
-            const w_mm = rect.width * domToMm;
-            const h_mm = rect.height * domToMm;
-
-            const pageIndex = Math.floor(y_mm / contentH);
-            const pageY = (y_mm % contentH) + M;
-
-            if (pageIndex < totalPages) {
-                pdf.setPage(pageIndex + 1);
-                // jsPDF link overlay
-                pdf.link(x_mm + M, pageY, w_mm, h_mm, { url: link.href });
-            }
-        });
-
-        // ── 4. Save ─────────────────────────────────────────────────
-        pdf.save('zaara-career-roadmap.pdf');
-        showToast(`PDF exported — ${totalPages} pages`, 'success');
-
-    } catch (err) {
-        console.error('[PDF] Export error:', err);
-        showToast('PDF export failed: ' + err.message, 'error');
-    } finally {
-        // ── 5. Restore DOM ──────────────────────────────────────────
-        document.body.classList.remove('pdf-exporting');
-        cursors.forEach(el => el.classList.add('typing-cursor'));
-        document.body.style.overflow = savedOverflow;
-        document.documentElement.style.overflow = savedHtmlOverflow;
-        const s = document.getElementById('pdf-prep-style');
-        if (s) s.remove();
-    }
+        // ── 4. Restore after print ───────────────────────────────────
+        setTimeout(() => {
+            const s = document.getElementById('zaara-print-style');
+            if (s) s.remove();
+        }, 1000);
+    }, 300);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
