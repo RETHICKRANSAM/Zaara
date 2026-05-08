@@ -16,9 +16,9 @@
     <script src="app.js?v=2" defer></script>
     <link rel="stylesheet" href="styles.css?v=5">
     <style>
-        :root { --neon-purple: #8B5CF6; --neon-pink: #EC4899; }
+        :root { --neon-purple: #C9A84C; --neon-pink: #E8C96A; --gold-primary: #C9A84C; --gold-light: #E8C96A; --gold-deep: #9A7830; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; font-size: 1.1rem; cursor: none; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
+        body { background: #FAFAF7; color: #1C1710; font-family: 'Inter', sans-serif; font-size: 1.1rem; cursor: none; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
         
         .hidden { display: none !important; }
         
@@ -40,8 +40,8 @@
         /* Glowing orb — the main cursor dot */
         .cursor-dot {
             width: 12px; height: 12px;
-            background: radial-gradient(circle at 35% 35%, #c084fc, #8B5CF6, #6d28d9);
-            box-shadow: 0 0 8px #8B5CF6, 0 0 18px rgba(139,92,246,0.6), 0 0 35px rgba(139,92,246,0.25);
+            background: radial-gradient(circle at 35% 35%, #E8C96A, #C9A84C, #9A7830);
+            box-shadow: 0 0 8px #C9A84C, 0 0 18px rgba(201,168,76,0.5), 0 0 35px rgba(201,168,76,0.2);
             border-radius: 50%;
             position: fixed; top: 0; left: 0;
             pointer-events: none;
@@ -51,24 +51,24 @@
         }
         .cursor-dot.hovering {
             width: 18px; height: 18px;
-            background: radial-gradient(circle at 35% 35%, #f9a8d4, #EC4899, #be185d);
-            box-shadow: 0 0 10px #EC4899, 0 0 24px rgba(236,72,153,0.7), 0 0 50px rgba(236,72,153,0.3);
+            background: radial-gradient(circle at 35% 35%, #F5E8C0, #E8C96A, #C9A84C);
+            box-shadow: 0 0 10px #E8C96A, 0 0 24px rgba(232,201,106,0.6), 0 0 50px rgba(201,168,76,0.25);
         }
         .cursor-dot.clicking {
             width: 8px; height: 8px;
-            box-shadow: 0 0 20px #8B5CF6, 0 0 50px rgba(139,92,246,0.9);
+            box-shadow: 0 0 20px #C9A84C, 0 0 50px rgba(201,168,76,0.8);
         }
 
         /* Outer lagging ring */
         .cursor-ring {
             width: 36px; height: 36px;
-            border: 1.5px solid rgba(139,92,246,0.7);
+            border: 1.5px solid rgba(201,168,76,0.6);
             border-radius: 50%;
             position: fixed; top: 0; left: 0;
             pointer-events: none;
             z-index: 99998;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 8px rgba(139,92,246,0.3), inset 0 0 8px rgba(139,92,246,0.08);
+            box-shadow: 0 0 8px rgba(201,168,76,0.2), inset 0 0 8px rgba(201,168,76,0.06);
             transition: width 0.25s cubic-bezier(0.25,0.8,0.25,1),
                         height 0.25s cubic-bezier(0.25,0.8,0.25,1),
                         border-color 0.2s ease,
@@ -77,14 +77,14 @@
         }
         .cursor-ring.hovering {
             width: 52px; height: 52px;
-            border-color: rgba(236,72,153,0.8);
-            background: rgba(236,72,153,0.06);
-            box-shadow: 0 0 16px rgba(236,72,153,0.4), inset 0 0 12px rgba(236,72,153,0.1);
+            border-color: rgba(232,201,106,0.8);
+            background: rgba(201,168,76,0.07);
+            box-shadow: 0 0 16px rgba(201,168,76,0.3), inset 0 0 12px rgba(201,168,76,0.08);
         }
         .cursor-ring.clicking {
             width: 28px; height: 28px;
-            border-color: rgba(139,92,246,1);
-            background: rgba(139,92,246,0.15);
+            border-color: rgba(201,168,76,1);
+            background: rgba(201,168,76,0.12);
         }
 
         /* Trail sparkles */
@@ -117,7 +117,7 @@
         .cursor-ripple {
             position: fixed;
             width: 10px; height: 10px;
-            border: 2px solid rgba(139,92,246,0.9);
+            border: 2px solid rgba(201,168,76,0.8);
             border-radius: 50%;
             pointer-events: none;
             z-index: 99996;
@@ -796,8 +796,8 @@
         let lastTrailX = 0, lastTrailY = 0;
         let trailHue = 270; // purple start
         const TRAIL_COLORS = [
-            'rgba(139,92,246,', 'rgba(168,85,247,', 'rgba(192,132,252,',
-            'rgba(236,72,153,', 'rgba(217,70,239,'
+            'rgba(201,168,76,',  'rgba(232,201,106,', 'rgba(245,232,192,',
+            'rgba(154,120,48,',  'rgba(212,175,55,'
         ];
         let trailColorIdx = 0;
 
@@ -875,7 +875,7 @@
         // ── Particle burst on click ────────────────────────────
         function spawnClickParticles(x, y) {
             const count = 10;
-            const colors = ['#8B5CF6','#EC4899','#c084fc','#f0abfc','#a78bfa','#ffffff'];
+            const colors = ['#C9A84C','#E8C96A','#9A7830','#F5E8C0','#D4AF37','#fffdf8'];
             for (let i = 0; i < count; i++) {
                 const p = document.createElement('div');
                 p.className = 'click-particle';
@@ -927,7 +927,7 @@
                 const y = (p.y + (offsetY * p.z) + height) % height;
                 ctx.beginPath();
                 ctx.rect(x, y, p.size * 2, p.size * 2);
-                ctx.fillStyle = `rgba(139, 92, 246, ${p.opacity > 0.3 ? 1.0 : 0.4})`;
+                ctx.fillStyle = `rgba(201, 168, 76, ${p.opacity > 0.3 ? 0.7 : 0.3})`;
                 ctx.fill();
             });
             requestAnimationFrame(drawBackground);

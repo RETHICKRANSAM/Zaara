@@ -1,15 +1,38 @@
-/* Custom CSS for Neon Purple & Black Edition - Glassmorphism */
+/* ZAARA AI — White & Gold Professional Edition */
 
 :root {
-    --neon-purple: #8B5CF6;
-    --neon-pink: #EC4899;
-    --bg-black: #050505;
-    --surface-dark: rgba(15, 15, 20, 0.6);
-    --glass-border: rgba(139, 92, 246, 0.3);
+    /* Gold Palette */
+    --gold-primary:  #C9A84C;
+    --gold-light:    #E8C96A;
+    --gold-deep:     #9A7830;
+    --gold-pale:     #F5E8C0;
+    --gold-border:   rgba(201, 168, 76, 0.35);
+    --gold-glow:     rgba(201, 168, 76, 0.25);
+
+    /* Legacy aliases — keeps old references working */
+    --neon-purple:   #C9A84C;
+    --neon-pink:     #E8C96A;
+
+    /* Surfaces */
+    --bg-warm:       #FAFAF7;
+    --bg-black:      #FAFAF7;
+    --surface-light: rgba(255, 253, 248, 0.92);
+    --surface-dark:  rgba(255, 253, 248, 0.92);
+    --glass-border:  rgba(201, 168, 76, 0.3);
+
+    /* Text */
+    --text-primary:  #1C1710;
+    --text-muted:    #6B5E4A;
+    --text-faint:    #9C8C78;
+
+    /* Borders */
+    --border-sand:   #DDD0B8;
+    --border-linen:  #EAE0CC;
 }
 
 body {
-    background-color: var(--bg-black);
+    background-color: var(--bg-warm);
+    color: var(--text-primary);
 }
 
 /* Custom Scrollbar */
@@ -17,23 +40,21 @@ body {
     width: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #000000; 
+    background: #F0EBE0;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3); 
+    background: rgba(201, 168, 76, 0.35);
     border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-purple); 
+    background: var(--gold-primary);
 }
 
-/* Glass Panels */
+/* Glass Panels — now warm white cards */
 .glass-panel {
-    background: var(--surface-dark);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 20px rgba(139, 92, 246, 0.05);
+    background: #FFFFFF;
+    border: 1px solid var(--border-linen);
+    box-shadow: 0 2px 16px rgba(201,168,76,0.08), 0 1px 4px rgba(0,0,0,0.05);
     border-radius: 16px;
 }
 
@@ -44,44 +65,44 @@ body {
 }
 
 .glass-card {
-    background: rgba(20, 20, 25, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #FFFFFF;
+    border: 1px solid #EAE0CC;
     border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .glass-card:hover {
-    border-color: var(--neon-purple);
+    border-color: var(--gold-primary);
     transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 10px 28px rgba(201,168,76,0.15), 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .glass-input {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-sand);
     border-radius: 8px;
-    color: white;
+    color: var(--text-primary);
 }
 
 .glass-input:focus {
-    border-color: var(--neon-purple);
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
     outline: none;
+    background: #FFFDF8;
 }
 
 /* Gradients & Glows */
 .gradient-text {
-    background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold-primary), var(--gold-light));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    text-shadow: none;
 }
 
 .neon-text-glow {
-    text-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple);
+    color: var(--gold-primary);
+    text-shadow: 0 0 12px rgba(201,168,76,0.35);
 }
 
 /* Badges for Tools/Skills */
