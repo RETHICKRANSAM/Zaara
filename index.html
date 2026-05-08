@@ -18,7 +18,7 @@
     <style>
         :root { --neon-purple: #C9A84C; --neon-pink: #E8C96A; --gold-primary: #C9A84C; --gold-light: #E8C96A; --gold-deep: #9A7830; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #FAFAF7; color: #1C1710; font-family: 'Inter', sans-serif; font-size: 1.1rem; cursor: none; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
+        body { background: #FAFAF7; color: #1C1710; font-family: 'Inter', sans-serif; font-size: 1.1rem; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
         
         .hidden { display: none !important; }
         
@@ -33,124 +33,11 @@
         .slide-in-card.animate { opacity: 1; transform: translateX(0); }
         .timeline-node { position: absolute; left: -10px; top: 20px; width: 14px; height: 14px; background: var(--neon-purple); border: 2px solid #000; }
 
-        /* ═══════════════════════════════════════════════════ */
-        /* SLEEK MINIMAL CURSOR — White & Gold Edition        */
-        /* ═══════════════════════════════════════════════════ */
-
-        /* Inner dot — sharp 8px circle, the precise hotspot */
-        .cursor-dot {
-            width: 8px;
-            height: 8px;
-            background: #1C1710;          /* espresso: visible on white */
-            border-radius: 50%;
-            position: fixed;
-            top: 0; left: 0;
-            pointer-events: none;
-            z-index: 999999;
-            transform: translate(-50%, -50%);
-            transition: width 0.18s ease,
-                        height 0.18s ease,
-                        background 0.18s ease,
-                        transform 0.1s ease;
-            display: block;
-        }
-        /* Hover: dot swells to gold filled circle */
-        .cursor-dot.hovering {
-            width: 12px;
-            height: 12px;
-            background: #C9A84C;
-        }
-        /* Click: dot compresses */
-        .cursor-dot.clicking {
-            transform: translate(-50%, -50%) scale(0.6);
-            background: #9A7830;
-        }
-
-        /* Outer ring — thin elegant circle, lags behind */
-        .cursor-ring {
-            width: 38px;
-            height: 38px;
-            border: 1.5px solid #C9A84C;  /* gold ring — visible on white */
-            border-radius: 50%;
-            position: fixed;
-            top: 0; left: 0;
-            pointer-events: none;
-            z-index: 999998;
-            transform: translate(-50%, -50%);
-            display: block;
-            background: transparent;
-            transition: width   0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                        height  0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                        border-color 0.25s ease,
-                        background   0.25s ease,
-                        opacity      0.2s ease;
-        }
-        /* Hover: ring expands + fills with faint gold tint */
-        .cursor-ring.hovering {
-            width: 50px;
-            height: 50px;
-            border-color: #9A7830;
-            background: rgba(201, 168, 76, 0.08);
-        }
-        /* Click: ring snaps inward */
-        .cursor-ring.clicking {
-            width: 28px;
-            height: 28px;
-            border-color: #C9A84C;
-            background: rgba(201, 168, 76, 0.12);
-        }
-
-        /* Click ripple — expands outward on mousedown */
-        .cursor-ripple {
-            position: fixed;
-            width: 8px; height: 8px;
-            border: 1.5px solid rgba(201, 168, 76, 0.7);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 999996;
-            transform: translate(-50%, -50%);
-            animation: rippleExpand 0.55s ease-out forwards;
-        }
-        @keyframes rippleExpand {
-            0%   { width: 8px;  height: 8px;  opacity: 0.9; }
-            100% { width: 60px; height: 60px; opacity: 0; }
-        }
-
-        /* Subtle trail dots */
-        .cursor-trail {
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 99997;
-            animation: trailFade 0.4s ease forwards;
-        }
-        @keyframes trailFade {
-            0%   { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
-            100% { opacity: 0;   transform: translate(-50%,-50%) scale(0); }
-        }
-
-        /* Click burst particles */
-        .click-particle {
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 99999;
-            animation: particleBurst 0.55s ease-out forwards;
-        }
-        @keyframes particleBurst {
-            0%   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-            100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); }
-        }
-
-        /* Magnetic element hover glow */
+        /* Default browser cursor — all custom cursor styles removed */
         [data-magnetic] { transition: transform 0.1s ease; }
-        select, button, label, a, input { cursor: none; outline: none; }
-        input[type="radio"] { cursor: none; }
-        button { cursor: none; border: none; font-family: 'Inter', sans-serif; border: 2px solid transparent; }
-        button:hover { border-color: rgba(255, 255, 255, 0.2); }
+        button { border: none; font-family: 'Inter', sans-serif; }
 
 
-        
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .items-center { align-items: center; }
@@ -310,86 +197,7 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- GLOBAL CURSOR — placed at body level so it always      -->
-    <!-- renders regardless of auth state. Root cause of the    -->
-    <!-- invisible cursor was: elements were inside #app-content -->
-    <!-- which starts with class="hidden" (display:none).        -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <div class="cursor-dot" id="cursor-dot"></div>
-    <div class="cursor-ring" id="cursor-ring"></div>
-
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- CURSOR BOOTSTRAP — runs synchronously at body open so  -->
-    <!-- the cursor is live from the very first mouse movement, -->
-    <!-- before any deferred scripts or auth state changes.     -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <script>
-    (function() {
-        // Hide native cursor everywhere
-        document.documentElement.style.cursor = 'none';
-
-        var dot  = document.getElementById('cursor-dot');
-        var ring = document.getElementById('cursor-ring');
-        if (!dot || !ring) return; // safety guard
-
-        var mx = 0, my = 0, rx = 0, ry = 0;
-        var animId;
-
-        // Lerp ring toward mouse each frame
-        function animRing() {
-            rx += (mx - rx) * 0.14;
-            ry += (my - ry) * 0.14;
-            ring.style.left = rx + 'px';
-            ring.style.top  = ry + 'px';
-            animId = requestAnimationFrame(animRing);
-        }
-        animRing();
-
-        document.addEventListener('mousemove', function(e) {
-            mx = e.clientX; my = e.clientY;
-            // Dot follows instantly
-            dot.style.left = mx + 'px';
-            dot.style.top  = my + 'px';
-
-            // Detect hoverable elements for hover state
-            var el = document.elementFromPoint(mx, my);
-            var hover = el && (el.matches('button,a,input,select,label,[data-magnetic]')
-                            || el.closest('button,a,[data-magnetic]'));
-            dot.classList.toggle('hovering', !!hover);
-            ring.classList.toggle('hovering', !!hover);
-        });
-
-        document.addEventListener('mousedown', function(e) {
-            dot.classList.add('clicking');
-            ring.classList.add('clicking');
-            // Gold ripple burst on click
-            var r = document.createElement('div');
-            r.style.cssText = 'position:fixed;border-radius:50%;pointer-events:none;z-index:999996;'
-                + 'border:2px solid rgba(201,168,76,0.8);'
-                + 'left:' + e.clientX + 'px;top:' + e.clientY + 'px;'
-                + 'transform:translate(-50%,-50%);'
-                + 'animation:rippleExpand 0.6s ease-out forwards;';
-            document.body.appendChild(r);
-            setTimeout(function(){ r.remove(); }, 650);
-        });
-
-        document.addEventListener('mouseup', function() {
-            dot.classList.remove('clicking');
-            ring.classList.remove('clicking');
-        });
-
-        // Hide cursor elements when mouse leaves window
-        document.addEventListener('mouseleave', function() {
-            dot.style.opacity = '0';
-            ring.style.opacity = '0';
-        });
-        document.addEventListener('mouseenter', function() {
-            dot.style.opacity = '1';
-            ring.style.opacity = '1';
-        });
-    })();
-    </script>
+    <!-- Normal browser cursor — all custom cursor code removed -->
 
     <!-- ═══════════════════════════════════════════════════════ -->
     <!-- AUTH VIEW — Supabase Login / Signup / Forgot Password  -->
