@@ -298,6 +298,15 @@
 <body class="p-4 md:p-8">
 
     <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- GLOBAL CURSOR — placed at body level so it always      -->
+    <!-- renders regardless of auth state. Root cause of the    -->
+    <!-- invisible cursor was: elements were inside #app-content -->
+    <!-- which starts with class="hidden" (display:none).        -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
     <!-- AUTH VIEW — Supabase Login / Signup / Forgot Password  -->
     <!-- ═══════════════════════════════════════════════════════ -->
     <div id="auth-view">
@@ -414,12 +423,12 @@
         LATENCY: <span class="text-white font-bold">0.001ms</span>
     </div>
 
-    <!-- Retro CRT Scanline Overlay -->
-    <div class="scanlines"></div>
+    <!-- CRT Scanline Overlay REMOVED — contradicts white/gold  -->
+    <!-- professional theme and causes the horizontal line grid  -->
+    <!-- artifact visible across the whole page background.     -->
 
-    <!-- Custom Cursor Elements -->
-    <div class="cursor-dot" id="cursor-dot"></div>
-    <div class="cursor-ring" id="cursor-ring"></div>
+    <!-- Custom Cursor Elements removed from here — moved to    -->
+    <!-- body level above #auth-view so they are always visible -->
     
     <!-- Interactive Background Canvas -->
     <canvas id="canvas-bg" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"></canvas>
@@ -536,14 +545,16 @@
                         <div id="form-error" class="hidden text-red-500 text-sm mt-4 text-center font-bold" style="text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);"></div>
 
                         <div class="flex flex-col gap-3 mt-4">
-                            <button onclick="generate()" data-magnetic class="w-full bg-purple-600 hover:bg-purple-500 hover:scale-105 shadow-[0_0_15px_var(--neon-purple)] py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2">
+                            <!-- Primary CTA — gold gradient replaces hardcoded bg-purple-600 -->
+                            <button onclick="generate()" data-magnetic class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105" style="background:linear-gradient(135deg,#C9A84C,#E8C96A);color:#1C1710;border:1px solid #B8943C;box-shadow:0 4px 20px rgba(201,168,76,0.35);">
                                 Initialize Sequence <i class="fa-solid fa-arrow-right"></i>
                             </button>
                             <div class="flex gap-3">
-                                <button onclick="loadPreviousRoadmap()" class="flex-1 bg-transparent border border-purple-500 text-purple-400 hover:bg-purple-500/20 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                                <!-- Secondary buttons — gold outline replaces purple-500 Tailwind classes -->
+                                <button onclick="loadPreviousRoadmap()" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2" style="background:transparent;border:1.5px solid #C9A84C;color:#9A7830;" onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='transparent'">
                                     <i class="fa-solid fa-clock-rotate-left"></i> Load Previous
                                 </button>
-                                <button onclick="openCompareModal()" class="flex-1 bg-transparent border border-pink-500 text-pink-400 hover:bg-pink-500/20 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                                <button onclick="openCompareModal()" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2" style="background:transparent;border:1.5px solid #9A7830;color:#9A7830;" onmouseover="this.style.background='rgba(201,168,76,0.08)'" onmouseout="this.style.background='transparent'">
                                     <i class="fa-solid fa-code-compare"></i> Compare Careers
                                 </button>
                             </div>

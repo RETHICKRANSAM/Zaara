@@ -35,6 +35,21 @@ body {
     color: var(--text-primary);
 }
 
+/* Scanlines — fully suppressed for white/gold professional theme.
+   Root cause: the CRT overlay was rendering horizontal lines across
+   the entire page, creating a visual artifact inconsistent with the
+   new light background. */
+.scanlines { display: none !important; }
+.scanlines-auth { display: none !important; }
+
+/* Duration radio buttons — override Tailwind peer-checked:border-purple-500
+   and peer-checked:bg-purple-500/20 with gold equivalents */
+input[type="radio"].peer:checked ~ div,
+.peer:checked ~ div {
+    border-color: #C9A84C !important;
+    background-color: rgba(201, 168, 76, 0.15) !important;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
