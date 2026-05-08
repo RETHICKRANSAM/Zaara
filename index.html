@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js" defer></script>
     <script src="auth.js?v=1" defer></script>
     <script src="app.js?v=2" defer></script>
     <link rel="stylesheet" href="styles.css?v=5">
@@ -32,58 +33,100 @@
         .slide-in-card.animate { opacity: 1; transform: translateX(0); }
         .timeline-node { position: absolute; left: -10px; top: 20px; width: 14px; height: 14px; background: var(--neon-purple); border: 2px solid #000; }
 
-        /* Custom Magnetic Cursor */
+        /* ═══════════════════════════════════════════════════ */
+        /* PREMIUM MAGNETIC CURSOR                            */
+        /* ═══════════════════════════════════════════════════ */
+
+        /* Glowing orb — the main cursor dot */
         .cursor-dot {
-            width: 10px; height: 10px;
-            background: var(--neon-purple);
+            width: 12px; height: 12px;
+            background: radial-gradient(circle at 35% 35%, #c084fc, #8B5CF6, #6d28d9);
+            box-shadow: 0 0 8px #8B5CF6, 0 0 18px rgba(139,92,246,0.6), 0 0 35px rgba(139,92,246,0.25);
+            border-radius: 50%;
             position: fixed; top: 0; left: 0;
             pointer-events: none;
             z-index: 99999;
-            transition: width 0.1s, height 0.1s, background 0.1s;
             transform: translate(-50%, -50%);
+            transition: width 0.15s ease, height 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
         }
         .cursor-dot.hovering {
-            width: 14px; height: 14px;
-            background: var(--neon-pink);
+            width: 18px; height: 18px;
+            background: radial-gradient(circle at 35% 35%, #f9a8d4, #EC4899, #be185d);
+            box-shadow: 0 0 10px #EC4899, 0 0 24px rgba(236,72,153,0.7), 0 0 50px rgba(236,72,153,0.3);
         }
+        .cursor-dot.clicking {
+            width: 8px; height: 8px;
+            box-shadow: 0 0 20px #8B5CF6, 0 0 50px rgba(139,92,246,0.9);
+        }
+
+        /* Outer lagging ring */
         .cursor-ring {
-            width: 30px; height: 30px;
-            border: 2px solid var(--neon-purple);
+            width: 36px; height: 36px;
+            border: 1.5px solid rgba(139,92,246,0.7);
+            border-radius: 50%;
             position: fixed; top: 0; left: 0;
             pointer-events: none;
             z-index: 99998;
-            transition: width 0.1s ease, height 0.1s ease, border-color 0.1s ease, background 0.1s ease;
             transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(139,92,246,0.3), inset 0 0 8px rgba(139,92,246,0.08);
+            transition: width 0.25s cubic-bezier(0.25,0.8,0.25,1),
+                        height 0.25s cubic-bezier(0.25,0.8,0.25,1),
+                        border-color 0.2s ease,
+                        box-shadow 0.2s ease,
+                        background 0.2s ease;
         }
         .cursor-ring.hovering {
-            width: 40px; height: 40px;
-            border-color: var(--neon-pink);
-            background: rgba(236, 72, 153, 0.2);
+            width: 52px; height: 52px;
+            border-color: rgba(236,72,153,0.8);
+            background: rgba(236,72,153,0.06);
+            box-shadow: 0 0 16px rgba(236,72,153,0.4), inset 0 0 12px rgba(236,72,153,0.1);
         }
+        .cursor-ring.clicking {
+            width: 28px; height: 28px;
+            border-color: rgba(139,92,246,1);
+            background: rgba(139,92,246,0.15);
+        }
+
+        /* Trail sparkles */
         .cursor-trail {
             position: fixed;
-            width: 5px; height: 5px;
             border-radius: 50%;
-            background: var(--neon-purple);
             pointer-events: none;
             z-index: 99997;
-            opacity: 0.7;
-            animation: trailFade 0.6s ease forwards;
+            animation: trailFade 0.55s ease forwards;
         }
         @keyframes trailFade {
-            to { opacity: 0; transform: scale(0); }
+            0%   { opacity: 0.75; transform: translate(-50%,-50%) scale(1); }
+            100% { opacity: 0;    transform: translate(-50%,-50%) scale(0.1); }
         }
+
+        /* Click burst particles */
         .click-particle {
             position: fixed;
-            width: 4px; height: 4px;
             border-radius: 50%;
             pointer-events: none;
             z-index: 99999;
-            animation: particleBurst 0.6s ease-out forwards;
+            animation: particleBurst 0.65s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
         }
         @keyframes particleBurst {
-            0% { opacity: 1; transform: translate(0, 0) scale(1); }
-            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+            0%   { opacity: 1;   transform: translate(-50%,-50%) scale(1); }
+            100% { opacity: 0;   transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.2); }
+        }
+
+        /* Ripple ring on click */
+        .cursor-ripple {
+            position: fixed;
+            width: 10px; height: 10px;
+            border: 2px solid rgba(139,92,246,0.9);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99996;
+            transform: translate(-50%, -50%);
+            animation: rippleExpand 0.6s ease-out forwards;
+        }
+        @keyframes rippleExpand {
+            0%   { width: 10px; height: 10px; opacity: 1; }
+            100% { width: 70px; height: 70px; opacity: 0; }
         }
 
         /* Magnetic element hover glow */
@@ -744,16 +787,116 @@
 
 
 
-    <!-- Magnetic Cursor Engine -->
+    <!-- Premium Magnetic Cursor Engine -->
     <script>
-        const dot = document.getElementById('cursor-dot');
+        const dot  = document.getElementById('cursor-dot');
         const ring = document.getElementById('cursor-ring');
         let mouseX = 0, mouseY = 0;
-        let dotX = 0, dotY = 0;
-        let ringX = 0, ringY = 0;
-        let trailTimer = 0;
+        let ringX  = 0, ringY  = 0;
+        let lastTrailX = 0, lastTrailY = 0;
+        let trailHue = 270; // purple start
+        const TRAIL_COLORS = [
+            'rgba(139,92,246,', 'rgba(168,85,247,', 'rgba(192,132,252,',
+            'rgba(236,72,153,', 'rgba(217,70,239,'
+        ];
+        let trailColorIdx = 0;
 
-        // Background Canvas Logic
+        // ── Smooth ring follow (lerp) ──────────────────────────
+        function animateCursor() {
+            // Ring lags behind mouse for a fluid feel
+            ringX += (mouseX - ringX) * 0.12;
+            ringY += (mouseY - ringY) * 0.12;
+            ring.style.left = ringX + 'px';
+            ring.style.top  = ringY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // ── Mouse move ─────────────────────────────────────────
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            dot.style.left = mouseX + 'px';
+            dot.style.top  = mouseY + 'px';
+
+            // Spawn trail sparkle every ~18px of movement
+            const dx = mouseX - lastTrailX, dy = mouseY - lastTrailY;
+            if (Math.sqrt(dx*dx + dy*dy) > 18) {
+                spawnTrail(mouseX, mouseY);
+                lastTrailX = mouseX; lastTrailY = mouseY;
+            }
+
+            // Hover detection for interactive elements
+            const el = document.elementFromPoint(mouseX, mouseY);
+            const isHoverable = el && (el.matches('button,a,input,select,label,[data-magnetic],[class*="card"],[class*="chip"],[class*="badge"]') || el.closest('button,a,[data-magnetic]'));
+            dot.classList.toggle('hovering', !!isHoverable);
+            ring.classList.toggle('hovering', !!isHoverable);
+        });
+
+        // ── Click effects ──────────────────────────────────────
+        document.addEventListener('mousedown', e => {
+            dot.classList.add('clicking');
+            ring.classList.add('clicking');
+            spawnRipple(e.clientX, e.clientY);
+            spawnClickParticles(e.clientX, e.clientY);
+        });
+        document.addEventListener('mouseup', () => {
+            dot.classList.remove('clicking');
+            ring.classList.remove('clicking');
+        });
+
+        // ── Trail sparkle ──────────────────────────────────────
+        function spawnTrail(x, y) {
+            const t = document.createElement('div');
+            t.className = 'cursor-trail';
+            const size = Math.random() * 5 + 3;
+            const color = TRAIL_COLORS[trailColorIdx % TRAIL_COLORS.length];
+            trailColorIdx++;
+            t.style.cssText = `
+                left:${x}px; top:${y}px;
+                width:${size}px; height:${size}px;
+                background:${color}0.75);
+                box-shadow:0 0 6px ${color}0.6);
+            `;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 560);
+        }
+
+        // ── Ripple ring on click ───────────────────────────────
+        function spawnRipple(x, y) {
+            const r = document.createElement('div');
+            r.className = 'cursor-ripple';
+            r.style.left = x + 'px';
+            r.style.top  = y + 'px';
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 620);
+        }
+
+        // ── Particle burst on click ────────────────────────────
+        function spawnClickParticles(x, y) {
+            const count = 10;
+            const colors = ['#8B5CF6','#EC4899','#c084fc','#f0abfc','#a78bfa','#ffffff'];
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'click-particle';
+                const angle = (i / count) * 2 * Math.PI;
+                const dist  = Math.random() * 45 + 20;
+                const size  = Math.random() * 5 + 3;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                p.style.cssText = `
+                    left:${x}px; top:${y}px;
+                    width:${size}px; height:${size}px;
+                    background:${color};
+                    box-shadow:0 0 8px ${color};
+                    --tx:${Math.cos(angle)*dist}px;
+                    --ty:${Math.sin(angle)*dist}px;
+                `;
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 680);
+            }
+        }
+
+        // ── Background Canvas (parallax stars) ─────────────────
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let points = [];
@@ -769,7 +912,7 @@
                     x: Math.random() * width,
                     y: Math.random() * height,
                     size: Math.random() * 1.5 + 1,
-                    z: Math.random() * 0.5 + 0.1, // Parallax depth
+                    z: Math.random() * 0.5 + 0.1,
                     opacity: Math.random() * 0.5 + 0.1
                 });
             }
@@ -777,19 +920,14 @@
 
         function drawBackground() {
             ctx.clearRect(0, 0, width, height);
-            
-            // Move dots based on cursor
             const offsetX = (mouseX - width / 2) * 0.03;
             const offsetY = (mouseY - height / 2) * 0.03;
-
             points.forEach(p => {
-                // Flat 2d parallax
-                const x = (p.x + (offsetX * p.z) + width) % width;
+                const x = (p.x + (offsetX * p.z) + width)  % width;
                 const y = (p.y + (offsetY * p.z) + height) % height;
-                
                 ctx.beginPath();
                 ctx.rect(x, y, p.size * 2, p.size * 2);
-                ctx.fillStyle = `rgba(139, 92, 246, ${p.opacity > 0.3 ? 1.0 : 0.4})`; // flatter opacity
+                ctx.fillStyle = `rgba(139, 92, 246, ${p.opacity > 0.3 ? 1.0 : 0.4})`;
                 ctx.fill();
             });
             requestAnimationFrame(drawBackground);
