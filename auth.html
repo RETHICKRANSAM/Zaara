@@ -155,16 +155,16 @@
         }
 
         .auth-logo {
-            height: 80px;
-            width: auto;
+            height: auto;
+            width: 200px;
             margin-bottom: 12px;
             animation: logoPulse 3s ease-in-out infinite alternate;
-            filter: drop-shadow(0 0 16px rgba(201, 168, 76, 0.25));
+            filter: drop-shadow(0 4px 18px rgba(201, 168, 76, 0.4));
         }
 
         @keyframes logoPulse {
-            from { transform: scale(1); filter: drop-shadow(0 0 16px rgba(201, 168, 76, 0.2)); }
-            to { transform: scale(1.03); filter: drop-shadow(0 0 28px rgba(201, 168, 76, 0.4)); }
+            from { transform: scale(1);    filter: drop-shadow(0 4px 18px rgba(201, 168, 76, 0.35)); }
+            to   { transform: scale(1.03); filter: drop-shadow(0 4px 30px rgba(201, 168, 76, 0.65)); }
         }
 
         .auth-title {
@@ -684,7 +684,7 @@
 
             <!-- Header -->
             <div class="auth-header">
-                <img src="zaara-logo-2d.png" alt="ZAARA" class="auth-logo" id="auth-logo">
+                <img src="logo.png" alt="ZAARA" class="auth-logo" id="auth-logo">
                 <h1 class="auth-title" id="auth-page-title">Neural Access</h1>
                 <p class="auth-subtitle" id="auth-page-subtitle">Authenticate to access your <span class="mode-label">Career Matrix</span></p>
             </div>
