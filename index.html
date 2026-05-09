@@ -197,6 +197,11 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
+    <div class="bg-orbs">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+        <div class="bg-orb orb-3"></div>
+    </div>
 
     <!-- Normal browser cursor — all custom cursor code removed -->
 
@@ -830,9 +835,12 @@
                 const x = (p.x + (offsetX * p.z) + width)  % width;
                 const y = (p.y + (offsetY * p.z) + height) % height;
                 ctx.beginPath();
-                ctx.rect(x, y, p.size * 2, p.size * 2);
-                ctx.fillStyle = `rgba(201, 168, 76, ${p.opacity > 0.3 ? 0.7 : 0.3})`;
+                ctx.arc(x, y, p.size * 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(201, 168, 76, ${p.opacity > 0.3 ? 0.8 : 0.4})`;
+                ctx.shadowBlur = p.size * 4;
+                ctx.shadowColor = 'rgba(232, 201, 106, 0.6)';
                 ctx.fill();
+                ctx.shadowBlur = 0; // Reset for performance
             });
             requestAnimationFrame(drawBackground);
         }

@@ -37,10 +37,50 @@
 body {
     background-color: var(--bg-warm);
     background-image:
-        radial-gradient(ellipse 900px 700px at 10% 20%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 700px 500px at 85% 80%, rgba(232, 201, 106, 0.05) 0%, transparent 55%);
+        radial-gradient(ellipse 1200px 900px at 10% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 85% 80%, rgba(232, 201, 106, 0.06) 0%, transparent 55%);
     background-attachment: fixed;
     color: var(--text-primary);
+}
+
+/* Beautiful Animated Mesh Background Elements */
+.bg-orbs {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    z-index: -11; /* Behind the canvas-bg */
+    pointer-events: none;
+}
+.bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    animation: floatOrb 25s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+}
+.orb-1 {
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle, rgba(232,201,106,0.8) 0%, rgba(232,201,106,0) 70%);
+    top: -20vw; left: -10vw;
+}
+.orb-2 {
+    width: 70vw; height: 70vw;
+    background: radial-gradient(circle, rgba(201,168,76,0.6) 0%, rgba(201,168,76,0) 70%);
+    bottom: -30vw; right: -20vw;
+    animation-delay: -8s;
+}
+.orb-3 {
+    width: 50vw; height: 50vw;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+    top: 30%; left: 20%;
+    animation-delay: -15s;
+    mix-blend-mode: soft-light;
+}
+@keyframes floatOrb {
+    0%   { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(6vw, 6vh) scale(1.1); }
+    66%  { transform: translate(-4vw, 8vh) scale(0.95); }
+    100% { transform: translate(-8vw, -4vh) scale(1.05); }
 }
 
 /* Scanlines — fully suppressed for white/gold professional theme.
