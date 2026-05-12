@@ -32,6 +32,7 @@
     /* Shadows */
     --shadow-gold:   0 4px 24px rgba(201, 168, 76, 0.12), 0 1px 4px rgba(0,0,0,0.06);
     --shadow-hover:  0 12px 36px rgba(201, 168, 76, 0.2), 0 2px 8px rgba(0,0,0,0.08);
+<<<<<<< Updated upstream
 }
 
 body {
@@ -40,6 +41,22 @@ body {
         radial-gradient(ellipse 1200px 900px at 10% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 60%),
         radial-gradient(ellipse 900px 700px at 85% 80%, rgba(232, 201, 106, 0.06) 0%, transparent 55%);
     background-attachment: fixed;
+=======
+}
+
+/* Background lives on <html> so that negative-z-index children of <body>
+   (like the Three.js dotted-surface canvas at z-index:-5) are visible. */
+html {
+    background-color: var(--bg-warm);
+    background-image:
+        radial-gradient(ellipse 1200px 900px at 10% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 900px 700px at 85% 80%, rgba(232, 201, 106, 0.06) 0%, transparent 55%);
+    background-attachment: fixed;
+}
+
+body {
+    background: transparent !important;  /* lets dotted-surface show through */
+>>>>>>> Stashed changes
     color: var(--text-primary);
 }
 

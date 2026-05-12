@@ -15,10 +15,13 @@
     <script src="auth.js?v=1" defer></script>
     <script src="app.js?v=2" defer></script>
     <link rel="stylesheet" href="styles.css?v=6">
+    <!-- Three.js + Dotted Surface Background -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <style>
+        html { background: #F6F3ED; background-image: radial-gradient(ellipse 1200px 900px at 10% 20%, rgba(201,168,76,0.08) 0%, transparent 60%), radial-gradient(ellipse 900px 700px at 85% 80%, rgba(232,201,106,0.06) 0%, transparent 55%); background-attachment: fixed; }
         :root { --neon-purple: #C9A84C; --neon-pink: #E8C96A; --gold-primary: #C9A84C; --gold-light: #E8C96A; --gold-deep: #9A7830; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #F6F3ED; color: #1C1710; font-family: 'Inter', sans-serif; font-size: 1.1rem; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
+        body { background: transparent !important; color: #1C1710; font-family: 'Inter', sans-serif; font-size: 1.1rem; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
         
         .hidden { display: none !important; }
         
@@ -330,7 +333,9 @@
     <!-- body level above #auth-view so they are always visible -->
     
     <!-- Interactive Background Canvas -->
-    <canvas id="canvas-bg" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"></canvas>
+    <!-- canvas-bg replaced by Three.js dotted-surface -->
+    <canvas id="canvas-bg" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none" style="display:none"></canvas>
+    <script src="dotted-surface.js"></script>
     <div id="main-container" class="max-w-6xl mx-auto">
 
         <!-- User Bar -->
@@ -369,7 +374,7 @@
 
                         <div>
                             <label class="block text-sm text-zinc-400 mb-2">My Career Goal <span class="text-neon-pink">*</span></label>
-                            <select id="career-goal" class="w-full glass-input p-3 transition-all">
+                            <select id="career-goal" class="w-full glass-input p-3 transition-all" onchange="handleCareerChange()">
                                 <option value="" disabled selected>Select a career path...</option>
                                 <option value="ai_engineer">🤖 AI / ML Engineer</option>
                                 <option value="web_dev">🌐 Full-Stack Web Developer</option>
@@ -831,17 +836,14 @@
             ctx.clearRect(0, 0, width, height);
             const offsetX = (mouseX - width / 2) * 0.03;
             const offsetY = (mouseY - height / 2) * 0.03;
-            points.forEach((p, i) => {
+            points.forEach(p => {
                 const x = (p.x + (offsetX * p.z) + width)  % width;
                 const y = (p.y + (offsetY * p.z) + height) % height;
                 ctx.beginPath();
                 ctx.arc(x, y, p.size * 1.5, 0, Math.PI * 2);
-                
-                // Mix of purple and cyan for Antigravity theme
-                const colorBase = (i % 2 === 0) ? '124, 58, 237' : '56, 189, 248';
-                ctx.fillStyle = `rgba(${colorBase}, ${p.opacity > 0.3 ? 0.8 : 0.4})`;
-                ctx.shadowBlur = p.size * 5;
-                ctx.shadowColor = `rgba(${colorBase}, 0.8)`;
+                ctx.fillStyle = `rgba(201, 168, 76, ${p.opacity > 0.3 ? 0.8 : 0.4})`;
+                ctx.shadowBlur = p.size * 4;
+                ctx.shadowColor = 'rgba(232, 201, 106, 0.6)';
                 ctx.fill();
                 ctx.shadowBlur = 0; // Reset for performance
             });
