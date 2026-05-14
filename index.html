@@ -18,10 +18,10 @@
     <!-- Three.js + Dotted Surface Background -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <style>
-        html { background: #F6F3ED; background-image: radial-gradient(ellipse 1200px 900px at 10% 20%, rgba(201,168,76,0.08) 0%, transparent 60%), radial-gradient(ellipse 900px 700px at 85% 80%, rgba(232,201,106,0.06) 0%, transparent 55%); background-attachment: fixed; }
+        html { background: #0A0A0F; background-image: radial-gradient(ellipse 1200px 900px at 10% 20%, rgba(201,168,76,0.08) 0%, transparent 60%), radial-gradient(ellipse 900px 700px at 85% 80%, rgba(232,201,106,0.06) 0%, transparent 55%); background-attachment: fixed; }
         :root { --neon-purple: #C9A84C; --neon-pink: #E8C96A; --gold-primary: #C9A84C; --gold-light: #E8C96A; --gold-deep: #9A7830; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: transparent !important; color: #1C1710; font-family: 'Inter', sans-serif; font-size: 1.1rem; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
+        body { background: transparent !important; color: #E8E4DD; font-family: 'Inter', sans-serif; font-size: 1.1rem; overflow-x: hidden; letter-spacing: 0.5px; min-height: 100vh; }
         
         .hidden { display: none !important; }
         
@@ -126,8 +126,8 @@
 
         /* Document PDF Export Optimization - Clean White Readability Layout */
         body.pdf-exporting, body.pdf-exporting #main-container, body.pdf-exporting #exportable-roadmap {
-            background-color: #ffffff !important;
-            background: #ffffff !important;
+            background-color: #0A0A0F !important;
+            background: #0A0A0F !important;
         }
         body.pdf-exporting * {
             -webkit-print-color-adjust: exact !important;
@@ -147,42 +147,42 @@
         }
 
         body.pdf-exporting, body.pdf-exporting #main-container, body.pdf-exporting p, body.pdf-exporting h2, body.pdf-exporting h3, body.pdf-exporting div, body.pdf-exporting span, body.pdf-exporting strong, body.pdf-exporting li {
-            color: #111111 !important;
+            color: #E8E4DD !important;
         }
         /* Defeat all Tailwind text colors */
         body.pdf-exporting .text-white, body.pdf-exporting .text-zinc-200, body.pdf-exporting .text-zinc-300, body.pdf-exporting .text-zinc-400, body.pdf-exporting .text-zinc-500 {
-            color: #111111 !important;
+            color: #E8E4DD !important;
         }
         /* Specific overrides for color visibility on white background */
-        body.pdf-exporting .gradient-text { background: none !important; -webkit-background-clip: unset !important; background-clip: unset !important; -webkit-text-fill-color: unset !important; color: #9333ea !important; font-weight: bold !important;}
-        body.pdf-exporting .text-purple-400, body.pdf-exporting .text-purple-300 { color: #7e22ce !important; }
-        body.pdf-exporting .text-pink-400, body.pdf-exporting .text-pink-200 { color: #be185d !important; font-weight: bold !important; }
-        body.pdf-exporting .text-neon-purple { color: #9333ea !important; }
+        body.pdf-exporting .gradient-text { background: none !important; -webkit-background-clip: unset !important; background-clip: unset !important; -webkit-text-fill-color: unset !important; color: #C9A84C !important; font-weight: bold !important;}
+        body.pdf-exporting .text-amber-500, body.pdf-exporting .text-amber-400 { color: #9A7830 !important; }
+        body.pdf-exporting .text-amber-500, body.pdf-exporting .text-amber-300 { color: #be185d !important; font-weight: bold !important; }
+        body.pdf-exporting .text-amber-500 { color: #C9A84C !important; }
 
         body.pdf-exporting .glass-panel, body.pdf-exporting .glass-card, body.pdf-exporting .timeline-card {
-            background: #f8fafc !important;
-            border: 1px solid #cbd5e1 !important;
+            background: #14141C !important;
+            border: 1px solid #2A2520 !important;
             page-break-inside: avoid !important;
             margin-bottom: 24px !important;
         }
         body.pdf-exporting .timeline-node {
-            background: #ffffff !important;
-            border-color: #9333ea !important;
+            background: #0A0A0F !important;
+            border-color: #C9A84C !important;
             box-shadow: none !important;
         }
         body.pdf-exporting .timeline-card:hover .timeline-node { transform: none !important; }
         body.pdf-exporting .tech-badge {
-            background: #f3e8ff !important;
-            color: #6b21a8 !important;
-            border: 1px solid #d8b4fe !important;
+            background: #FFF8E1 !important;
+            color: #7A5C1E !important;
+            border: 1px solid #E8C96A !important;
         }
         body.pdf-exporting .skill-item {
-            background: #f1f5f9 !important;
-            border-left-color: #9333ea !important;
+            background: #1A1A22 !important;
+            border-left-color: #C9A84C !important;
         }
         body.pdf-exporting .bg-black\/40 {
-            background: #ffffff !important;
-            border: 1px solid #cbd5e1 !important;
+            background: #0A0A0F !important;
+            border: 1px solid #2A2520 !important;
         }
         @media print {
             body, html, * {
@@ -441,28 +441,28 @@
                         <div>
                             <label class="block text-sm text-zinc-400 mb-2">Duration</label>
                             <div class="flex gap-4">
-                                <label class="flex-1"><input type="radio" name="duration" value="30" checked class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/20 cursor-pointer text-xs font-bold uppercase tracking-wider transition-all">30 Days</div></label>
-                                <label class="flex-1"><input type="radio" name="duration" value="60" class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-500/20 cursor-pointer text-xs font-bold uppercase tracking-wider transition-all">60 Days</div></label>
+                                <label class="flex-1"><input type="radio" name="duration" value="30" checked class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-500/20 cursor-pointer text-xs font-bold uppercase tracking-wider transition-all">30 Days</div></label>
+                                <label class="flex-1"><input type="radio" name="duration" value="60" class="hidden peer"><div class="p-4 text-center border border-zinc-800 rounded-xl peer-checked:border-amber-500 peer-checked:bg-amber-500/20 cursor-pointer text-xs font-bold uppercase tracking-wider transition-all">60 Days</div></label>
                             </div>
                         </div>
 
                         <div id="form-error" class="hidden text-red-500 text-sm mt-4 text-center font-bold" style="text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);"></div>
 
                         <div class="flex flex-col gap-3 mt-4">
-                            <!-- Primary CTA — gold gradient replaces hardcoded bg-purple-600 -->
-                            <button onclick="generate()" data-magnetic class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105" style="background:linear-gradient(135deg,#C9A84C,#E8C96A);color:#1C1710;border:1px solid #B8943C;box-shadow:0 4px 20px rgba(201,168,76,0.35);">
+                            <!-- Primary CTA — gold gradient replaces hardcoded bg-amber-600 -->
+                            <button onclick="generate()" data-magnetic class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105" style="background:linear-gradient(135deg,#C9A84C,#E8C96A);color:#0A0A0F;border:1px solid #B8943C;box-shadow:0 4px 20px rgba(201,168,76,0.35);">
                                 Initialize Sequence <i class="fa-solid fa-arrow-right"></i>
                             </button>
                             <div class="flex gap-3">
                                 <!-- Secondary buttons — gold outline replaces purple-500 Tailwind classes -->
-                                <button onclick="loadPreviousRoadmap()" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2" style="background:transparent;border:1.5px solid #C9A84C;color:#9A7830;" onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='transparent'">
+                                <button onclick="loadPreviousRoadmap()" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2" style="background:transparent;border:1.5px solid #C9A84C;color:#E8C96A;" onmouseover="this.style.background='rgba(201,168,76,0.1)'" onmouseout="this.style.background='transparent'">
                                     <i class="fa-solid fa-clock-rotate-left"></i> Load Previous
                                 </button>
-                                <button onclick="openCompareModal()" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2" style="background:transparent;border:1.5px solid #9A7830;color:#9A7830;" onmouseover="this.style.background='rgba(201,168,76,0.08)'" onmouseout="this.style.background='transparent'">
+                                <button onclick="openCompareModal()" class="flex-1 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2" style="background:transparent;border:1.5px solid #9A7830;color:#C9A84C;" onmouseover="this.style.background='rgba(201,168,76,0.08)'" onmouseout="this.style.background='transparent'">
                                     <i class="fa-solid fa-code-compare"></i> Compare Careers
                                 </button>
                             </div>
-                            <button onclick="openStatsModal()" class="w-full bg-transparent border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2">
+                            <button onclick="openStatsModal()" class="w-full bg-transparent border border-amber-500/50 text-amber-500 hover:bg-amber-500/10 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-chart-line"></i> My Stats Dashboard
                             </button>
                         </div>
@@ -520,7 +520,7 @@
                 <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color: #71717a; font-size:0.85rem;"></i>
                 <input type="text" id="roadmap-search" class="w-full glass-input p-3" style="padding-left:38px;" placeholder="Search roadmap topics..." oninput="filterTimeline(this.value)">
             </div>
-            <button onclick="shareRoadmap()" class="bg-transparent border border-purple-500 text-purple-400 hover:bg-purple-500/20 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2" title="Share Roadmap">
+            <button onclick="shareRoadmap()" class="bg-transparent border border-amber-500 text-amber-500 hover:bg-amber-500/20 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2" title="Share Roadmap">
                 <i class="fa-solid fa-share-nodes"></i> Share
             </button>
         </div>
@@ -536,43 +536,43 @@
 
             <!-- Identity Panel -->
             <div id="matrix-identity" class="glass-card p-6 mb-6 roadmap-section">
-                <h3 class="text-purple-400 text-xs tracking-widest mb-1 opacity-80"><i class="fa-solid fa-id-badge"></i> CAREER IDENTITY</h3>
+                <h3 class="text-amber-500 text-xs tracking-widest mb-1 opacity-80"><i class="fa-solid fa-id-badge"></i> CAREER IDENTITY</h3>
                 <div id="identity-text" class="text-2xl font-bold text-white typing-cursor" style="display:inline-block;"></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 roadmap-section">
                 <!-- Skill Tree -->
                 <div class="glass-card p-6">
-                    <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-network-wired"></i> SKILLS TREE (Beginner → Advanced)</h3>
+                    <h3 class="text-amber-500 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-network-wired"></i> SKILLS TREE (Beginner → Advanced)</h3>
                     <div id="skill-tree-list" class="skills-grid text-zinc-300 font-mono"></div>
                 </div>
                 <!-- Tools Stack -->
                 <div class="glass-card p-6">
-                    <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-toolbox"></i> RECOMMENDED TECH STACK</h3>
+                    <h3 class="text-amber-500 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-toolbox"></i> RECOMMENDED TECH STACK</h3>
                     <div id="tools-list" class="flex flex-wrap gap-2 text-zinc-300 font-mono"></div>
                 </div>
             </div>
 
             <!-- Projects Panel -->
             <div class="glass-card p-6 mb-8 roadmap-section">
-                <h3 class="text-purple-400 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-flask"></i> SUGGESTED PROJECTS</h3>
+                <h3 class="text-amber-500 text-xs tracking-widest mb-4 opacity-80"><i class="fa-solid fa-flask"></i> SUGGESTED PROJECTS</h3>
                 <ul id="projects-list" class="list-disc pl-5 space-y-3 text-zinc-300 font-mono"></ul>
             </div>
 
             <!-- AI Recommendation -->
-            <div class="glass-card p-6 mb-8 border-pink-500/50 roadmap-section" style="background: rgba(236,72,153,0.05); box-shadow: inset 0 0 20px rgba(236,72,153,0.05);">
-                <h3 class="text-pink-400 text-xs tracking-widest mb-2 font-bold"><i class="fa-solid fa-bolt"></i> AI SUGGESTIONS</h3>
-                <p id="ai-rec-text" class="text-pink-200 italic font-mono text-[1.1rem] leading-relaxed typing-cursor" style="display:inline-block;"></p>
+            <div class="glass-card p-6 mb-8 border-amber-500/50 roadmap-section" style="background: rgba(201,168,76,0.08); box-shadow: inset 0 0 20px rgba(201,168,76,0.08);">
+                <h3 class="text-amber-500 text-xs tracking-widest mb-2 font-bold"><i class="fa-solid fa-bolt"></i> AI SUGGESTIONS</h3>
+                <p id="ai-rec-text" class="text-amber-300 italic font-mono text-[1.1rem] leading-relaxed typing-cursor" style="display:inline-block;"></p>
             </div>
             
-            <h3 class="text-purple-400 text-xs tracking-widest mb-4 ml-4 opacity-80 mt-12 roadmap-section"><i class="fa-solid fa-route"></i> TIMELINE VISUALIZATION</h3>
+            <h3 class="text-amber-500 text-xs tracking-widest mb-4 ml-4 opacity-80 mt-12 roadmap-section"><i class="fa-solid fa-route"></i> TIMELINE VISUALIZATION</h3>
             <div id="timeline" class="border-l border-zinc-800 ml-4 space-y-8 mb-12 relative"></div>
         </div>
 
             <!-- Final CTAs -->
             <div class="mt-8 flex flex-col md:flex-row gap-4 justify-center">
-                <button data-magnetic onclick="downloadPDF()" class="bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-500 shadow-[0_0_10px_var(--neon-purple)] font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-file-pdf"></i> Download as PDF</button>
-                <button data-magnetic onclick="shareRoadmap()" class="bg-zinc-800 px-6 py-3 border border-cyan-600 rounded-lg hover:bg-cyan-900/30 font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 text-cyan-400"><i class="fa-solid fa-share-nodes"></i> Share Roadmap</button>
+                <button data-magnetic onclick="downloadPDF()" class="bg-amber-600 px-6 py-3 rounded-lg hover:bg-amber-500 shadow-[0_0_10px_var(--neon-purple)] font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-file-pdf"></i> Download as PDF</button>
+                <button data-magnetic onclick="shareRoadmap()" class="bg-zinc-800 px-6 py-3 border border-amber-600 rounded-lg hover:bg-amber-900/30 font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 text-amber-500"><i class="fa-solid fa-share-nodes"></i> Share Roadmap</button>
                 <button data-magnetic onclick="goHome()" class="bg-zinc-800 px-6 py-3 border border-zinc-600 rounded-lg hover:bg-zinc-700 font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105"><i class="fa-solid fa-rotate-right"></i> Regenerate Path</button>
             </div>
         </div>
@@ -586,7 +586,7 @@
         <div class="chatbot-window" id="chatbot-window">
             <div class="chatbot-header">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span class="font-bold text-white"><i class="fa-solid fa-robot text-purple-400"></i> ZAARA AI</span>
+                    <span class="font-bold text-white"><i class="fa-solid fa-robot text-amber-500"></i> ZAARA AI</span>
                     <div id="ai-status-indicator" class="ai-status-indicator">
                         <span class="ai-status-dot offline"></span>
                         <span class="ai-status-label">Checking...</span>
@@ -599,17 +599,20 @@
                 </div>
             </div>
 
-            <!-- API Key Settings Panel (hidden by default) -->
+            <!-- Gemini API Key Settings Panel (hidden by default) -->
             <div id="ai-settings-panel" class="ai-settings-panel hidden">
                 <div class="ai-settings-inner">
-                    <label class="ai-settings-label"><i class="fa-solid fa-key"></i> OpenAI API Key</label>
+                    <label class="ai-settings-label"><i class="fa-brands fa-google" style="color:#4285F4;"></i> Google Gemini API Key</label>
                     <div style="display: flex; gap: 8px;">
-                        <input type="password" id="ai-key-input" class="ai-key-input" placeholder="sk-..." onfocus="if(this.dataset.masked==='true'){this.value='';this.dataset.masked='false';}">
+                        <input type="password" id="ai-key-input" class="ai-key-input" placeholder="AIza..." onfocus="if(this.dataset.masked==='true'){this.value='';this.dataset.masked='false';}">
                         <button onclick="saveAIKey()" class="ai-key-save-btn"><i class="fa-solid fa-check"></i></button>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                        <span class="ai-settings-hint">Your key is stored locally and never shared.</span>
-                        <button onclick="clearAIKey()" class="ai-key-clear-btn">Clear Key</button>
+                        <span class="ai-settings-hint">Key stored locally &amp; never shared. <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#C9A84C;text-decoration:underline;">Get free key →</a></span>
+                        <button onclick="clearAIKey()" class="ai-key-clear-btn">Clear</button>
+                    </div>
+                    <div style="margin-top:8px; padding: 6px 8px; background: rgba(201,168,76,0.08); border-radius:6px; border:1px solid rgba(201,168,76,0.2);">
+                        <span style="font-size:10px;color:#9A7830;"><i class="fa-solid fa-circle-info"></i> Uses <strong>Gemini 1.5 Flash</strong> with RAG over ZAARA's career knowledge base</span>
                     </div>
                 </div>
             </div>
@@ -709,7 +712,7 @@
         let mouseX = 0, mouseY = 0;
         let ringX  = 0, ringY  = 0;
         let lastTrailX = 0, lastTrailY = 0;
-        let trailHue = 270; // purple start
+        let trailHue = 43; // gold start
         const TRAIL_COLORS = [
             'rgba(201,168,76,',  'rgba(232,201,106,', 'rgba(154,120,48,'
         ];
@@ -917,7 +920,7 @@
 
         // Click particle burst
         document.addEventListener('click', (e) => {
-            const colors = ['#b026ff', '#ec4899', '#a855f7', '#7c3aed', '#06b6d4'];
+            const colors = ['#C9A84C', '#E8C96A', '#9A7830', '#D4AF37', '#F5E8C0'];
             for (let i = 0; i < 8; i++) {
                 const p = document.createElement('div');
                 p.className = 'click-particle';
