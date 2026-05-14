@@ -24,7 +24,7 @@
 
   // ── Scene ───────────────────────────────────────────────────────
   const scene    = new THREE.Scene();
-  scene.fog      = new THREE.Fog(0xffffff, 2000, 10000);
+  scene.fog      = new THREE.Fog(0x0a0a0f, 2000, 10000);
 
   const camera   = new THREE.PerspectiveCamera(
     60,
@@ -51,8 +51,8 @@
         0,
         iy * SEPARATION - (AMOUNTY * SEPARATION) / 2
       );
-      // gold dots (RGB 0-1): #C9A84C
-      colors.push(0.788, 0.659, 0.298);
+      // black dots (RGB 0-1): #1A1A1A
+      colors.push(0.102, 0.102, 0.102);
     }
   }
 
