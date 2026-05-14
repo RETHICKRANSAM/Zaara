@@ -51,8 +51,8 @@
         0,
         iy * SEPARATION - (AMOUNTY * SEPARATION) / 2
       );
-      // black dots (RGB 0-1): #1A1A1A
-      colors.push(0.102, 0.102, 0.102);
+      // bright gold dots (RGB 0-1): #E8C96A
+      colors.push(0.91, 0.788, 0.416);
     }
   }
 
@@ -64,7 +64,7 @@
     size:          6,
     vertexColors:  true,
     transparent:   true,
-    opacity:       0.55,
+    opacity:       0.8,
     sizeAttenuation: true,
   });
 
