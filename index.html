@@ -197,6 +197,117 @@
             }
             #main-container { max-width: 100% !important; padding: 0 !important; }
         }
+        /* AI Bot Mascot Widget — Gold Theme (App Page) */
+        .bot-mascot-widget {
+            display: flex;
+            justify-content: center;
+            margin-bottom: -10px;
+            position: relative;
+            z-index: 15;
+            animation: mascotEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        }
+        @keyframes mascotEntrance {
+            from { opacity: 0; transform: translateY(-30px) scale(0.5); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .bot-mascot {
+            width: 90px;
+            height: 90px;
+            position: relative;
+            cursor: pointer;
+            animation: mascotBobble 3s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+        .bot-mascot:hover { transform: scale(1.12); }
+        @keyframes mascotBobble {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .bot-body {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #F5E8C0 0%, #C9A84C 55%, #9A7830 100%);
+            box-shadow:
+                0 6px 20px rgba(201, 168, 76, 0.4),
+                0 0 25px rgba(201, 168, 76, 0.25),
+                inset 0 -6px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        .bot-mascot:hover .bot-body {
+            box-shadow:
+                0 8px 30px rgba(201, 168, 76, 0.5),
+                0 0 35px rgba(232, 201, 106, 0.35),
+                inset 0 -8px 20px rgba(0, 0, 0, 0.1);
+        }
+        .bot-face {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52px; height: 26px;
+            background: #0A0A0F;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+        }
+        .bot-eye {
+            width: 10px; height: 10px;
+            background: #E8C96A;
+            border-radius: 50%;
+            animation: botBlink 4s ease-in-out infinite;
+            box-shadow: 0 0 6px rgba(232, 201, 106, 0.6);
+        }
+        @keyframes botBlink {
+            0%, 42%, 44%, 100% { transform: scaleY(1); }
+            43% { transform: scaleY(0.1); }
+        }
+        .bot-ear {
+            position: absolute;
+            width: 14px; height: 22px;
+            background: radial-gradient(circle at 50% 40%, #E8C96A 0%, #9A7830 100%);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3);
+        }
+        .bot-ear.left { left: -4px; }
+        .bot-ear.right { right: -4px; }
+        .bot-greeting {
+            position: absolute;
+            top: -8px; left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background: rgba(15, 15, 20, 0.95);
+            border: 1px solid rgba(201, 168, 76, 0.4);
+            border-radius: 12px;
+            padding: 6px 14px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #E8C96A;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), 0 0 10px rgba(201,168,76,0.15);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .bot-greeting::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; left: 50%;
+            width: 10px; height: 10px;
+            background: rgba(15, 15, 20, 0.95);
+            border-right: 1px solid rgba(201, 168, 76, 0.4);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.4);
+            transform: translateX(-50%) rotate(45deg);
+        }
+        .bot-mascot:hover .bot-greeting {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-110%);
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -211,8 +322,24 @@
     <!-- ═══════════════════════════════════════════════════════ -->
     <!-- AUTH VIEW — Supabase Login / Signup / Forgot Password  -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <div id="auth-view">
+    <div id="auth-view" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh;">
         <canvas id="auth-particles"></canvas>
+
+        <!-- AI Bot Mascot Widget (Gold Theme) -->
+        <div class="bot-mascot-widget" id="bot-mascot-app">
+            <div class="bot-mascot">
+                <div class="bot-greeting">Welcome back! ✨</div>
+                <div class="bot-body">
+                    <div class="bot-ear left"></div>
+                    <div class="bot-ear right"></div>
+                    <div class="bot-face">
+                        <div class="bot-eye"></div>
+                        <div class="bot-eye"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="auth-card">
             <img src="logo.png" alt="ZAARA" class="auth-logo">
             <h1 class="auth-title" id="auth-title">Neural Link Access</h1>

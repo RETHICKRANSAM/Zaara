@@ -639,6 +639,150 @@
             50% { box-shadow: 0 0 12px var(--gold-primary); opacity: 1; }
         }
 
+        /* ── AI Bot Mascot Widget ────────────────────────── */
+        .bot-mascot-widget {
+            display: flex;
+            justify-content: center;
+            margin-bottom: -10px;
+            position: relative;
+            z-index: 15;
+            animation: mascotEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        }
+
+        @keyframes mascotEntrance {
+            from { opacity: 0; transform: translateY(-30px) scale(0.5); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .bot-mascot {
+            width: 90px;
+            height: 90px;
+            position: relative;
+            cursor: pointer;
+            animation: mascotBobble 3s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+
+        .bot-mascot:hover {
+            transform: scale(1.12);
+        }
+
+        .bot-mascot:hover .bot-body {
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.15),
+                0 0 20px rgba(201, 168, 76, 0.25),
+                inset 0 -8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes mascotBobble {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .bot-body {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #F0EDE6 50%, #DDD8CC 100%);
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.12),
+                0 0 15px rgba(201, 168, 76, 0.15),
+                inset 0 -6px 15px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* The face visor / eye panel */
+        .bot-face {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52px;
+            height: 26px;
+            background: #1A1A1A;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .bot-eye {
+            width: 10px;
+            height: 10px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            position: relative;
+            animation: botBlink 4s ease-in-out infinite;
+        }
+
+        @keyframes botBlink {
+            0%, 42%, 44%, 100% { transform: scaleY(1); }
+            43% { transform: scaleY(0.1); }
+        }
+
+        /* Little ear bumps */
+        .bot-ear {
+            position: absolute;
+            width: 14px;
+            height: 22px;
+            background: radial-gradient(circle at 50% 40%, #F0EDE6 0%, #DDD8CC 100%);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .bot-ear.left {
+            left: -4px;
+        }
+
+        .bot-ear.right {
+            right: -4px;
+        }
+
+        /* Speech bubble greeting */
+        .bot-greeting {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background: #FFFFFF;
+            border: 1px solid #DDD0B8;
+            border-radius: 12px;
+            padding: 6px 14px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #4A3F30;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .bot-greeting::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: #FFFFFF;
+            border-right: 1px solid #DDD0B8;
+            border-bottom: 1px solid #DDD0B8;
+            transform: translateX(-50%) rotate(45deg);
+        }
+
+        .bot-mascot:hover .bot-greeting {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-110%);
+        }
+
         /* ── Responsive ──────────────────────────────────── */
         @media (max-width: 480px) {
             .auth-card {
@@ -695,6 +839,21 @@
 
     <!-- Auth Container -->
     <div class="auth-container">
+        <!-- AI Bot Mascot Widget -->
+        <div class="bot-mascot-widget" id="bot-mascot-login">
+            <div class="bot-mascot">
+                <div class="bot-greeting">Hey! I'm ZAARA 👋</div>
+                <div class="bot-body">
+                    <div class="bot-ear left"></div>
+                    <div class="bot-ear right"></div>
+                    <div class="bot-face">
+                        <div class="bot-eye"></div>
+                        <div class="bot-eye"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="auth-card" id="auth-card">
 
             <!-- Header -->
